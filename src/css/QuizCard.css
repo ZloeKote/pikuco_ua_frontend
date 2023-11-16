@@ -1,0 +1,75 @@
+
+.layout-quizcard {
+  display: grid;
+  grid-template-rows: 34% repeat(2, 30px) 13px 1fr;
+  grid-template-columns: 20% 60px 1fr auto;
+}
+
+.quiz-cover {
+  grid-row: 1 / 3;
+  grid-column: 1 / 5;
+}
+
+.quizcard-playbutton {
+  grid-row: 2 / 4;
+  grid-column: 2 / 3;
+  z-index: 1;
+}
+
+.quizcard-creator {
+  grid-row: 3 / 5;
+  grid-column: 4 / 5;
+}
+
+.quizcard-content-layout {
+  grid-row: 3 / 6;
+  grid-column: 1 / 5;
+}
+
+.quizcard-content {
+  grid-row: 5 / 6;
+  grid-column: 1 / 5;
+}
+
+.quizcard-creator-nickname {
+  /* IF CONTENT DOESN'T FIT REPLACE WITH ...*/
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.quizcard-content-title {
+  /* IF CONTENT DOESN'T FIT REPLACE WITH ...*/
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.quizcard-content-desc {
+  /* IF CONTENT DOESN'T FIT REPLACE WITH ...*/
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  white-space: pre-wrap;
+}
+
+/* ELEMENT'S HOVER */
+.quiz-cover:hover,
+.quiz-cover:hover ~ .quizcard-content-layout, 
+.quizcard-content-layout:hover {
+  cursor: pointer;
+  background-color: var(--dark-quizcard-background-hover);
+}
+
+.quiz-cover:hover ~ .quizcard-content-layout .quizcard-content-title,
+.quizcard-content-layout:hover .quizcard-content-title {
+  text-decoration-line: underline;
+}
+
+.quizcard-creator:hover {
+  background-color: var(--dark-quizcard-background-hover);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--dark-quizcard-description);
+}
