@@ -64,7 +64,7 @@ function DropdownLink({ options, children, NotDefaultOpening, isOpenExt, to, ...
   }
 
   return (
-    <div {...defaultOpening} {...rest} className="relative">
+    <div {...defaultOpening} {...rest} className="relative z-30">
       {DropdownTitle}
       {(isOpen || isOpenExt) && (
         <div className="absolute pt-2">

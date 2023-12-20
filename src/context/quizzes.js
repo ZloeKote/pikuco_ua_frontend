@@ -1,9 +1,11 @@
-import { createContext, useState, useCallback } from 'react';
-import axios from 'axios';
+import { createContext, useState, useCallback, useContext } from "react";
+import axios from "axios";
+import avatar from "../img/avatar.png";
+import quizCover from "../img/quizCover.png";
 
 const QuizContext = createContext();
 
-function Provider({children}) {
+function Provider({ children }) {
   const [quizzes, setQuizzes] = useState([]);
 
   const fetchQuizzes = useCallback(async () => {
@@ -14,15 +16,11 @@ function Provider({children}) {
 
   const quizzesToShare = {
     quizzes,
-    fetchQuizzes
-  }
+    fetchQuizzes,
+  };
 
-  return (
-    <QuizContext.Provider value={quizzesToShare}>
-      {children}
-    </QuizContext.Provider>
-  )
+  return <QuizContext.Provider value={quizzesToShare}>{children}</QuizContext.Provider>;
 }
 
-export {Provider};
+export { Provider };
 export default QuizContext;

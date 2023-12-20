@@ -2,11 +2,17 @@ import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
 import MainPage from "./pages/MainPage";
 import QuizzesPage from "./pages/QuizzesPage";
+import QuizPage from "./pages/QuizPage";
+import QuizStatsPage from "./pages/QuizStatsPage";
 import ErrorPage from "./pages/ErrorPage";
+import SignupPage from "./pages/SignupPage";
+import LoginPage from "./pages/LoginPage";
+import {ROUTES} from "./ROUTES";
+
 
 const Router = createBrowserRouter([
   {
-    path: "/",
+    path: ROUTES.Main,
     element: <App />,
     errorElement: <ErrorPage />,
     children: [
@@ -15,17 +21,37 @@ const Router = createBrowserRouter([
         element: <MainPage />,
       },
       {
-        path: "/content",
+        path: ROUTES.QuizzesList,
         element: <QuizzesPage />,
       },
       {
-        path: "/about",
+        path: ROUTES.About,
         element: <div>About</div>,
       },
       {
-        path: "/contacts",
+        path: ROUTES.Contacts,
         element: <div>Contacts</div>,
       },
+      {
+        path: ROUTES.Quiz,
+        element: <QuizPage />
+      },
+      {
+        path: ROUTES.QuizStats,
+        element: <QuizStatsPage />
+      },
+      {
+        path: ROUTES.PlayQuiz,
+        element: <div className="text-[--dark-text]">PLAY QUIZ</div>
+      },
+      {
+        path: ROUTES.Login,
+        element: <LoginPage />
+      },
+      {
+        path: ROUTES.Signup,
+        element: <SignupPage />
+      }
     ],
   },
 ]);

@@ -55,7 +55,7 @@
 }
 
 /* ELEMENT'S HOVER */
-.quiz-cover:hover,
+.quiz-cover:hover img,
 .quiz-cover:hover ~ .quizcard-content-layout, 
 .quizcard-content-layout:hover {
   cursor: pointer;

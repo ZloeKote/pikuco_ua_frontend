@@ -5,7 +5,7 @@ function QuizzesList({ quizzes }) {
     return <QuizCard key={quiz.id} quiz={quiz} />
   });
 
-  return <div className="mt-[50px] flex flex-wrap justify-between gap-y-10">{renderedQuizzes}</div>;
+  return <div className="mt-[20px] flex flex-wrap justify-between gap-y-10">{renderedQuizzes}</div>;
 }
 
 export default QuizzesList;
