@@ -4,8 +4,29 @@ import Link from "../components/Link";
 import { ROUTES } from "../ROUTES";
 import SignupCover from "../img/Screenshot_2.png";
 import classNames from "classnames";
+import PasswordInput from "../components/PasswordInput";
+import { setCredentials, useSignupMutation } from "../store";
+import { useState, useRef, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import Cookies from "universal-cookie";
 
 function Signup() {
+  const [signup, { isLoading }] = useSignupMutation();
+  const emailRef = useRef();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [user, setUser] = useState({
+    username: "",
+    email: "",
+    password: "",
+    birthdate: "",
+  });
+
+  useEffect(() => {
+    emailRef.current.focus();
+  }, []);
+
   const labelClassname = classNames("text-[26px] ml-[10px]");
   const redAsterix = (
     <span className="text-[red]" title="Обов'язкове поле">
@@ -13,9 +34,39 @@ function Signup() {
     </span>
   );
 
-  const handleSubmitSignup = (e) => {
+  const handleChangeEmail = (e) => setUser({ ...user, email: e.target.value });
+  const handleChangeUsername = (e) => setUser({ ...user, username: e.target.value });
+  const handleChangePassword = (e) => setUser({ ...user, password: e.target.value });
+  const handleChangeBirthdate = (e) => setUser({ ...user, birthdate: e.target.value });
+
+  const handleSubmitSignup = async (e) => {
     e.preventDefault();
+    try {
+      const userData = await signup(user).unwrap();
+      dispatch(setCredentials({ ...userData, email: user.email }));
+      setUser({
+        username: "",
+        email: "",
+        password: "",
+        birthdate: "",
+      });
+      navigate("/");
+    } catch (err) {
+      if (!err?.originalStatus) {
+        // setErrMsg("No server response");
+      } else if (err.originalStatus?.status === 400) {
+        // setErrMsg("Missing email or password");
+      } else if (err.originalStatus?.status === 403) {
+        // setErrMsg("Unathorized");
+      } else {
+        // setErrMsg("Login Failed");
+      }
+    }
   };
+  // if (results.isSuccess) {
+  //   const cookies = new Cookies();
+  //   cookies.set("Authorization", results.data.token, { path: "/"})
+  // }
 
   return (
     <div className="flex justify-center items-center">
@@ -29,19 +80,29 @@ function Signup() {
             <form className="flex flex-col" onSubmit={handleSubmitSignup}>
               <div className="flex flex-col">
                 <label className={labelClassname}>Електронна пошта {redAsterix}</label>
-                <Input type="email" placeholder="test@gmail.com" />
+                <Input
+                  type="email"
+                  innerRef={emailRef}
+                  value={user.email}
+                  onChange={handleChangeEmail}
+                  placeholder="test@gmail.com"
+                />
               </div>
               <div className="flex flex-col mt-[15px]">
                 <label className={labelClassname}>Нікнейм {redAsterix}</label>
-                <Input placeholder="Username" />
+                <Input value={user.username} onChange={handleChangeUsername} placeholder="Username" />
               </div>
               <div className="flex flex-col mt-[15px]">
                 <label className={labelClassname}>Пароль {redAsterix}</label>
-                <Input type="password" placeholder="Вводь, я дивлюся" />
+                <PasswordInput
+                  value={user.password}
+                  onChange={handleChangePassword}
+                  placeholder="Вводь, я дивлюся"
+                />
               </div>
               <div className="flex flex-col mt-[15px]">
                 <label className={labelClassname}>Дата народження</label>
-                <Input type="date" />
+                <Input value={user.birthdate} onChange={handleChangeBirthdate} type="date" />
               </div>
               <Button
                 className="w-[15rem] h-[3rem] text-[26px] rounded-2xl self-center mt-[25px]"

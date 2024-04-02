@@ -2,11 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { FcCollapse, FcExpand } from "react-icons/fc";
 import classNames from "classnames";
 import { twMerge } from "tailwind-merge";
+import { NavLink, useLocation } from "react-router-dom";
 
-function Dropdown({ options, onChange, value, className }) {
+function Dropdown({ options, onChange, value, className, param }) {
   const [isOpen, setIsOpen] = useState(false);
   const divEl = useRef();
-
+  const { pathname, search } = useLocation();
   const layoutClassname = twMerge(
     classNames("w-48 relative", className, `${!isOpen || "bg-[--dark-quizcard-background-hover]"}`)
   );
@@ -44,13 +45,28 @@ function Dropdown({ options, onChange, value, className }) {
     };
   }, []);
 
-  const renderedOptions = options.map((option) => {
-    return (
-      <div className={optionClassname} onClick={() => handleOptionClick(option)} key={option.value}>
-        {option.label}
-      </div>
-    );
-  });
+  let renderedOptions;
+  if (param !== null) {
+    renderedOptions = options.map((option) => {
+      return (
+        <div
+          className={optionClassname + " block"}
+          onClick={() => handleOptionClick(option)}
+          key={option.value}
+        >
+          {option.label}
+        </div>
+      );
+    });
+  } else {
+    renderedOptions = options.map((option) => {
+      return (
+        <div className={optionClassname} onClick={() => handleOptionClick(option)} key={option.value}>
+          {option.label}
+        </div>
+      );
+    });
+  }
 
   return (
     <div ref={divEl} className={layoutClassname}>

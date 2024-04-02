@@ -2,8 +2,7 @@ import { useState } from "react";
 import classNames from "classnames";
 import { twMerge } from "tailwind-merge";
 
-function ActiveButton({ children, ...rest }) {
-  const [isActive, setIsActive] = useState(false);
+function ActiveButton({ children, isActive, onClick, ...rest }) {
   const classname = twMerge(
     classNames(
       "flex items-center justify-center border w-20 h-6",
@@ -14,11 +13,8 @@ function ActiveButton({ children, ...rest }) {
     )
   );
 
-  const handleClickActive = () => {
-    setIsActive(!isActive);
-  }
   return (
-    <button {...rest} onClick={handleClickActive} className={classname}>
+    <button {...rest} onClick={onClick} className={classname}>
       {children}
     </button>
   );

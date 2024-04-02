@@ -13,10 +13,9 @@ function QuizCard({ quiz }) {
     "w-[432px] h-[314px] bg-[--dark-quizcard-background]",
     "layout-quizcard"
   );
-
   return (
     <div className={classnames}>
-      <Link className="quiz-cover" to={ROUTES.Quiz}>
+      <Link className="quiz-cover" to={ROUTES.Quiz(quiz.pseudoId)}>
         <img className="rounded-t-2xl" src={quizCover} alt="cover" />
       </Link>
 
@@ -34,7 +33,7 @@ function QuizCard({ quiz }) {
           {quiz.creator.nickname}
         </span>
       </div>
-      <Link className="quizcard-content-layout rounded-b-2xl" to={ROUTES.Quiz}>
+      <Link className="quizcard-content-layout rounded-b-2xl" to={ROUTES.Quiz(quiz.pseudoId)}>
         <div className="quizcard-content px-2 mt-11">
           <div className="quizcard-content-title text-white text-[26px] pb-2 leading-none" title={quiz.title}>
             {quiz.title}

@@ -1,11 +1,14 @@
+import QuizzesList from "./components/QuizzesList"
+
 export const ROUTES = {
   Main: "/",
   QuizzesList: "/quizzes",
-  Quiz: "/quizzes/quiz",
-  QuizStats: "/quizzes/quiz/stats",
-  PlayQuiz: "/quizzes/quiz/play",
+  Quiz: (pseudoId) => (pseudoId ? `/quizzes/${pseudoId}` : "/quizzes/:pseudoId"),
+  QuizStats: (pseudoId) =>  (pseudoId ? `/quizzes/${pseudoId}/stats` : "/quizzes/:pseudoId/stats"),
+  PlayQuiz: (pseudoId) =>  (pseudoId ? `/quizzes/${pseudoId}/play` : "/quizzes/:pseudoId/play"),
   Login: "/login",
   Signup: "/signup",
+  Profile: (email) => (email ? `/user/${email}` : "/user/:email"),
   About: "/about",
   Contacts: "/contacts",
 

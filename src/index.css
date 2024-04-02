@@ -5,7 +5,7 @@
 
 :root {
   --dark-main: #121212;
-  --dark-nav: rgba(15, 15, 15, 0.95);
+  --dark-nav: rgba(12, 12, 12, 0.95);
   --dark-link-text-hover: rgba(255, 255, 255, 0.6);
   --dark-link-background-hover: #2a2a2a;
   --dark-layout-cover: rgba(18, 18, 18, 0.7);
@@ -19,6 +19,8 @@
   --dark-quizcard-description: rgba(255, 255, 255, 0.75);
   --dark-button-active: rgb(140, 135, 42);
   --dark-button-border-active: rgb(224, 216, 68);
+  --dark-background-primary: rgba(15, 15, 15, 0.95);
+  --dark-background-secondary: rgba(12, 12, 12, 0.95);
 }
 
 html, body {

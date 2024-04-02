@@ -2,7 +2,7 @@ import { useState } from "react";
 import classNames from "classnames";
 import { twMerge } from "tailwind-merge";
 
-function Input({ className, width, height, type, ...rest}) {
+function Input({ className, width, height, type, value, onChange, innerRef, ...rest}) {
   const [inputText, setInputText] = useState("");
 
   const classname = twMerge(
@@ -24,8 +24,9 @@ function Input({ className, width, height, type, ...rest}) {
     <input
       className={classname}
       type={type || "text"}
-      value={inputText}
-      onChange={handleChangeInput}
+      value={value ? value : inputText}
+      onChange={onChange ? onChange : handleChangeInput}
+      ref={innerRef}
       {...rest}
     />
   );
