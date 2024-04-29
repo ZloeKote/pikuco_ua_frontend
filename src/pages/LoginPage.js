@@ -66,8 +66,11 @@ function LoginPage() {
         <h2 className="text-[52px] mb-[15px] text-center">Увійти</h2>
         <form className="flex flex-col" onSubmit={handleSubmitLogin}>
           <div className="flex flex-col">
-            <label for="email" className={labelClassname}>Пошта або нікнейм</label>
+            <label for="email" className={labelClassname}>
+              Пошта або нікнейм
+            </label>
             <Input
+              className="w-[350px] text-[26px]"
               type="email"
               value={email}
               onChange={handleChangeEmail}
@@ -78,8 +81,17 @@ function LoginPage() {
             />
           </div>
           <div className="flex flex-col mt-[15px]">
-            <label for="password" className={labelClassname}>Пароль</label>
-            <PasswordInput id="password" value={password} onChange={handleChangePassword} placeholder="Пароль" required />
+            <label for="password" className={labelClassname}>
+              Пароль
+            </label>
+            <PasswordInput
+              className="w-[350px] text-[26px]"
+              id="password"
+              value={password}
+              onChange={handleChangePassword}
+              placeholder="Пароль"
+              required
+            />
           </div>
           <Button
             className="w-[10rem] h-[3rem] text-[26px] rounded-2xl self-center mt-[25px]"

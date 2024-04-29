@@ -8,8 +8,7 @@ function Input({ className, width, height, type, value, onChange, innerRef, ...r
   const classname = twMerge(
     classNames(
       className,
-      "w-[350px]",
-      "text-[26px] text-white pl-[10px] pr-[10px]",
+      "text-white pl-[10px] pr-[10px]",
       "border border-[--dark-quizcard-border] rounded-2xl",
       "bg-[--dark-quizcard-background]",
       "hover:bg-[--dark-quizcard-background-hover] focus:bg-[--dark-quizcard-background-hover]"

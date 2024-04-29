@@ -25,10 +25,18 @@ const quizzesApi = createApi({
             method: "GET"
           }
         }
-      })
+      }),
+      fetchQuizMain: builder.query({
+        query: (pseudoId) => {
+          return {
+            url: `/${pseudoId}/main`,
+            method: "GET"
+          }
+        }
+      }),
     }
   }
 });
 
-export const { useFetchQuizzesQuery, useFetchQuizQuery } = quizzesApi;
+export const { useFetchQuizzesQuery, useFetchQuizQuery, useFetchQuizMainQuery } = quizzesApi;
 export {quizzesApi};

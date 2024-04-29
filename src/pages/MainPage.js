@@ -3,10 +3,6 @@ import QuizzesList from "../components/QuizzesList";
 import avatar from "../img/avatar.png";
 import quizCover from "../img/quizCover.png";
 
-import { useSelector } from "react-redux";
-import { selectCurrentToken, selectCurrentUser } from "../store/slices/authSlice";
-import { Link } from "react-router-dom";
-
 function MainPage() {
   const quizzes = [
     {
@@ -56,11 +52,11 @@ function MainPage() {
     <div className="main-page-layout mx-[3rem] mt-[30px]">
       <div>
         <QuizHeader>Популярні вікторини</QuizHeader>
-        <QuizzesList quizzes={quizzes} />
+        <QuizzesList quizzes={quizzes} hiddenPagination={true} />
       </div>
       <div className="mt-[40px]">
         <QuizHeader>Нові вікторини</QuizHeader>
-        <QuizzesList quizzes={quizzes} />
+        <QuizzesList quizzes={quizzes} hiddenPagination={true} />
       </div>
     </div>
   );

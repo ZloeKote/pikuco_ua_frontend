@@ -9,7 +9,6 @@ import { setCredentials, useSignupMutation } from "../store";
 import { useState, useRef, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import Cookies from "universal-cookie";
 
 function Signup() {
   const [signup, { isLoading }] = useSignupMutation();
@@ -81,6 +80,7 @@ function Signup() {
               <div className="flex flex-col">
                 <label className={labelClassname}>Електронна пошта {redAsterix}</label>
                 <Input
+                  className="w-[350px] text-[26px]"
                   type="email"
                   innerRef={emailRef}
                   value={user.email}
@@ -90,11 +90,17 @@ function Signup() {
               </div>
               <div className="flex flex-col mt-[15px]">
                 <label className={labelClassname}>Нікнейм {redAsterix}</label>
-                <Input value={user.username} onChange={handleChangeUsername} placeholder="Username" />
+                <Input
+                  className="w-[350px] text-[26px]"
+                  value={user.username}
+                  onChange={handleChangeUsername}
+                  placeholder="Username"
+                />
               </div>
               <div className="flex flex-col mt-[15px]">
                 <label className={labelClassname}>Пароль {redAsterix}</label>
                 <PasswordInput
+                  className="w-[350px] text-[26px]"
                   value={user.password}
                   onChange={handleChangePassword}
                   placeholder="Вводь, я дивлюся"
@@ -102,7 +108,12 @@ function Signup() {
               </div>
               <div className="flex flex-col mt-[15px]">
                 <label className={labelClassname}>Дата народження</label>
-                <Input value={user.birthdate} onChange={handleChangeBirthdate} type="date" />
+                <Input
+                  className="w-[350px] text-[26px]"
+                  value={user.birthdate}
+                  onChange={handleChangeBirthdate}
+                  type="date"
+                />
               </div>
               <Button
                 className="w-[15rem] h-[3rem] text-[26px] rounded-2xl self-center mt-[25px]"

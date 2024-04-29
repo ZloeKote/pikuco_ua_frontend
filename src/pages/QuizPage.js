@@ -1,18 +1,22 @@
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import Link from "../components/Link";
 import { GoArrowLeft } from "react-icons/go";
 import classNames from "classnames";
 import { ROUTES } from "../ROUTES";
-import { useFetchQuizQuery } from "../store/apis/quizzesApi";
+import { useFetchQuizMainQuery } from "../store/apis/quizzesApi";
 import ShowQuiz from "../components/ShowQuiz";
+import { LinearProgress } from "@mui/material";
 
 function QuizPage() {
+  const [searchParams] = useSearchParams();
   const { pseudoId } = useParams();
-  const { data, isLoading } = useFetchQuizQuery(pseudoId);
+  const { data, isLoading } = useFetchQuizMainQuery(pseudoId);
 
   const mainStatClassname =
     "hover:cursor-pointer hover:bg-[--dark-link-background-hover] px-[10px] rounded-md";
   const mainClassname = classNames(mainStatClassname, "font-semibold border-b");
+
+  const langParam = searchParams.get("lang") !== null ? "?lang=" + searchParams.get("lang") : "";
 
   return (
     <div className="flex flex-col items-center mt-10 text-white w-full">
@@ -27,11 +31,15 @@ function QuizPage() {
           <Link className={mainClassname} to={ROUTES.Quiz(pseudoId)}>
             Загальна інформація
           </Link>
-          <Link className={mainStatClassname} to={ROUTES.QuizStats(pseudoId)}>
+          <Link
+            className={mainStatClassname}
+            to={ROUTES.QuizStats(pseudoId)}
+            params={langParam}
+          >
             Статистика
           </Link>
         </div>
-        {isLoading ? <span className="text-white">Loading...</span> : <ShowQuiz quiz={data} />}
+        {isLoading ? <LinearProgress /> : <ShowQuiz quiz={data} />}
       </div>
     </div>
   );

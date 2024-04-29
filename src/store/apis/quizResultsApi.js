@@ -42,8 +42,6 @@ const quizResultsApi = createApi({
       }),
       addQuizResult: builder.mutation({
         query: ({pseudoId, results, token}) => {
-          console.log("results");
-          console.log(results);
           return {
             url: `/${pseudoId}`,
             method: "POST",

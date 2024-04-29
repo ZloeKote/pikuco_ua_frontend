@@ -1,19 +1,42 @@
-import classNames from "classnames";
 import ytLinkToValid from "../hooks/YtLinkToValid";
 
-function ShowQuestion({ question, type, individual }) {
+function ShowQuestion({ question, type, individual, lang }) {
+  let questionTitle = question.title;
+  let questionDescription = question.description !== "null" ? question.description : "";
+
+  if (question.translations?.some((tr) => tr.language === lang)) {
+    questionTitle = question.translations.find((tr) => tr.language === lang).title;
+    questionDescription = question.translations.find((tr) => tr.language === lang).description;
+  }
+  let questionInfo = (
+    <div className="w-[70%] pl-3">
+        <div className="text-[24px]">{questionTitle}</div>
+        <div className="text-[20px]">{questionDescription}</div>
+      </div>
+  );
+  if (questionDescription === "" || questionDescription === null) {
+    questionInfo = (
+      <div className="w-[70%] pl-3 flex items-center">
+          <div className="text-[32px]">{questionTitle}</div>
+        </div>
+    );
+  }
+
   let previewQuestion;
   if (type === "Tournament - Video") {
     previewQuestion = (
-      <iframe title="Youtube" width="100%" height="100px" src={ytLinkToValid(question.url)} allowFullScreen></iframe>
+      <iframe
+        title="Youtube"
+        width="100%"
+        height="100px"
+        src={ytLinkToValid(question.url)}
+        allowFullScreen
+      ></iframe>
     );
   } else {
-    previewQuestion = <img src={question.url} alt={question.title} />;
+    previewQuestion = <img src={question.url} alt={questionTitle} />;
   }
-  const infoClassname = classNames("pl-[15px] flex flex-col", {
-    "w-[70%]": individual,
-    "w-[70%]": !individual,
-  });
+
   let score = (
     <div className="w-[10%] text-[40px] flex items-center justify-center">
       {question.score ? question.score : 0}
@@ -29,10 +52,7 @@ function ShowQuestion({ question, type, individual }) {
     <div className={layoutClassname}>
       <div className="w-[7%] text-[40px] flex items-center justify-center">{question.place}</div>
       <div className="w-[13%] self-center">{previewQuestion}</div>
-      <div className="w-[70%]">
-        <div className="text-[24px]">{question.title}</div>
-        <div className="text-[20px]">{question.description}</div>
-      </div>
+      {questionInfo}
       {score}
     </div>
   );

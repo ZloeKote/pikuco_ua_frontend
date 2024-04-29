@@ -1,5 +1,3 @@
-import QuizzesList from "./components/QuizzesList"
-
 export const ROUTES = {
   Main: "/",
   QuizzesList: "/quizzes",
@@ -8,7 +6,11 @@ export const ROUTES = {
   PlayQuiz: (pseudoId) =>  (pseudoId ? `/quizzes/${pseudoId}/play` : "/quizzes/:pseudoId/play"),
   Login: "/login",
   Signup: "/signup",
-  Profile: (email) => (email ? `/user/${email}` : "/user/:email"),
+  Profile: (nickname) => (nickname ? `/user/${nickname}` : "/user/:nickname"),
+  Privacy: (nickname) => (nickname ? `/user/${nickname}/privacy` : "/user/:nickname/privacy"),
+  User_completed_quizzes: (nickname) => (nickname ? `/user/${nickname}/quizzes/completed` : "/user/:nickname/quizzes/completed"),
+  User_quizzes: (nickname) => (nickname ? `/user/${nickname}/quizzes/my` : "/user/:nickname/quizzes/my"),
+  User_wishlisted_quizzes: (nickname) => (nickname ? `/user/${nickname}/quizzes/wishlist` : "/user/:nickname/quizzes/wishlist"),
   About: "/about",
   Contacts: "/contacts",
 

@@ -6,6 +6,8 @@ import avatar from "../img/avatar.png";
 import quizCover from "../img/quizCover.png";
 import Link from "./Link";
 import { ROUTES } from "../ROUTES";
+import { Typography } from "@mui/material";
+import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 
 function QuizCard({ quiz }) {
   const classnames = classNames(
@@ -24,20 +26,38 @@ function QuizCard({ quiz }) {
           <BsFillPlayFill className="text-5xl" />
         </Link>
       </Button>
-      <div className="quizcard-creator flex items-center border border-[--dark-quizcard-border] w-[120px] h-fit rounded-full self-center mr-3 z-10 bg-[--dark-quizcard-background]">
-        <img src={avatar} alt="creator" className="h-7 mr-2" />
-        <span
-          className="quizcard-creator-nickname text-[--dark-text] leading-none text-[16px] italic"
-          title={quiz.creator.nickname}
-        >
-          {quiz.creator.nickname}
-        </span>
-      </div>
+
+      <Link to={`/user/${quiz.creator.nickname.toLowerCase()}`} className="quizcard-creator z-10 mr-3 w-[120px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]">
+        <div className="flex items-center">
+          <img src={avatar} alt="creator" className="h-7 mr-1" />
+          <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
+            <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[16px] italic">
+              {quiz.creator.nickname}
+            </span>
+          </Tooltip>
+        </div>
+      </Link>
+
       <Link className="quizcard-content-layout rounded-b-2xl" to={ROUTES.Quiz(quiz.pseudoId)}>
         <div className="quizcard-content px-2 mt-11">
-          <div className="quizcard-content-title text-white text-[26px] pb-2 leading-none" title={quiz.title}>
-            {quiz.title}
-          </div>
+          <Tooltip
+            title={<Typography>{quiz.title}</Typography>}
+            placement="bottom-start"
+            slotProps={{
+              popper: {
+                sx: {
+                  [`&.${tooltipClasses.popper}[data-popper-placement*="bottom"] .${tooltipClasses.tooltip}`]:
+                    {
+                      marginTop: "0px",
+                    },
+                },
+              },
+            }}
+          >
+            <div className="quizcard-content-title text-white text-[26px] pb-2 leading-none">
+              {quiz.title}
+            </div>
+          </Tooltip>
           <div className="quizcard-content-desc text-[--dark-quizcard-description] text-[17px] leading-[1.1]">
             {quiz.description}
           </div>

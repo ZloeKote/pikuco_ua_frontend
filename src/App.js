@@ -10,40 +10,51 @@ import PlayQuizPage from "./pages/PlayQuizPage";
 import { ROUTES } from "./ROUTES";
 import QuizPage from "./pages/QuizPage";
 import QuizStatsPage from "./pages/QuizStatsPage";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import UserProfilePage from "./pages/UserProfilePage";
+import UserPrivacyPage from "./pages/UserPrivacyPage";
+import UserCQuizzesPage from "./pages/UserCQuizzesPage";
+import UserQuizzesPage from "./pages/UserQuizzesPage";
+import UserWQuizzesPage from "./pages/UserWQuizzesPage";
 
+const darkTheme = createTheme({
+  palette: {
+    mode: "dark",
+  },
+});
 
 function App() {
-    return (
-    <Routes>
-      <Route path={ROUTES.Main} element={<FullLayout />}>
-        {/* Public routes */}
-        <Route index element={<MainPage />} />
-        <Route path={ROUTES.QuizzesList} element={<QuizzesPage />}/>
-        <Route path={ROUTES.About} element={<div>About</div>}/>
-        <Route path={ROUTES.Contacts} element={<div>Contacts</div>} />
-        <Route path={ROUTES.Quiz()} element={<QuizPage />} />
-        <Route path={ROUTES.QuizStats()} element={<QuizStatsPage />} />
-        <Route path={ROUTES.Login} element={<LoginPage />} />
-        <Route path={ROUTES.Signup} element={<SignupPage />} />
+  return (
+    <ThemeProvider theme={darkTheme}>
+      <Routes>
+        <Route path={ROUTES.Main} element={<FullLayout />}>
+          {/* Public routes */}
+          <Route index element={<MainPage />} />
+          <Route path={ROUTES.QuizzesList} element={<QuizzesPage />} />
+          <Route path={ROUTES.About} element={<div>About</div>} />
+          <Route path={ROUTES.Contacts} element={<div>Contacts</div>} />
+          <Route path={ROUTES.Quiz()} element={<QuizPage />} />
+          <Route path={ROUTES.QuizStats()} element={<QuizStatsPage />} />
+          <Route path={ROUTES.Login} element={<LoginPage />} />
+          <Route path={ROUTES.Signup} element={<SignupPage />} />
 
-        {/* protected routes */}
-        <Route element={<RequireAuth />}>
+          <Route path={ROUTES.PlayQuiz()} element={<SimpleLayout />}>
+            <Route index element={<PlayQuizPage />} />
+          </Route>
+          {/* protected routes */}
+          <Route element={<RequireAuth />}></Route>
+          <Route path={ROUTES.Profile()}>
+            <Route index element={<UserProfilePage />} />
+            <Route path={ROUTES.Privacy()} element={<UserPrivacyPage />} />
+
+            <Route path={ROUTES.User_completed_quizzes()} element={<UserCQuizzesPage />} />
+            <Route path={ROUTES.User_quizzes()} element={<UserQuizzesPage />} />
+            <Route path={ROUTES.User_wishlisted_quizzes()} element={<UserWQuizzesPage />} />
+          </Route>
         </Route>
-      </Route>
-      <Route path={ROUTES.PlayQuiz()} element={<SimpleLayout />}>
-        <Route index element={<PlayQuizPage />}/>
-      </Route>
-    </Routes>
+      </Routes>
+    </ThemeProvider>
   );
 }
 
 export default App;
-
-// Що було
-{
-  /* <div className="layout font-serif">
-      <NavigationPanel />
-      <Outlet></Outlet>
-      <Footer />
-    </div> */
-}

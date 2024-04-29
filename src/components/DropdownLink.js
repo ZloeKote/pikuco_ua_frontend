@@ -4,7 +4,7 @@ import { useState } from "react";
 import { GoChevronDown, GoChevronUp } from "react-icons/go";
 import { twMerge } from "tailwind-merge";
 
-function DropdownLink({ options, children, onClick, isOpenExt, to, titleClassName, ...rest }) {
+function DropdownLink({ options, children, onClick, OnClickTitle, isOpenExt, to, titleClassName, ...rest }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleOpen = () => setIsOpen(true);
@@ -29,9 +29,12 @@ function DropdownLink({ options, children, onClick, isOpenExt, to, titleClassNam
     return (
       <div className={linkClassName} key={option.label}>
         <Link
-          onClick={option.handleClick ? option.handleClick : handleClose}
+          onClick={() => {
+            setIsOpen(false);
+            if (option.handleClick) option.handleClick();
+          }}
           className="block"
-          to={option.to}
+          to={option.to + (option.param || "")}
         >
           {option.label}
         </Link>
@@ -40,6 +43,12 @@ function DropdownLink({ options, children, onClick, isOpenExt, to, titleClassNam
   });
 
   let defaultOpening = null;
+  if (onClick) {
+    defaultOpening = { onClick: handleClick };
+  } else {
+    defaultOpening = { onMouseEnter: handleOpen, onMouseLeave: handleClose };
+  }
+
   let DropdownTitle = (
     <div className={titleClassNames}>
       {children}
@@ -50,17 +59,13 @@ function DropdownLink({ options, children, onClick, isOpenExt, to, titleClassNam
       )}
     </div>
   );
-  if (onClick) {
-    defaultOpening = { onClick: handleClick };
-  } else {
-    defaultOpening = { onMouseEnter: handleOpen, onMouseLeave: handleClose };
-  }
-
   if (to) {
     if (onClick) {
       DropdownTitle = (
         <div className={titleClassNames}>
-          <Link to={to}>{children}</Link>
+          <Link to={to} onClick={OnClickTitle ?? null}>
+            {children}
+          </Link>
           {isOpen || isOpenExt ? (
             <GoChevronUp className="self-center cursor-pointer" />
           ) : (
@@ -70,7 +75,7 @@ function DropdownLink({ options, children, onClick, isOpenExt, to, titleClassNam
       );
     } else {
       DropdownTitle = (
-        <Link className={titleClassNames} to={to}>
+        <Link className={titleClassNames} to={to} onClick={OnClickTitle ?? null}>
           {children}
           {isOpen || isOpenExt ? (
             <GoChevronUp className="self-center" />
