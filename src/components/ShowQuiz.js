@@ -1,12 +1,12 @@
 import { useState } from "react";
 import classNames from "classnames";
-import Link from "../components/Link";
-import Button from "./Button";
+import Link from "../components/simpleComponents/Link";
+import Button from "./simpleComponents/Button";
 import { ROUTES } from "../ROUTES";
 import { GoChevronUp, GoChevronDown } from "react-icons/go";
 import avatar from "../img/avatar.png";
 import quizCover from "../img/quizCover.png";
-import LanguagePicker from "./LanguagePicker";
+import LanguagePicker from "./simpleComponents/LanguagePicker";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 function ShowQuiz({ quiz }) {

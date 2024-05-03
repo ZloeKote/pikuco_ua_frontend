@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import { Tooltip, Typography } from "@mui/material";
 import { BsInfoCircleFill } from "react-icons/bs";
-import defaultAvatar from "../img/avatar.png";
+import defaultAvatar from "../../img/avatar.png";
 
 function ShowPublicUserProfile({ user }) {
   const classnameLayout = classNames(

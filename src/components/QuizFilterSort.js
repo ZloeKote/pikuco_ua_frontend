@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
-import Button from "./Button";
-import ActiveButton from "./ActiveButton";
-import Dropdown from "./Dropdown";
+import Button from "./simpleComponents/Button";
+import ActiveButton from "./simpleComponents/ActiveButton";
+import Dropdown from "./simpleComponents/Dropdown";
 import classNames from "classnames";
 import { useSearchParams } from "react-router-dom";
 import ParamsContext from "../context/searchParams";

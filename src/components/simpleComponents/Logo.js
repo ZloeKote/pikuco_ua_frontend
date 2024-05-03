@@ -1,8 +1,8 @@
 import Link from "./Link";
 import { twMerge } from "tailwind-merge";
 import classNames from "classnames";
-import LogoImg from "../img/logo/PIKUCOUA.png";
-import {ROUTES} from "../ROUTES";
+import LogoImg from "../../img/logo/PIKUCOUA.png";
+import {ROUTES} from "../../ROUTES";
 
 function Logo({ className }) {
   const classnames = twMerge(classNames("w-44", className));

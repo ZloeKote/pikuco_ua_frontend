@@ -1,9 +1,9 @@
-import Link from "./Link";
-import Logo from "./Logo";
+import Link from "./simpleComponents/Link";
+import Logo from "./simpleComponents/Logo";
 import avatar from "../img/avatar.png";
-import DropdownLink from "./DropdownLink";
+import DropdownLink from "./simpleComponents/DropdownLink";
 import classNames from "classnames";
-import Button from "./Button";
+import Button from "./simpleComponents/Button";
 import { FiLogIn } from "react-icons/fi";
 import { ROUTES } from "../ROUTES";
 import { useSelector, useDispatch } from "react-redux";
@@ -26,7 +26,7 @@ function NavigationPanel() {
   const location = useLocation();
   const navigate = useNavigate();
   const token = useSelector(selectCurrentToken);
-  const {nickname} = useSelector(selectCurrentUser);
+  const { nickname } = useSelector(selectCurrentUser);
   const userAvatar = useSelector(selectCurrentAvatar);
   const classnames = classNames("hover:bg-[--dark-link-background-hover] hover:rounded-md px-2 flex");
 
@@ -49,7 +49,6 @@ function NavigationPanel() {
     userContent = (
       <DropdownLink
         options={userOptions}
-        
         className="h-fit max-w-[260px] self-center mr-3"
         titleClassName="!rounded-full pr-1"
         to={ROUTES.Profile(nickname.toLowerCase())}

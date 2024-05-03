@@ -1,6 +1,6 @@
 import { AiFillFacebook, AiFillInstagram, AiFillLinkedin, AiFillTwitterSquare } from "react-icons/ai";
-import Link from "./Link";
-import Logo from "./Logo";
+import Link from "./simpleComponents/Link";
+import Logo from "./simpleComponents/Logo";
 import classNames from "classnames";
 import { ROUTES } from "../ROUTES";
 

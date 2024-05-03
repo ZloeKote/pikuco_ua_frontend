@@ -1,15 +1,15 @@
 import classNames from "classnames";
 import { Alert, TextField, Tooltip, Typography } from "@mui/material";
 import { BsInfoCircleFill } from "react-icons/bs";
-import Button from "./Button";
+import Button from "../simpleComponents/Button";
 import { useState, useEffect } from "react";
 import { BiEditAlt } from "react-icons/bi";
 import { IoCheckbox } from "react-icons/io5";
-import Input from "./Input";
-import { selectCurrentToken, useUpdateUserPublicMutation } from "../store";
+import Input from "../simpleComponents/Input";
+import { selectCurrentToken, useUpdateUserPublicMutation } from "../../store";
 import { useSelector } from "react-redux";
-import { ROUTES } from "../ROUTES";
-import defaultAvatar from "../img/avatar.png";
+import { ROUTES } from "../../ROUTES";
+import defaultAvatar from "../../img/avatar.png";
 
 function ShowEditedUserProfile({ user }) {
   const token = useSelector(selectCurrentToken);
@@ -21,23 +21,23 @@ function ShowEditedUserProfile({ user }) {
   const [actualDescription, setActualDescription] = useState(editedDescription);
   const [updateUser, result] = useUpdateUserPublicMutation();
 
-
   const classnameLayout = classNames(
     "grid grid-cols-[200px_100px_1fr_1fr]",
     "grid-rows-[25px_repeat(3,minmax(0,65px))_300px_1fr]"
   );
+  const editedInfoClassname = classNames("italic", "hover:cursor-pointer hover:underline");
 
   const handleEditNickname = () => setIsEditingNickname(true);
   const handleCompleteEditingNickname = () => {
     setIsEditingNickname(false);
     setActualNickname(editedNickname);
-  }
+  };
   const handleCloseEditingNicknameOnEscape = (e) => {
     if (e.code === "Escape") {
       setIsEditingNickname(false);
       setEditedNickname(actualNickname);
     }
-  }
+  };
   const handleChangeNickname = (e) => setEditedNickname(e.target.value);
   const handleEditDescription = () => setIsEditingDescription(true);
   const handleChangeDescription = (e) => setEditedDescription(e.target.value);
@@ -55,8 +55,6 @@ function ShowEditedUserProfile({ user }) {
     setEditedDescription(user.description);
   };
 
-  const editedInfoClassname = classNames("italic", "hover:cursor-pointer hover:underline");
-
   const handleClickSave = () => {
     updateUser({
       newNickname: editedNickname,
@@ -66,8 +64,9 @@ function ShowEditedUserProfile({ user }) {
     });
   };
   useEffect(() => {
-    if (result.isSuccess) window.location.replace(ROUTES.Profile(editedNickname));
+    if (result.isSuccess) window.location.replace(ROUTES.Profile(editedNickname.toLowerCase()));
   }, [editedNickname, result.isSuccess]);
+
   let error = "";
   if (result.isError) {
     error += (
@@ -124,7 +123,13 @@ function ShowEditedUserProfile({ user }) {
           <h3>Нікнейм</h3>
           {isEditingNickname ? (
             <form onSubmit={handleCompleteEditingNickname} className="flex gap-1 text-[20px]">
-              <Input className="w-[150px]" value={editedNickname} onChange={handleChangeNickname} autoFocus onKeyDown={handleCloseEditingNicknameOnEscape} />
+              <Input
+                className="w-[150px]"
+                value={editedNickname}
+                onChange={handleChangeNickname}
+                autoFocus
+                onKeyDown={handleCloseEditingNicknameOnEscape}
+              />
               <button type="submit">
                 <IoCheckbox className="text-[27px] text-green-500 hover:text-green-400" />
               </button>
@@ -155,7 +160,7 @@ function ShowEditedUserProfile({ user }) {
         </div>
       </div>
       <div className="px-5 row-start-5 row-end-6 col-span-full border-t border-[--dark-link-text-hover]">
-        <h2 className="text-[28px] bold">Опис</h2>
+        <h2 className="text-[28px]">Опис</h2>
         {isEditingDescription ? (
           <TextField
             sx={{ lineHeight: 0 }}

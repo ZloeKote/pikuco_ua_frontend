@@ -2,7 +2,6 @@ import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { quizzesApi } from "./apis/quizzesApi";
 import { quizResultsApi } from "./apis/quizResultsApi";
-import { authApi } from "./apis/authApi";
 import { apiSlice } from "./apis/authApi";
 import authReducer from "./slices/authSlice";
 import { usersApi } from "./apis/UsersApi";
@@ -27,18 +26,25 @@ export const store = configureStore({
 
 setupListeners(store.dispatch);
 
-export { useFetchQuizzesQuery, useFetchQuizQuery } from "./apis/quizzesApi";
+export {
+  useFetchQuizzesQuery,
+  useFetchQuizQuery,
+  useFetchUserCompletedQuizzesQuery,
+} from "./apis/quizzesApi";
+
 export {
   useFetchQuizResultsQuery,
   useFetchIndividualResultsQuery,
   useAddQuizResultMutation,
 } from "./apis/quizResultsApi";
+
 export {
   useLoginMutation,
   useSignupMutation,
   useRecreateTokenMutation,
   useLogoutMutation,
 } from "./slices/authApiSlice";
+
 export {
   setCredentials,
   logOut,
@@ -46,4 +52,10 @@ export {
   selectCurrentUser,
   selectCurrentAvatar,
 } from "./slices/authSlice";
-export { useFetchUserByNicknameQuery, useUpdateUserPublicMutation } from "./apis/UsersApi";
+
+export {
+  useFetchUserByNicknameQuery,
+  useFetchUserPrivacyByNicknameQuery,
+  useUpdateUserPublicMutation,
+  useUpdateUserPrivacyMutation,
+} from "./apis/UsersApi";

@@ -22,21 +22,35 @@ const quizzesApi = createApi({
         query: (pseudoId) => {
           return {
             url: `/${pseudoId}`,
-            method: "GET"
-          }
-        }
+            method: "GET",
+          };
+        },
       }),
       fetchQuizMain: builder.query({
         query: (pseudoId) => {
           return {
             url: `/${pseudoId}/main`,
-            method: "GET"
-          }
-        }
+            method: "GET",
+          };
+        },
       }),
-    }
-  }
+      fetchUserCompletedQuizzes: builder.query({
+        query: ({ token, param }) => {
+          return {
+            url: `/user${param !== undefined ? param : ""}`,
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+          };
+        },
+      }),
+    };
+  },
 });
 
-export const { useFetchQuizzesQuery, useFetchQuizQuery, useFetchQuizMainQuery } = quizzesApi;
-export {quizzesApi};
+export const {
+  useFetchQuizzesQuery,
+  useFetchQuizQuery,
+  useFetchQuizMainQuery,
+  useFetchUserCompletedQuizzesQuery,
+} = quizzesApi;
+export { quizzesApi };

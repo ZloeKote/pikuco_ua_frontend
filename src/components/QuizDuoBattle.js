@@ -1,4 +1,4 @@
-import Button from "./Button";
+import Button from "./simpleComponents/Button";
 
 function QuizDuoBattle({ question1, question2, type, handleWinner }) {
   return (

@@ -1,6 +1,6 @@
 import { useParams, useLocation, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import Link from "../components/Link";
+import Link from "../components/simpleComponents/Link";
 import { GoArrowLeft } from "react-icons/go";
 import classNames from "classnames";
 import { ROUTES } from "../ROUTES";

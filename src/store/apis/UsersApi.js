@@ -18,13 +18,32 @@ const usersApi = createApi({
           };
         },
       }),
+      fetchUserPrivacyByNickname: builder.query({
+        query: ({ nickname, token }) => {
+          return {
+            url: `/${nickname}/privacy`,
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+          };
+        },
+      }),
       updateUserPublic: builder.mutation({
-        query: ({newNickname, newDescription, nickname, token}) => {
+        query: ({ newNickname, newDescription, nickname, token }) => {
           return {
             url: `/${nickname}`,
             method: "PUT",
             body: { nickname: newNickname, description: newDescription },
-            headers: {Authorization: `Bearer ${token}`},
+            headers: { Authorization: `Bearer ${token}` },
+          };
+        },
+      }),
+      updateUserPrivacy: builder.mutation({
+        query: ({ newEmail, newPassword, currentPassword, nickname, token }) => {
+          return {
+            url: `/${nickname}/privacy`,
+            method: "PUT",
+            body: { email: newEmail, newPassword: newPassword, currentPassword: currentPassword },
+            headers: { Authorization: `Bearer ${token}` },
           };
         },
       }),
@@ -32,5 +51,10 @@ const usersApi = createApi({
   },
 });
 
-export const { useFetchUserByNicknameQuery, useUpdateUserPublicMutation } = usersApi;
+export const {
+  useFetchUserByNicknameQuery,
+  useFetchUserPrivacyByNicknameQuery,
+  useUpdateUserPublicMutation,
+  useUpdateUserPrivacyMutation,
+} = usersApi;
 export { usersApi };

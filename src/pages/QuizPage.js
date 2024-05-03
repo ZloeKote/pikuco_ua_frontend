@@ -1,5 +1,5 @@
 import { useParams, useSearchParams } from "react-router-dom";
-import Link from "../components/Link";
+import Link from "../components/simpleComponents/Link";
 import { GoArrowLeft } from "react-icons/go";
 import classNames from "classnames";
 import { ROUTES } from "../ROUTES";

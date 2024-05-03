@@ -1,10 +1,10 @@
 import "../css/QuizCard.css";
 import classNames from "classnames";
-import Button from "./Button";
+import Button from "./simpleComponents/Button";
 import { BsFillPlayFill } from "react-icons/bs";
 import avatar from "../img/avatar.png";
 import quizCover from "../img/quizCover.png";
-import Link from "./Link";
+import Link from "./simpleComponents/Link";
 import { ROUTES } from "../ROUTES";
 import { Typography } from "@mui/material";
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";

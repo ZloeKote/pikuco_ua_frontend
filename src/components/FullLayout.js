@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import Cookie from "universal-cookie";
 import { Outlet } from "react-router-dom";
@@ -8,13 +8,14 @@ import Footer from "./Footer";
 import { useRecreateTokenMutation, setCredentials } from "../store";
 
 function FullLayout() {
-  const [recreateToken, { isLoading }] = useRecreateTokenMutation();
+  const [recreateToken, { isSuccess }] = useRecreateTokenMutation();
   const dispatch = useDispatch();
 
   let outlet = <div>Loading...</div>;
+  const cookie = useMemo(() => new Cookie(), []);
+
   useEffect(() => {
     const refreshLogin = async () => {
-      const cookie = new Cookie();
       try {
         if (cookie.get("LoggedIn")) {
           const userData = await recreateToken().unwrap();
@@ -25,9 +26,9 @@ function FullLayout() {
       }
     };
     refreshLogin();
-  }, [recreateToken, dispatch]);
+  }, [recreateToken, dispatch, cookie]);
 
-  if (!isLoading) outlet = <Outlet />;
+  if (cookie.get("LoggedIn") ? isSuccess : true) outlet = <Outlet />;
 
   return (
     <div className="layout font-serif">

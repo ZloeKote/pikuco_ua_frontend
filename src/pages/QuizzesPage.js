@@ -26,7 +26,12 @@ function QuizzesPage() {
       {isLoading && !error ? (
         <LinearProgress />
       ) : (
-        <QuizzesList quizzes={data?.quizzes} numPages={data?.numPages} handlePageParam={handleChangeParams} />
+        <QuizzesList
+          className="mt-[20px]"
+          quizzes={data?.quizzes}
+          numPages={data?.numPages}
+          handlePageParam={handleChangeParams}
+        />
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import { Link } from "react-router-dom";
-import ProfileSections from "../predefined/ProfileSections";
-import { ROUTES } from "../ROUTES";
+import ProfileSections from "../../predefined/ProfileSections";
+import { ROUTES } from "../../ROUTES";
 
 function UserProfileLayout({ title, section, userNickname, children }) {
   const classnameLayout = classNames(

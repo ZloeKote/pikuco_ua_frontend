@@ -1,11 +1,11 @@
 import { useParams } from "react-router-dom";
-import UserProfileLayout from "../components/UserProfileLayout";
+import UserProfileLayout from "../components/userProfile/UserProfileLayout";
 import ProfileSections from "../predefined/ProfileSections";
 import { selectCurrentUser, useFetchUserByNicknameQuery } from "../store";
 import { useSelector } from "react-redux";
 import { LinearProgress } from "@mui/material";
-import ShowEditedUserProfile from "../components/ShowEditedUserProfile";
-import ShowPublicUserProfile from "../components/ShowPublicUserProfile";
+import ShowEditedUserProfile from "../components/userProfile/ShowEditedUserProfile";
+import ShowPublicUserProfile from "../components/userProfile/ShowPublicUserProfile";
 
 function UserProfilePage() {
   const { nickname } = useParams();

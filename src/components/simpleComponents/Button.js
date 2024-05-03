@@ -4,8 +4,10 @@ import { twMerge } from "tailwind-merge";
 
 function Button({ children, primary, secondary, success, warning, danger, rounded, disabled, ...rest }) {
   const className = twMerge(classNames("flex items-center justify-center border w-20 h-6", {
-    "border-blue-400 bg-blue-600 text-white hover:bg-blue-500": primary,
-    "border-gray-400 bg-gray-600 text-white": secondary,
+    "border-blue-400 bg-blue-600 text-white hover:bg-blue-500": primary && !disabled,
+    "border-blue-700 bg-blue-800 text-white hover:cursor-no-drop": primary && disabled,
+    "border-gray-400 bg-gray-600 text-white hover:bg-gray-500": secondary && !disabled,
+    "border-gray-700 bg-gray-800 text-white hover:cursor-no-drop": secondary && disabled,
     "border-green-500 bg-green-700 text-white hover:bg-green-600": success && !disabled,
     "border-green-700 bg-green-800 hover:cursor-no-drop": success && disabled,
     "border-yellow-400 bg-yellow-600 text-white": warning,

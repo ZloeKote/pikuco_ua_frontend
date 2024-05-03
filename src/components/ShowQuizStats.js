@@ -1,9 +1,9 @@
 import { useLocation, useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
-import LanguagePicker from "./LanguagePicker";
+import LanguagePicker from "./simpleComponents/LanguagePicker";
 import { GoChevronUp, GoChevronDown } from "react-icons/go";
 import QuestionList from "./QuestionList";
-import ActiveButton from "./ActiveButton";
+import ActiveButton from "./simpleComponents/ActiveButton";
 import { LinearProgress } from "@mui/material";
 import classNames from "classnames";
 import { ROUTES } from "../ROUTES";

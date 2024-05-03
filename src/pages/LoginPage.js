@@ -1,7 +1,7 @@
-import Input from "../components/Input";
-import PasswordInput from "../components/PasswordInput";
-import Button from "../components/Button";
-import Link from "../components/Link";
+import Input from "../components/simpleComponents/Input";
+import PasswordInput from "../components/simpleComponents/PasswordInput";
+import Button from "../components/simpleComponents/Button";
+import Link from "../components/simpleComponents/Link";
 import { ROUTES } from "../ROUTES";
 import SignupCover from "../img/Screenshot_2.png";
 import classNames from "classnames";

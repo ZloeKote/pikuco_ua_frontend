@@ -1,4 +1,4 @@
-import UserProfileLayout from "../components/UserProfileLayout";
+import UserProfileLayout from "../components/userProfile/UserProfileLayout";
 import ProfileSections from "../predefined/ProfileSections";
 
 function UserWQuizzesPage() {

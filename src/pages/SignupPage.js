@@ -1,10 +1,10 @@
-import Input from "../components/Input";
-import Button from "../components/Button";
-import Link from "../components/Link";
+import Input from "../components/simpleComponents/Input";
+import Button from "../components/simpleComponents/Button";
+import Link from "../components/simpleComponents/Link";
 import { ROUTES } from "../ROUTES";
 import SignupCover from "../img/Screenshot_2.png";
 import classNames from "classnames";
-import PasswordInput from "../components/PasswordInput";
+import PasswordInput from "../components/simpleComponents/PasswordInput";
 import { setCredentials, useSignupMutation } from "../store";
 import { useState, useRef, useEffect } from "react";
 import { useDispatch } from "react-redux";
