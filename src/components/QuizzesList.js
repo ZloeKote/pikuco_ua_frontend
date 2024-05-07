@@ -3,6 +3,7 @@ import { Pagination } from "@mui/material";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import classNames from "classnames";
+import { twMerge } from "tailwind-merge";
 
 const gapXVariants = {
   small: "gap-x-3",
@@ -22,13 +23,13 @@ function QuizzesList({
   gapX = "small",
   gapY = "distant",
   hiddenPagination,
+  showActions = false,
   ...rest
 }) {
   const [searchParams] = useSearchParams();
   const [page, setPage] = useState(searchParams.get("page") !== null ? searchParams.get("page") : 1);
-  const quizzesClassName = classNames(
-    `flex flex-wrap ${gapXVariants[gapX]} ${gapYVariants[gapY]} justify-center`
-  );
+  const quizzesClassName = classNames(`flex flex-wrap ${gapXVariants[gapX]} ${gapYVariants[gapY]}`);
+  const layoutClassname = twMerge(classNames(rest.className, "flex flex-col "));
 
   const handleChangePage = (e, value) => {
     if (value !== 1) searchParams.set("page", value);
@@ -37,12 +38,12 @@ function QuizzesList({
     handlePageParam(searchParams.toString() !== "" ? "?" + searchParams.toString() : "");
   };
   const renderedQuizzes = quizzes?.map((quiz) => {
-    return <QuizCard key={quiz.pseudoId} quiz={quiz} />;
+    return <QuizCard key={quiz.pseudoId} quiz={quiz} showActions={showActions} />;
   });
 
   return (
     // якщо щось зламалося, то замінити перший div на <>
-    <div {...rest}>
+    <div className={layoutClassname}>
       <div className={quizzesClassName}>{renderedQuizzes}</div>
       <div className="flex justify-center mt-[20px]">
         <Pagination

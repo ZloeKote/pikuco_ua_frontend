@@ -11,6 +11,7 @@ export const ROUTES = {
   User_completed_quizzes: (nickname) => (nickname ? `/user/${nickname}/quizzes/completed` : "/user/:nickname/quizzes/completed"),
   User_quizzes: (nickname) => (nickname ? `/user/${nickname}/quizzes/my` : "/user/:nickname/quizzes/my"),
   User_wishlisted_quizzes: (nickname) => (nickname ? `/user/${nickname}/quizzes/wishlist` : "/user/:nickname/quizzes/wishlist"),
+  Create_quiz: "/quizzes/create",
   About: "/about",
   Contacts: "/contacts",
 

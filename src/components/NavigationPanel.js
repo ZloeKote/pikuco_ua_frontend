@@ -33,7 +33,7 @@ function NavigationPanel() {
   const handleClick = () => {
     logout(token);
     dispatch(logOut());
-    window.location.reload(true);
+    // window.location.reload(true);
   };
 
   const userOptions = [

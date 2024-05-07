@@ -70,9 +70,9 @@ function UserProfileLayout({ title, section, userNickname, children }) {
         </div>
         <div className="flex flex-col w-4/5">
           <div className="h-12 w-full border-b flex">
-            <div className="self-center text-[28px] ml-2">{title}</div>
+            <div className="self-center text-[28px] ml-2 w-full">{title}</div>
           </div>
-          <div>{children}</div>
+          {children}
         </div>
       </div>
     </div>

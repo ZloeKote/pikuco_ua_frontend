@@ -1,4 +1,5 @@
 import "../css/QuizCard.css";
+import { useState } from "react";
 import classNames from "classnames";
 import Button from "./simpleComponents/Button";
 import { BsFillPlayFill } from "react-icons/bs";
@@ -6,15 +7,40 @@ import avatar from "../img/avatar.png";
 import quizCover from "../img/quizCover.png";
 import Link from "./simpleComponents/Link";
 import { ROUTES } from "../ROUTES";
-import { Typography } from "@mui/material";
+import { IconButton, Menu, Typography, MenuItem } from "@mui/material";
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
+import { IoMenu } from "react-icons/io5";
 
-function QuizCard({ quiz }) {
+const actionOptions = [
+  { label: "Редагувати", to: "/quizzes/edit" },
+  { label: "Додати перевод", to: "/quizzes/translation/add" },
+  { label: "Видалити" },
+];
+
+function QuizCard({ quiz, showActions = false }) {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   const classnames = classNames(
     "border-2 border-[--dark-quizcard-border] rounded-2xl",
     "w-[432px] h-[314px] bg-[--dark-quizcard-background]",
-    "layout-quizcard"
+    "layout-quizcard relative"
   );
+
+  const renderedActions = actionOptions.map((option) => {
+    return (
+      <MenuItem key={option.label} onClick={handleClose}>
+        {option.to ? <Link to={option.to}>{option.label}</Link> : option.label}
+      </MenuItem>
+    );
+  });
+
   return (
     <div className={classnames}>
       <Link className="quiz-cover" to={ROUTES.Quiz(quiz.pseudoId)}>
@@ -27,7 +53,10 @@ function QuizCard({ quiz }) {
         </Link>
       </Button>
 
-      <Link to={`/user/${quiz.creator.nickname.toLowerCase()}`} className="quizcard-creator z-10 mr-3 w-[120px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]">
+      <Link
+        to={`/user/${quiz.creator.nickname.toLowerCase()}`}
+        className="quizcard-creator z-10 mr-3 w-[120px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]"
+      >
         <div className="flex items-center">
           <img src={avatar} alt="creator" className="h-7 mr-1" />
           <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
@@ -63,6 +92,41 @@ function QuizCard({ quiz }) {
           </div>
         </div>
       </Link>
+
+      {showActions && (
+        <div className="absolute top-0 right-0">
+          <IconButton
+            id="long-button"
+            aria-label="more"
+            aria-controls={open ? "long-menu" : undefined}
+            aria-expanded={open ? "true" : undefined}
+            aria-haspopup="true"
+            size="large"
+            onClick={handleClick}
+          >
+            <IoMenu />
+          </IconButton>
+          <Menu
+            MenuListProps={{ "aria-labelledby": "long-button" }}
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            slotProps={{
+              paper: {
+                style: {
+                  maxHeight: "max-content",
+                  backgroundColor: "var(--dark-quizcard-background)",
+                  border: "1px solid var(--dark-quizcard-border)",
+                  backgroundImage: "none",
+                },
+              },
+            }}
+            variant="menu"
+          >
+            {renderedActions}
+          </Menu>
+        </div>
+      )}
     </div>
   );
 }

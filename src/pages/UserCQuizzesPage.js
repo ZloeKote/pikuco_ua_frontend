@@ -40,7 +40,7 @@ function UserCQuizzesPage() {
       >
         {!isLoading ? (
           <QuizzesList
-            className="mt-2 mb-2"
+            className="my-2 mx-8"
             quizzes={quizzes?.quizzes}
             numPages={quizzes?.numPages}
             gapY="middle"

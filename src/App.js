@@ -16,6 +16,7 @@ import UserPrivacyPage from "./pages/UserPrivacyPage";
 import UserCQuizzesPage from "./pages/UserCQuizzesPage";
 import UserQuizzesPage from "./pages/UserQuizzesPage";
 import UserWQuizzesPage from "./pages/UserWQuizzesPage";
+import CreateQuizPage from "./pages/CreateQuizPage";
 
 const darkTheme = createTheme({
   palette: {
@@ -27,8 +28,8 @@ function App() {
   return (
     <ThemeProvider theme={darkTheme}>
       <Routes>
+        {/* Public routes */}
         <Route path={ROUTES.Main} element={<FullLayout />}>
-          {/* Public routes */}
           <Route index element={<MainPage />} />
           <Route path={ROUTES.QuizzesList} element={<QuizzesPage />} />
           <Route path={ROUTES.About} element={<div>About</div>} />
@@ -41,8 +42,13 @@ function App() {
           <Route path={ROUTES.PlayQuiz()} element={<SimpleLayout />}>
             <Route index element={<PlayQuizPage />} />
           </Route>
+
           {/* protected routes */}
-          <Route element={<RequireAuth />}></Route>
+          <Route element={<RequireAuth />}>
+            <Route path={ROUTES.Create_quiz} element={<CreateQuizPage />} />
+          </Route>
+
+          {/* user profile routes */}
           <Route path={ROUTES.Profile()}>
             <Route index element={<UserProfilePage />} />
             <Route path={ROUTES.Privacy()} element={<UserPrivacyPage />} />
