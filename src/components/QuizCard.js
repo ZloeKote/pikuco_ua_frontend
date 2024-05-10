@@ -7,14 +7,17 @@ import avatar from "../img/avatar.png";
 import quizCover from "../img/quizCover.png";
 import Link from "./simpleComponents/Link";
 import { ROUTES } from "../ROUTES";
-import { IconButton, Menu, Typography, MenuItem } from "@mui/material";
+import { IconButton, Menu, Typography, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 import { IoMenu } from "react-icons/io5";
+import { BiEditAlt } from "react-icons/bi";
+import { BsTranslate } from "react-icons/bs";
+import { MdDelete } from "react-icons/md";
 
 const actionOptions = [
-  { label: "Редагувати", to: "/quizzes/edit" },
-  { label: "Додати перевод", to: "/quizzes/translation/add" },
-  { label: "Видалити" },
+  { label: "Редагувати", to: "/quizzes/edit", icon: <BiEditAlt /> },
+  { label: "Додати перевод", to: "/quizzes/translation/add", icon: <BsTranslate /> },
+  { label: "Видалити", icon: <MdDelete /> },
 ];
 
 function QuizCard({ quiz, showActions = false }) {
@@ -36,7 +39,8 @@ function QuizCard({ quiz, showActions = false }) {
   const renderedActions = actionOptions.map((option) => {
     return (
       <MenuItem key={option.label} onClick={handleClose}>
-        {option.to ? <Link to={option.to}>{option.label}</Link> : option.label}
+        <ListItemIcon>{option.icon}</ListItemIcon>
+        <ListItemText>{option.to ? <Link to={option.to}>{option.label}</Link> : option.label}</ListItemText>
       </MenuItem>
     );
   });

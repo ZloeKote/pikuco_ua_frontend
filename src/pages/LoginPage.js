@@ -67,7 +67,7 @@ function LoginPage() {
         <form className="flex flex-col" onSubmit={handleSubmitLogin}>
           <div className="flex flex-col">
             <label for="email" className={labelClassname}>
-              Пошта або нікнейм
+              Пошта
             </label>
             <Input
               className="w-[350px] text-[26px]"

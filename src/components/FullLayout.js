@@ -4,7 +4,6 @@ import Cookie from "universal-cookie";
 import { Outlet } from "react-router-dom";
 import NavigationPanel from "./NavigationPanel";
 import Footer from "./Footer";
-
 import { useRecreateTokenMutation, setCredentials } from "../store";
 
 function FullLayout() {

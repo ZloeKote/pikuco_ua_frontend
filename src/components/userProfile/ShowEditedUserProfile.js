@@ -53,6 +53,8 @@ function ShowEditedUserProfile({ user }) {
   const handleClickReset = () => {
     setEditedNickname(user.nickname);
     setEditedDescription(user.description);
+    setIsEditingNickname(false);
+    setIsEditingDescription(false);
   };
 
   const handleClickSave = () => {

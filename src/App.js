@@ -39,10 +39,6 @@ function App() {
           <Route path={ROUTES.Login} element={<LoginPage />} />
           <Route path={ROUTES.Signup} element={<SignupPage />} />
 
-          <Route path={ROUTES.PlayQuiz()} element={<SimpleLayout />}>
-            <Route index element={<PlayQuizPage />} />
-          </Route>
-
           {/* protected routes */}
           <Route element={<RequireAuth />}>
             <Route path={ROUTES.Create_quiz} element={<CreateQuizPage />} />
@@ -57,6 +53,10 @@ function App() {
             <Route path={ROUTES.User_quizzes()} element={<UserQuizzesPage />} />
             <Route path={ROUTES.User_wishlisted_quizzes()} element={<UserWQuizzesPage />} />
           </Route>
+        </Route>
+
+        <Route path={ROUTES.PlayQuiz()} element={<SimpleLayout />}>
+          <Route index element={<PlayQuizPage />} />
         </Route>
       </Routes>
     </ThemeProvider>
