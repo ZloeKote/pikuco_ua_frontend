@@ -138,6 +138,9 @@ function NavigationPanel() {
           <Link className={classnames} to={ROUTES.Contacts}>
             Контакти
           </Link>
+          <Link className={classnames} to={ROUTES.CreateQuiz}>
+            Створити турнір
+          </Link>
         </div>
       </div>
       {userContent}

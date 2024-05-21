@@ -9,6 +9,7 @@ import classNames from "classnames";
 import { ROUTES } from "../ROUTES";
 import avatar from "../img/avatar.png";
 import { useFetchQuizResultsQuery } from "../store";
+import { types } from "../predefined/QuestionTypes";
 
 function ShowQuizStats({ quiz, indResults }) {
   const navigate = useNavigate();
@@ -136,7 +137,12 @@ function ShowQuizStats({ quiz, indResults }) {
           {resultsIsLoading ? (
             <LinearProgress />
           ) : (
-            <QuestionList questions={questions} type={quiz.type} individual={isIndividual} lang={currLanguage} />
+            <QuestionList
+              questions={questions}
+              questionType={quiz.type}
+              variant={isIndividual ? types.individual : types.general}
+              lang={currLanguage}
+            />
           )}
         </div>
       </div>

@@ -10,6 +10,98 @@ const quizzesApi = createApi({
   }),
   endpoints(builder) {
     return {
+      createQuiz: builder.mutation({
+        query: ({ generalInfo, questions, token }) => {
+          return {
+            method: "POST",
+            body: {
+              title: generalInfo.title,
+              description: generalInfo.description,
+              type: generalInfo.quizType,
+              questions: questions.filter((question) => question.url !== "" || question.title !== ""),
+              pseudoId: generalInfo.pseudoId,
+              isRoughDraft: false,
+              language: generalInfo.language.iso6391,
+            },
+            headers: { Authorization: `Bearer ${token}` },
+          };
+        },
+      }),
+      createQuizAsRoughDraft: builder.mutation({
+        query: ({ generalInfo, questions, token }) => {
+          return {
+            url: "",
+            method: "POST",
+            body: {
+              title: generalInfo.title,
+              description: generalInfo.description,
+              type: generalInfo.quizType,
+              questions: questions.filter((question) => question.url !== "" || question.title !== ""),
+              pseudoId: generalInfo.pseudoId,
+              isRoughDraft: true,
+              language: generalInfo.language.iso6391,
+            },
+            headers: { Authorization: `Bearer ${token}` },
+          };
+        },
+      }),
+      updateQuiz: builder.mutation({
+        query: ({ generalInfo, questions, token }) => {
+          return {
+            url: `/${generalInfo.pseudoId}`,
+            method: "PUT",
+            body: {
+              title: generalInfo.title,
+              description: generalInfo.description,
+              type: generalInfo.quizType,
+              questions: questions.filter((question) => question.url !== "" || question.title !== ""),
+              pseudoId: generalInfo.pseudoId,
+              isRoughDraft: generalInfo.isRoughDraft,
+              language: generalInfo.language.iso6391,
+            },
+            headers: { Authorization: `Bearer ${token}` },
+          };
+        },
+      }),
+      deleteQuiz: builder.mutation({
+        query: ({ pseudoId, token }) => {
+          return {
+            url: `/${pseudoId}`,
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          };
+        },
+      }),
+      addQuizTranslation: builder.mutation({
+        query: ({ translation, pseudoId, token }) => {
+          return {
+            url: `/${pseudoId}/translations`,
+            method: "PUT",
+            headers: { Authorization: `Bearer ${token}` },
+            body: {
+              title: translation.title,
+              description: translation.description,
+              language: translation.language,
+              questions: translation.questions,
+            },
+          };
+        },
+      }),
+      editQuizTranslation: builder.mutation({
+        query: ({ translation, pseudoId, token}) => {
+          return {
+            url: `/${pseudoId}/translations/${translation.language}`,
+            method: "PUT",
+            headers: { Authorization: `Bearer ${token}` },
+            body: {
+              title: translation.title,
+              description: translation.description,
+              language: translation.language,
+              questions: translation.questions,
+            },
+          }
+        }
+      }),
       fetchQuizzes: builder.query({
         query: (param) => {
           return {
@@ -52,5 +144,10 @@ export const {
   useFetchQuizQuery,
   useFetchQuizMainQuery,
   useFetchUserCompletedQuizzesQuery,
+  useCreateQuizMutation,
+  useCreateQuizAsRoughDraftMutation,
+  useDeleteQuizMutation,
+  useAddQuizTranslationMutation,
+  useEditQuizTranslationMutation,
 } = quizzesApi;
 export { quizzesApi };

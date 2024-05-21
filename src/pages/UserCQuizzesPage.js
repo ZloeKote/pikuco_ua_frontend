@@ -16,6 +16,7 @@ function UserCQuizzesPage() {
   const [params, setParams] = useState("");
   const token = useSelector(selectCurrentToken);
 
+  const { data: quizzes, isLoading } = useFetchUserCompletedQuizzesQuery({ token: token, param: params });
   useEffect(() => {
     if (nickname.toLowerCase() !== authPersonNickname?.toLowerCase())
       navigate(ROUTES.Profile(nickname), { replace: true });
@@ -29,18 +30,17 @@ function UserCQuizzesPage() {
     setParams(newParam);
   };
 
-  const { data: quizzes, isLoading } = useFetchUserCompletedQuizzesQuery({ token: token, param: params });
-
   return (
     <div className="flex justify-center mt-12">
       <UserProfileLayout
         title="ПРОЙДЕНІ ВІКТОРИНИ"
         section={ProfileSections.completed_quizzes}
         userNickname={nickname}
+        className="h-[776px]"
       >
         {!isLoading ? (
           <QuizzesList
-            className="my-2 mx-8"
+            className="my-2 mx-8 justify-between h-full"
             quizzes={quizzes?.quizzes}
             numPages={quizzes?.numPages}
             gapY="middle"

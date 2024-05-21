@@ -1,36 +1,47 @@
-import { useState, Fragment, useEffect, useContext } from "react";
+import { useState, Fragment, useContext } from "react";
 import Box from "@mui/material/Box";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Typography from "@mui/material/Typography";
-import Button from "../components/simpleComponents/Button";
+import Button from "../simpleComponents/Button";
 import classNames from "classnames";
-import GeneralInfoQuiz from "../components/manageQuiz/GeneralInfoQuiz";
-import QuizQuestionsInfo from "../components/manageQuiz/QuizQuestionsInfo";
-import CreatingQuizConfirmation from "../components/manageQuiz/CreatingQuizConfirmation";
+import GeneralInfoQuiz from "../manageQuiz/GeneralInfoQuiz";
+import QuizQuestionsInfo from "../manageQuiz/QuizQuestionsInfo";
+import CreatingQuizConfirmation from "../manageQuiz/CreatingQuizConfirmation";
 import { iso6393 } from "iso-639-3";
-import { selectCurrentToken, useCreateQuizAsRoughDraftMutation, useCreateQuizMutation } from "../store";
+import { selectCurrentToken, useAddQuizTranslationMutation } from "../../store";
 import { useSelector } from "react-redux";
-import SnackbarsContext from "../context/snackbars";
+import SnackbarsContext from "../../context/snackbars";
 import { CircularProgress } from "@mui/material";
-import Link from "../components/simpleComponents/Link";
-import { ROUTES } from "../ROUTES";
+import Link from "../simpleComponents/Link";
+import { ROUTES } from "../../ROUTES";
+import predefinedLanguages from "../../predefined/AvailableLanguages";
 
-function CreateQuizPage() {
+function CreateQuizTranslation({ quiz }) {
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
   const token = useSelector(selectCurrentToken);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [quizType, setQuizType] = useState("");
-  const [language, setLanguage] = useState(iso6393.find((lang) => lang.iso6391 === "en"));
-  const [numQuestions, setNumQuestions] = useState("");
-  const [questions, setQuestions] = useState([]);
-  const [pseudoId, setPseudoId] = useState(0);
+  const [quizType, setQuizType] = useState(quiz.type);
+  const [language, setLanguage] = useState(
+    iso6393.find(
+      (lang) =>
+        lang ===
+        predefinedLanguages
+          .filter((preLang) => !!!quiz.languages.find((disLang) => disLang === preLang.iso6391))
+          .at(0)
+    )
+  );
+  const [numQuestions, setNumQuestions] = useState(quiz.questions.length);
+  const [questions, setQuestions] = useState(
+    quiz.questions?.map((q) => {
+      return { ...q, title: "", description: "" };
+    })
+  );
   const [activeStep, setActiveStep] = useState(0);
 
-  const [createQuiz, result] = useCreateQuizMutation();
-  const [createQuizAsRoughDraft, resultRoughDraft] = useCreateQuizAsRoughDraftMutation();
+  const [addTranslation, result] = useAddQuizTranslationMutation();
 
   const handleNext = (e) => {
     e?.preventDefault();
@@ -58,60 +69,26 @@ function CreateQuizPage() {
     setQuestions(changedQuestions);
   };
 
-  const handleClickCreateQuiz = () => {
-    createQuiz({
-      generalInfo: {
-        title: title,
-        description: description,
-        quizType: quizType,
-        pseudoId: pseudoId,
-        language: language,
-      },
-      questions: questions,
-      token: token,
-    });
-  };
-
-  useEffect(() => {
-    if (resultRoughDraft.isSuccess) {
-      handleEnqueueSnackbar("Чернетка успішно збережена!", "success", false);
-      setPseudoId(resultRoughDraft.data);
-      resultRoughDraft.reset();
-    }
-    if (result.isSuccess) setPseudoId(result.data);
-  }, [
-    resultRoughDraft,
-    result,
-    handleEnqueueSnackbar,
-  ]);
-
-  const handleClickSaveRoughDraft = () => {
+  const handleClickAddTranslation = () => {
     if (title === "") {
       handleEnqueueSnackbar("Поле назви не може бути пустим!", "error", false);
       return;
     } else if (description === "") {
       handleEnqueueSnackbar("Поле опису вікторини не може бути пустим!", "error", false);
       return;
-    } else if (quizType === "") {
-      handleEnqueueSnackbar("Поле типу вікторини не може бути пустим!", "error", false);
-      return;
     } else if (language === null) {
       handleEnqueueSnackbar("Поле мови вікторини не може бути пустим!", "error", false);
       return;
-    } else if (numQuestions === "") {
-      handleEnqueueSnackbar("Поле кількості питань вікторини не може бути пустим!", "error", false);
-      return;
     }
 
-    createQuizAsRoughDraft({
-      generalInfo: {
+    addTranslation({
+      translation: {
         title: title,
         description: description,
-        quizType: quizType,
-        pseudoId: pseudoId,
-        language: language,
+        language: language.iso6391,
+        questions: questions,
       },
-      questions: questions,
+      pseudoId: quiz.pseudoId,
       token: token,
     });
   };
@@ -122,26 +99,37 @@ function CreateQuizPage() {
       element: (
         <GeneralInfoQuiz
           title={title}
+          originalTitle={quiz.title}
           onChangeTitle={handleChangeTitle}
           description={description}
+          originalDescription={quiz.description}
           onChangeDescription={handleChangeDescription}
           quizType={quizType}
           onChangeQuizType={handleChangeQuizType}
+          readOnlyQuizType
           language={language}
           onChangeLanguage={handleChangeLanguage}
+          disabledLanguages={quiz.languages}
           numQuestions={numQuestions}
           onChangeNumQuestions={handleChangeNumQuestions}
+          readOnlyNumQuestions
         />
       ),
     },
     {
       label: "Заповнення інформації про питання",
       element: (
-        <QuizQuestionsInfo questions={questions} questionType={quizType} onChange={handleChangeQuestion} />
+        <QuizQuestionsInfo
+          questions={questions}
+          originalQuestions={quiz.questions}
+          questionType={quizType}
+          readOnlyUrl
+          onChange={handleChangeQuestion}
+        />
       ),
     },
     {
-      label: "Підтвердження та створення",
+      label: "Підтвердження та редагування",
       element: (
         <CreatingQuizConfirmation
           title={title}
@@ -171,20 +159,20 @@ function CreateQuizPage() {
   if (result.isLoading) {
     lastContent = (
       <>
-        <span>Створюється вікторина. Будь ласка, зачекайте...</span>
+        <span>Переклад додається. Будь ласка, зачекайте...</span>
         <CircularProgress />
       </>
     );
   } else if (result.isSuccess) {
     lastContent = (
       <>
-        <span>Вікторина успішно створена!</span>
+        <span>Переклад успішно доданий!</span>
         <div className="flex gap-4">
           <Button className={buttonClassname} primary>
             <Link to={ROUTES.Main}>Головна сторінка</Link>
           </Button>
           <Button className={buttonClassname} primary>
-            <Link to={ROUTES.Quiz(pseudoId)}>Сторінка вікторини</Link>
+            <Link to={ROUTES.Quiz(quiz.pseudoId)}>Сторінка вікторини</Link>
           </Button>
         </div>
       </>
@@ -192,9 +180,9 @@ function CreateQuizPage() {
   } else if (result.isError) {
     lastContent = (
       <>
-        <span>На жаль, сталася помилка при створенні вікторини!</span>
+        <span>На жаль, сталася помилка при додаванні перекладу!</span>
         <span>Деталі помилки {result.error.status}:</span>
-        <p>{result.error.message}</p>
+        <p>{result.error.data}</p>
         <Button className={buttonClassname} warning onClick={handleBack}>
           Повернутися
         </Button>
@@ -218,16 +206,7 @@ function CreateQuizPage() {
         })}
       </Stepper>
       {activeStep === steps.length ? (
-        <div className="flex flex-col gap-4 text-[22px] items-center max-w-[1200px]">
-          {lastContent}
-          {/* <Typography sx={{ mt: 2, mb: 1 }}>All steps completed - you&apos;re finished</Typography>
-          <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-            <Box sx={{ flex: "1 1 auto" }} />
-            <Button className={buttonClassname} onClick={handleReset} danger>
-              Скинути
-            </Button>
-          </Box> */}
-        </div>
+        <div className="flex flex-col gap-4 text-[22px] items-center max-w-[1200px]">{lastContent}</div>
       ) : (
         <Fragment>
           <div className={classnameLayout}>
@@ -247,17 +226,13 @@ function CreateQuizPage() {
                     </Button>
                   </div>
                   <div className="flex gap-2">
-                    <Button
-                      className={buttonClassname}
-                      type="button"
-                      secondary
-                      onClick={handleClickSaveRoughDraft}
-                    >
-                      Зберегти як чернетку
-                    </Button>
                     {isLastStep ? (
-                      <Button className={buttonClassname + " mr-2"} onClick={handleClickCreateQuiz} success>
-                        Створити
+                      <Button
+                        className={buttonClassname + " mr-2"}
+                        onClick={handleClickAddTranslation}
+                        success
+                      >
+                        Додати
                       </Button>
                     ) : (
                       <Button className={buttonClassname + " mr-2"} primary>
@@ -275,4 +250,4 @@ function CreateQuizPage() {
   );
 }
 
-export default CreateQuizPage;
+export default CreateQuizTranslation;

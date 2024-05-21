@@ -7,22 +7,20 @@ import avatar from "../img/avatar.png";
 import quizCover from "../img/quizCover.png";
 import Link from "./simpleComponents/Link";
 import { ROUTES } from "../ROUTES";
-import { IconButton, Menu, Typography, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
+import { IconButton, Menu, Typography, MenuItem, ListItemText } from "@mui/material";
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
-import { IoMenu } from "react-icons/io5";
+import { IoMenu, IoClose } from "react-icons/io5";
 import { BiEditAlt } from "react-icons/bi";
 import { BsTranslate } from "react-icons/bs";
 import { MdDelete } from "react-icons/md";
+import { FaChevronRight } from "react-icons/fa6";
+import { IconMenuItem, NestedMenuItem } from "mui-nested-menu";
+import { iso6393 } from "iso-639-3";
 
-const actionOptions = [
-  { label: "Редагувати", to: "/quizzes/edit", icon: <BiEditAlt /> },
-  { label: "Додати перевод", to: "/quizzes/translation/add", icon: <BsTranslate /> },
-  { label: "Видалити", icon: <MdDelete /> },
-];
-
-function QuizCard({ quiz, showActions = false }) {
+function QuizCard({ quiz, showActions = false, onDelete }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -35,15 +33,6 @@ function QuizCard({ quiz, showActions = false }) {
     "w-[432px] h-[314px] bg-[--dark-quizcard-background]",
     "layout-quizcard relative"
   );
-
-  const renderedActions = actionOptions.map((option) => {
-    return (
-      <MenuItem key={option.label} onClick={handleClose}>
-        <ListItemIcon>{option.icon}</ListItemIcon>
-        <ListItemText>{option.to ? <Link to={option.to}>{option.label}</Link> : option.label}</ListItemText>
-      </MenuItem>
-    );
-  });
 
   return (
     <div className={classnames}>
@@ -108,27 +97,66 @@ function QuizCard({ quiz, showActions = false }) {
             size="large"
             onClick={handleClick}
           >
-            <IoMenu />
+            {anchorEl === null ? <IoMenu /> : <IoClose />}
           </IconButton>
           <Menu
             MenuListProps={{ "aria-labelledby": "long-button" }}
             anchorEl={anchorEl}
             open={open}
             onClose={handleClose}
-            slotProps={{
-              paper: {
-                style: {
-                  maxHeight: "max-content",
-                  backgroundColor: "var(--dark-quizcard-background)",
-                  border: "1px solid var(--dark-quizcard-border)",
-                  backgroundImage: "none",
-                },
-              },
-            }}
             variant="menu"
           >
-            {renderedActions}
+            <IconMenuItem
+              leftIcon={<BiEditAlt />}
+              label={
+                <Link to={ROUTES.EditQuiz} state={{ pseudoId: quiz.pseudoId }}>
+                  Редагувати
+                </Link>
+              }
+            />
+            <IconMenuItem
+              leftIcon={<BsTranslate />}
+              label={
+                <Link to={ROUTES.CreateQuizTranslation} state={{ pseudoId: quiz.pseudoId }}>
+                  Додати переклад
+                </Link>
+              }
+            />
+            <NestedMenuItem
+              leftIcon={<BsTranslate />}
+              rightIcon={<FaChevronRight />}
+              label="Редагувати переклад"
+              parentMenuOpen={open}
+              disabled={quiz.languages.length < 2}
+            >
+              {quiz.languages.slice(1).map((lang) => {
+                return (
+                  <MenuItem onClick={handleClose} key={lang}>
+                    <ListItemText>
+                      <Link
+                        to={ROUTES.EditQuizTranslation}
+                        state={{ pseudoId: quiz.pseudoId, language: lang }}
+                      >
+                        {iso6393.find((isoLang) => isoLang.iso6391 === lang)?.name}
+                      </Link>
+                    </ListItemText>
+                  </MenuItem>
+                );
+              })}
+            </NestedMenuItem>
+            <IconMenuItem
+              onClick={() => onDelete(quiz.pseudoId)}
+              className="hover:!bg-red-600"
+              leftIcon={<MdDelete />}
+              label="Видалити"
+            />
           </Menu>
+        </div>
+      )}
+
+      {quiz.isRoughDraft && (
+        <div className="absolute h-min w-[160px] flex justify-end bg-[--dark-quizcard-background] left-0 top-5 rounded-r-full">
+          <span className="select-none text-red-500 text-[22px] mr-3">ЧЕРНЕТКА</span>
         </div>
       )}
     </div>
@@ -136,3 +164,15 @@ function QuizCard({ quiz, showActions = false }) {
 }
 
 export default QuizCard;
+
+// дизайн меню дій
+// slotProps={{
+//   paper: {
+//     style: {
+//       maxHeight: "max-content",
+//       backgroundColor: "var(--dark-quizcard-background)",
+//       border: "1px solid var(--dark-quizcard-border)",
+//       backgroundImage: "none",
+//     },
+//   },
+// }}

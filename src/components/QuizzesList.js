@@ -24,6 +24,7 @@ function QuizzesList({
   gapY = "distant",
   hiddenPagination,
   showActions = false,
+  onDelete,
   ...rest
 }) {
   const [searchParams] = useSearchParams();
@@ -38,7 +39,7 @@ function QuizzesList({
     handlePageParam(searchParams.toString() !== "" ? "?" + searchParams.toString() : "");
   };
   const renderedQuizzes = quizzes?.map((quiz) => {
-    return <QuizCard key={quiz.pseudoId} quiz={quiz} showActions={showActions} />;
+    return <QuizCard key={quiz.pseudoId} quiz={quiz} showActions={showActions} onDelete={onDelete}/>;
   });
 
   return (
@@ -48,7 +49,7 @@ function QuizzesList({
       <div className="flex justify-center mt-[20px]">
         <Pagination
           count={numPages}
-          page={page}
+          page={Number(page) }
           onChange={handleChangePage}
           size="large"
           showFirstButton

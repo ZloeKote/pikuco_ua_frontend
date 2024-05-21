@@ -5,11 +5,13 @@ import { quizResultsApi } from "./apis/quizResultsApi";
 import { apiSlice } from "./apis/authApi";
 import authReducer from "./slices/authSlice";
 import { usersApi } from "./apis/UsersApi";
+import { evaluationApi } from "./apis/evaluationApi";
 
 export const store = configureStore({
   reducer: {
     [quizzesApi.reducerPath]: quizzesApi.reducer,
     [quizResultsApi.reducerPath]: quizResultsApi.reducer,
+    [evaluationApi.reducerPath]: evaluationApi.reducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
     [usersApi.reducerPath]: usersApi.reducer,
     auth: authReducer,
@@ -18,6 +20,7 @@ export const store = configureStore({
     return getDefaultMiddleware()
       .concat(quizzesApi.middleware)
       .concat(quizResultsApi.middleware)
+      .concat(evaluationApi.middleware)
       .concat(apiSlice.middleware)
       .concat(usersApi.middleware);
   },
@@ -30,6 +33,11 @@ export {
   useFetchQuizzesQuery,
   useFetchQuizQuery,
   useFetchUserCompletedQuizzesQuery,
+  useCreateQuizMutation,
+  useCreateQuizAsRoughDraftMutation,
+  useDeleteQuizMutation,
+  useAddQuizTranslationMutation,
+  useEditQuizTranslationMutation,
 } from "./apis/quizzesApi";
 
 export {
@@ -37,6 +45,13 @@ export {
   useFetchIndividualResultsQuery,
   useAddQuizResultMutation,
 } from "./apis/quizResultsApi";
+
+export {
+  useFetchEvaluationQuizQuery,
+  useLazyFetchEvaluationQuizQuery,
+  useAddEvaluationQuizMutation,
+  useDeleteEvaluationQuizMutation,
+} from "./apis/evaluationApi";
 
 export {
   useLoginMutation,

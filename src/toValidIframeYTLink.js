@@ -1,6 +1,6 @@
-export function YtLinkToValid(ytLink) {
+function toValidIframeYTLink(ytLink) {
   const curYTLink = ytLink;
-  const YT_id_time = getYtId(curYTLink);
+  const YT_id_time = getId(curYTLink);
   const YTid = YT_id_time.videoId;
   if (YTid === "error") {
     return;
@@ -11,12 +11,8 @@ export function YtLinkToValid(ytLink) {
   return ytLink;
 }
 
-export function getYtThumbnail(url, quality) {
-  const ytId = getYtId(url).videoId;
-  return `https://img.youtube.com/vi/${ytId}/${quality}.jpg`;
-}
-
-export function getYtId(url) {
+// Get youtube video's id
+function getId(url) {
   try {
     let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     let match = url.match(regExp);
@@ -39,5 +35,6 @@ export function getYtId(url) {
   } catch (err) {
     return "error";
   }
-  // Get youtube video's id
 }
+
+export default toValidIframeYTLink;

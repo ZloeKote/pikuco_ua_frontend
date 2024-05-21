@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import classNames from "classnames";
 import Link from "../components/simpleComponents/Link";
 import Button from "./simpleComponents/Button";
@@ -8,13 +8,31 @@ import avatar from "../img/avatar.png";
 import quizCover from "../img/quizCover.png";
 import LanguagePicker from "./simpleComponents/LanguagePicker";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { CircularProgress, Tooltip } from "@mui/material";
+import { useSelector } from "react-redux";
+import { selectCurrentToken } from "../store/slices/authSlice";
+import SnackbarsContext from "../context/snackbars";
+import {
+  useAddEvaluationQuizMutation,
+  useDeleteEvaluationQuizMutation,
+  useLazyFetchEvaluationQuizQuery,
+} from "../store";
 
 function ShowQuiz({ quiz }) {
   const navigate = useNavigate();
+  const token = useSelector(selectCurrentToken);
   const [searchParams] = useSearchParams();
-  const [isLiked, setIsLiked] = useState(null);
-  const [evaluation, setEvaluation] = useState(12);
   const languages = [quiz.language];
+
+  const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
+  const [fetchEvaluation, fetchingResult] = useLazyFetchEvaluationQuizQuery();
+  const [addEvaluation, addingResult] = useAddEvaluationQuizMutation();
+  const [deleteEvaluation, deletingResult] = useDeleteEvaluationQuizMutation();
+
+  useEffect(() => {
+    fetchEvaluation({ pseudoId: quiz.pseudoId, token: token });
+  }, [fetchEvaluation, quiz.pseudoId, token]);
+
   quiz.translations?.forEach((translation) => {
     languages.push(translation.language);
   });
@@ -23,7 +41,7 @@ function ShowQuiz({ quiz }) {
     (languages.includes(searchParams.get("lang")) ? searchParams.get("lang") : false) ||
     (languages.includes("uk") ? "uk" : false) ||
     quiz.language;
-  const quizTitle =
+  let quizTitle =
     currLanguage === quiz.language
       ? quiz.title
       : quiz.translations.find((tr) => tr.language === currLanguage).title;
@@ -40,40 +58,71 @@ function ShowQuiz({ quiz }) {
     });
   };
 
+  if (quiz.isRoughDraft) {
+    quizTitle = (
+      <Tooltip title="Вікторина є чернеткою">
+        <span className="text-[36px] ml-[15px] italic">{quizTitle} *</span>
+      </Tooltip>
+    );
+  } else {
+    quizTitle = <span className="text-[36px] ml-[15px]">{quizTitle}</span>;
+  }
+
   const evalClassName = "hover:bg-[--dark-link-background-hover] hover:cursor-pointer rounded-full";
-  const likeClassname = classNames(evalClassName, { "text-[green]": isLiked });
-  const dislikeClassname = classNames(evalClassName, { "text-[red]": !isLiked && isLiked != null });
+  const likeClassname = classNames(evalClassName, { "text-[green]": fetchingResult.data?.liked });
+  const dislikeClassname = classNames(evalClassName, { "text-[red]": fetchingResult.data?.disliked });
 
   const handleClickLike = () => {
-    if (isLiked) {
-      setIsLiked(null);
-      setEvaluation(evaluation - 1);
-    } else if (!isLiked && isLiked != null) {
-      setIsLiked(true);
-      setEvaluation(evaluation + 2);
-    } else {
-      setIsLiked(true);
-      setEvaluation(evaluation + 1);
-    }
+    if (addingResult.isLoading || deletingResult.isLoading) return;
+
+    if (fetchingResult.data?.liked) deleteEvaluation({ pseudoId: quiz.pseudoId, token: token });
+    else addEvaluation({ isLiked: true, pseudoId: quiz.pseudoId, token: token });
   };
   const handleClickDislike = () => {
-    if (!isLiked && isLiked != null) {
-      setIsLiked(null);
-      setEvaluation(evaluation + 1);
-    } else if (isLiked) {
-      setIsLiked(false);
-      setEvaluation(evaluation - 2);
-    } else {
-      setIsLiked(false);
-      setEvaluation(evaluation - 1);
-    }
+    if (addingResult.isLoading || deletingResult.isLoading) return;
+
+    if (fetchingResult.data?.disliked) deleteEvaluation({ pseudoId: quiz.pseudoId, token: token });
+    else addEvaluation({ isLiked: false, pseudoId: quiz.pseudoId, token: token });
   };
+
+  useEffect(() => {
+    if (addingResult.isSuccess) {
+      fetchEvaluation({ pseudoId: quiz.pseudoId, token: token });
+      addingResult.reset();
+    } else if (addingResult.isError) {
+      handleEnqueueSnackbar(
+        `Сталася помилка при оцінці вікторини! Код помилки ${addingResult.error.originalStatus}: ${addingResult.error.data}`,
+        "error",
+        false
+      );
+    } else if (deletingResult.isSuccess) {
+      fetchEvaluation({ pseudoId: quiz.pseudoId, token: token });
+      deletingResult.reset();
+    } else if (deletingResult.isError) {
+      handleEnqueueSnackbar(
+        `Сталася помилка при оцінці вікторини! Код помилки ${deletingResult.error.originalStatus}: ${deletingResult.error.data}`,
+        "error",
+        false
+      );
+    }
+  }, [addingResult, deletingResult, fetchEvaluation, handleEnqueueSnackbar, quiz.pseudoId, token]);
+
+  let evaluationContent = "";
+  if (fetchingResult.isLoading) evaluationContent = <CircularProgress />;
+  else if (fetchingResult.isError) {
+    evaluationContent = 0;
+    handleEnqueueSnackbar(
+      `Не вдалося отримати оцінку. Код помилки ${fetchingResult.error.status} ${fetchingResult.error.data}`,
+      "error",
+      false
+    );
+  } else if (fetchingResult.isSuccess) evaluationContent = fetchingResult.data.evaluation;
 
   return (
     <div className="mt-[10px]">
       <div className="bg-[--dark-quizcard-background] border border-[--dark-quizcard-border] w-[75rem] rounded-2xl">
         <div className="flex items-center justify-between py-[10px] border-b border-[--dark-quizcard-border]">
-          <span className="text-[36px] ml-[15px]">{quizTitle}</span>
+          {quizTitle}
           <div className="flex gap-[6rem]">
             <div>
               <LanguagePicker
@@ -83,9 +132,25 @@ function ShowQuiz({ quiz }) {
               />
             </div>
             <div className="flex items-center text-[36px] gap-[5px]">
-              <GoChevronUp className={likeClassname} onClick={handleClickLike} />
-              {evaluation}
-              <GoChevronDown className={dislikeClassname} onClick={handleClickDislike} />
+              <GoChevronUp
+                className={
+                  fetchingResult.isLoading ||
+                  addingResult.isLoading ||
+                  deletingResult.isLoading ||
+                  likeClassname
+                }
+                onClick={handleClickLike}
+              />
+              {evaluationContent}
+              <GoChevronDown
+                className={
+                  fetchingResult.isLoading ||
+                  addingResult.isLoading ||
+                  deletingResult.isLoading ||
+                  dislikeClassname
+                }
+                onClick={handleClickDislike}
+              />
             </div>
             <div className="quizcard-creator flex items-center border border-[--dark-quizcard-border] w-[170px] h-fit rounded-full self-center mr-3 z-10 bg-[--dark-quizcard-background]">
               <img src={avatar} alt="creator" className="h-[40px] mr-2" />
@@ -108,11 +173,13 @@ function ShowQuiz({ quiz }) {
             <p className="mb-[15px]">{quiz.amountQuestions} варіанти</p>
           </div>
         </div>
-        <div className="flex justify-center mb-[20px]">
-          <Button className="w-[200px] h-[90px] text-[32px]" success rounded>
-            <Link to={ROUTES.PlayQuiz(quiz.pseudoId)}>Грати</Link>
-          </Button>
-        </div>
+        {!quiz.isRoughDraft && (
+          <div className="flex justify-center mb-[20px]">
+            <Button className="w-[200px] h-[90px] text-[32px]" success rounded>
+              <Link to={ROUTES.PlayQuiz(quiz.pseudoId)}>Грати</Link>
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

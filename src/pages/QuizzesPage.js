@@ -20,13 +20,14 @@ function QuizzesPage() {
     changeQuizzesSearchParams(newParam);
   };
   return (
-    <div className="flex flex-col mx-[50px] mt-[40px] mb-[20px]">
+    <div className="flex flex-col mx-[50px] mt-[40px]">
       <QuizFilterSort params={quizzesSearchParams} handleParams={handleChangeParams} />
       {error && <span className="text-white">Errors could happens...</span>}
       {isLoading && !error ? (
         <LinearProgress />
       ) : (
         <QuizzesList
+          gapY="small"
           className="mt-[20px]"
           quizzes={data?.quizzes}
           numPages={data?.numPages}

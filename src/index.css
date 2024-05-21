@@ -1,9 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('./font.css');
+@import url("./font.css");
 
 :root {
+  color-scheme: dark;
+
   --dark-main: #121212;
   --dark-nav: rgba(12, 12, 12, 0.95);
   --dark-link-text-hover: rgba(255, 255, 255, 0.6);
@@ -23,14 +25,13 @@
   --dark-background-secondary: rgba(12, 12, 12, 0.95);
 }
 
-html, body {
+html,
+body {
   height: 100%;
 }
 
 body {
-  background: linear-gradient(
-    var(--dark-layout-cover), 
-    var(--dark-layout-cover)), 
+  background: linear-gradient(var(--dark-layout-cover), var(--dark-layout-cover)),
     url("/public/dark-main-background.png");
   background-size: cover;
   background-attachment: fixed;

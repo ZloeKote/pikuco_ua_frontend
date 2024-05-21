@@ -17,6 +17,9 @@ import UserCQuizzesPage from "./pages/UserCQuizzesPage";
 import UserQuizzesPage from "./pages/UserQuizzesPage";
 import UserWQuizzesPage from "./pages/UserWQuizzesPage";
 import CreateQuizPage from "./pages/CreateQuizPage";
+import EditQuizPage from "./pages/EditQuizPage";
+import CreateQuizTranslationPage from "./pages/CreateQuizTranslationPage";
+import EditQuizTranslationPage from "./pages/EditQuizTranslationPage";
 
 const darkTheme = createTheme({
   palette: {
@@ -41,7 +44,10 @@ function App() {
 
           {/* protected routes */}
           <Route element={<RequireAuth />}>
-            <Route path={ROUTES.Create_quiz} element={<CreateQuizPage />} />
+            <Route path={ROUTES.CreateQuiz} element={<CreateQuizPage />} />
+            <Route path={ROUTES.EditQuiz} element={<EditQuizPage />} />
+            <Route path={ROUTES.CreateQuizTranslation} element={<CreateQuizTranslationPage />} />
+            <Route path={ROUTES.EditQuizTranslation} element={<EditQuizTranslationPage />} />
           </Route>
 
           {/* user profile routes */}
@@ -49,9 +55,9 @@ function App() {
             <Route index element={<UserProfilePage />} />
             <Route path={ROUTES.Privacy()} element={<UserPrivacyPage />} />
 
-            <Route path={ROUTES.User_completed_quizzes()} element={<UserCQuizzesPage />} />
-            <Route path={ROUTES.User_quizzes()} element={<UserQuizzesPage />} />
-            <Route path={ROUTES.User_wishlisted_quizzes()} element={<UserWQuizzesPage />} />
+            <Route path={ROUTES.UserCompletedQuizzes()} element={<UserCQuizzesPage />} />
+            <Route path={ROUTES.UserQuizzes()} element={<UserQuizzesPage />} />
+            <Route path={ROUTES.UserWishlistedQuizzes()} element={<UserWQuizzesPage />} />
           </Route>
         </Route>
 

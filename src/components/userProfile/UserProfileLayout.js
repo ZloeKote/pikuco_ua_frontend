@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import ProfileSections from "../../predefined/ProfileSections";
 import { ROUTES } from "../../ROUTES";
 
-function UserProfileLayout({ title, section, userNickname, children }) {
+function UserProfileLayout({ title, section, userNickname, children, className }) {
   const classnameLayout = classNames(
+    className,
     "bg-[--dark-quizcard-background]",
     "flex",
     "border border-[--dark-quizcard-border] rounded-2xl",
@@ -43,7 +44,7 @@ function UserProfileLayout({ title, section, userNickname, children }) {
                 <li>
                   <Link
                     className={classNames({ "font-bold": ProfileSections.completed_quizzes === section })}
-                    to={ROUTES.User_completed_quizzes(userNickname)}
+                    to={ROUTES.UserCompletedQuizzes(userNickname)}
                   >
                     Пройдені
                   </Link>
@@ -51,7 +52,7 @@ function UserProfileLayout({ title, section, userNickname, children }) {
                 <li>
                   <Link
                     className={classNames({ "font-bold": ProfileSections.my_quizzes === section })}
-                    to={ROUTES.User_quizzes(userNickname)}
+                    to={ROUTES.UserQuizzes(userNickname)}
                   >
                     Мої
                   </Link>
@@ -59,7 +60,7 @@ function UserProfileLayout({ title, section, userNickname, children }) {
                 <li>
                   <Link
                     className={classNames({ "font-bold": ProfileSections.wishlisted_quizzes === section })}
-                    to={ROUTES.User_wishlisted_quizzes(userNickname)}
+                    to={ROUTES.UserWishlistedQuizzes(userNickname)}
                   >
                     Список бажаного
                   </Link>

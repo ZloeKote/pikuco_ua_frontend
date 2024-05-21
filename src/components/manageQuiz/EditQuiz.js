@@ -4,29 +4,29 @@ import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Typography from "@mui/material/Typography";
-import Button from "../components/simpleComponents/Button";
+import Button from "../simpleComponents/Button";
 import classNames from "classnames";
-import GeneralInfoQuiz from "../components/manageQuiz/GeneralInfoQuiz";
-import QuizQuestionsInfo from "../components/manageQuiz/QuizQuestionsInfo";
-import CreatingQuizConfirmation from "../components/manageQuiz/CreatingQuizConfirmation";
+import GeneralInfoQuiz from "../manageQuiz/GeneralInfoQuiz";
+import QuizQuestionsInfo from "../manageQuiz/QuizQuestionsInfo";
+import CreatingQuizConfirmation from "../manageQuiz/CreatingQuizConfirmation";
 import { iso6393 } from "iso-639-3";
-import { selectCurrentToken, useCreateQuizAsRoughDraftMutation, useCreateQuizMutation } from "../store";
+import { selectCurrentToken, useCreateQuizAsRoughDraftMutation, useCreateQuizMutation } from "../../store";
 import { useSelector } from "react-redux";
-import SnackbarsContext from "../context/snackbars";
+import SnackbarsContext from "../../context/snackbars";
 import { CircularProgress } from "@mui/material";
-import Link from "../components/simpleComponents/Link";
-import { ROUTES } from "../ROUTES";
+import Link from "../simpleComponents/Link";
+import { ROUTES } from "../../ROUTES";
 
-function CreateQuizPage() {
+function EditQuiz({ quiz }) {
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
   const token = useSelector(selectCurrentToken);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [quizType, setQuizType] = useState("");
-  const [language, setLanguage] = useState(iso6393.find((lang) => lang.iso6391 === "en"));
-  const [numQuestions, setNumQuestions] = useState("");
-  const [questions, setQuestions] = useState([]);
-  const [pseudoId, setPseudoId] = useState(0);
+  const [title, setTitle] = useState(quiz.title);
+  const [description, setDescription] = useState(quiz.description);
+  const [quizType, setQuizType] = useState(quiz.type);
+  const [language, setLanguage] = useState(iso6393.find((lang) => lang.iso6391 === quiz.language));
+  const [numQuestions, setNumQuestions] = useState(quiz.questions.length);
+  const [questions, setQuestions] = useState(quiz.questions);
+  const [pseudoId, setPseudoId] = useState(quiz.pseudoId);
   const [activeStep, setActiveStep] = useState(0);
 
   const [createQuiz, result] = useCreateQuizMutation();
@@ -79,13 +79,14 @@ function CreateQuizPage() {
       resultRoughDraft.reset();
     }
     if (result.isSuccess) setPseudoId(result.data);
-  }, [
-    resultRoughDraft,
-    result,
-    handleEnqueueSnackbar,
-  ]);
+  }, [resultRoughDraft, result, handleEnqueueSnackbar]);
 
   const handleClickSaveRoughDraft = () => {
+    if (!quiz.isRoughDraft) {
+      handleEnqueueSnackbar("Ви не можете зберігати чернетку вже опублікованого турніру", "error", false);
+      return;
+    }
+
     if (title === "") {
       handleEnqueueSnackbar("Поле назви не може бути пустим!", "error", false);
       return;
@@ -109,6 +110,7 @@ function CreateQuizPage() {
         description: description,
         quizType: quizType,
         pseudoId: pseudoId,
+        isRoughDraft: quiz.isRoughDraft,
         language: language,
       },
       questions: questions,
@@ -141,7 +143,7 @@ function CreateQuizPage() {
       ),
     },
     {
-      label: "Підтвердження та створення",
+      label: "Підтвердження та редагування",
       element: (
         <CreatingQuizConfirmation
           title={title}
@@ -171,14 +173,14 @@ function CreateQuizPage() {
   if (result.isLoading) {
     lastContent = (
       <>
-        <span>Створюється вікторина. Будь ласка, зачекайте...</span>
+        <span>Вікторина редагується. Будь ласка, зачекайте...</span>
         <CircularProgress />
       </>
     );
   } else if (result.isSuccess) {
     lastContent = (
       <>
-        <span>Вікторина успішно створена!</span>
+        <span>Вікторина успішно відредагована!</span>
         <div className="flex gap-4">
           <Button className={buttonClassname} primary>
             <Link to={ROUTES.Main}>Головна сторінка</Link>
@@ -192,7 +194,7 @@ function CreateQuizPage() {
   } else if (result.isError) {
     lastContent = (
       <>
-        <span>На жаль, сталася помилка при створенні вікторини!</span>
+        <span>На жаль, сталася помилка при редагуванні вікторини!</span>
         <span>Деталі помилки {result.error.status}:</span>
         <p>{result.error.message}</p>
         <Button className={buttonClassname} warning onClick={handleBack}>
@@ -218,16 +220,7 @@ function CreateQuizPage() {
         })}
       </Stepper>
       {activeStep === steps.length ? (
-        <div className="flex flex-col gap-4 text-[22px] items-center max-w-[1200px]">
-          {lastContent}
-          {/* <Typography sx={{ mt: 2, mb: 1 }}>All steps completed - you&apos;re finished</Typography>
-          <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-            <Box sx={{ flex: "1 1 auto" }} />
-            <Button className={buttonClassname} onClick={handleReset} danger>
-              Скинути
-            </Button>
-          </Box> */}
-        </div>
+        <div className="flex flex-col gap-4 text-[22px] items-center max-w-[1200px]">{lastContent}</div>
       ) : (
         <Fragment>
           <div className={classnameLayout}>
@@ -247,17 +240,19 @@ function CreateQuizPage() {
                     </Button>
                   </div>
                   <div className="flex gap-2">
-                    <Button
-                      className={buttonClassname}
-                      type="button"
-                      secondary
-                      onClick={handleClickSaveRoughDraft}
-                    >
-                      Зберегти як чернетку
-                    </Button>
+                    {quiz.isRoughDraft && (
+                      <Button
+                        className={buttonClassname}
+                        type="button"
+                        secondary
+                        onClick={handleClickSaveRoughDraft}
+                      >
+                        Зберегти як чернетку
+                      </Button>
+                    )}
                     {isLastStep ? (
                       <Button className={buttonClassname + " mr-2"} onClick={handleClickCreateQuiz} success>
-                        Створити
+                        Відредагувати
                       </Button>
                     ) : (
                       <Button className={buttonClassname + " mr-2"} primary>
@@ -275,4 +270,4 @@ function CreateQuizPage() {
   );
 }
 
-export default CreateQuizPage;
+export default EditQuiz;

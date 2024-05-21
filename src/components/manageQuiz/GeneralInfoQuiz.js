@@ -1,45 +1,33 @@
 import classNames from "classnames";
 import Input from "../simpleComponents/Input";
 import { useState } from "react";
-import { MenuItem, TextField, Tooltip, Typography } from "@mui/material";
+import { MenuItem, TextField, Typography } from "@mui/material";
 import InfoIcon from "../simpleComponents/InfoIcon";
 import LanguageAutocompleter from "../simpleComponents/LanguageAutocompleter";
-import { iso6393 } from "iso-639-3";
 import predefinedNumQuestions from "../../predefined/NumQuestions";
+import { RedAsterisk } from "../../custom-materials";
 
 function GeneralInfoQuiz({
   title,
+  originalTitle,
   onChangeTitle,
+  readOnlyTitle,
   description,
+  originalDescription,
   onChangeDescription,
+  readOnlyDescription,
   quizType,
   onChangeQuizType,
+  readOnlyQuizType,
   language,
   onChangeLanguage,
+  disabledLanguages,
+  readOnlyLanguage,
   numQuestions,
   onChangeNumQuestions,
+  readOnlyNumQuestions,
 }) {
-  const [numDescriptionSymbolsLeft, setNumDescriptionSymbolsLeft] = useState(255);
-
-  const RedAsterisk = (
-    <Tooltip
-      title="Обов'язкове поле"
-      slotProps={{
-        popper: {
-          modifiers: [
-            {
-              name: "offset",
-              options: {
-                offset: [0, -14],
-              },
-            },
-          ],
-        },
-      }}
-    >
-      <span className="bold text-red-600">*</span>
-    </Tooltip>
-  );
+  const [numDescriptionSymbolsLeft, setNumDescriptionSymbolsLeft] = useState(80);
 
   const renderedQuizTypes = QuizTypes.filter((type) => type.value !== "").map((type) => {
     return (
@@ -78,23 +66,24 @@ function GeneralInfoQuiz({
           <label className={labelClassname}>
             Назва вікторини {RedAsterisk}
             <InfoIcon className="ml-2 self-center">
-              Назва вікторини повинна мати довжину від 2 до 30 символів
+              Назва вікторини повинна мати довжину від 3 до 30 символів
             </InfoIcon>
           </label>
           <Input
             className="text-[22px] !rounded"
             value={title}
             onChange={handleChangeTitle}
-            placeholder="Найкраща пісня останнього десятиліття"
+            placeholder={originalTitle || "Найкраща пісня останнього десятиліття"}
             autoFocus
             required
+            disabled={readOnlyTitle}
           />
         </div>
         <div className="flex flex-col">
           <label className={labelClassname}>
-            Опис вікторини
+            Опис вікторини {RedAsterisk}
             <InfoIcon className="ml-2 self-center">
-              Опис вікторини повинен мати довжину до 255 символів.
+              Опис вікторини повинен мати довжину від 5 до 80 символів.
               <br /> <span>{numDescriptionSymbolsLeft}</span>
             </InfoIcon>
           </label>
@@ -104,6 +93,9 @@ function GeneralInfoQuiz({
             onChange={handleChangeDescription}
             multiline
             rows={8}
+            required
+            disabled={readOnlyDescription}
+            helperText={originalDescription}
           />
         </div>
       </div>
@@ -111,13 +103,26 @@ function GeneralInfoQuiz({
       <div className="flex flex-col w-[300px] gap-6">
         <div className="flex flex-col">
           <label className={labelClassname}>Тип вікторини {RedAsterisk}</label>
-          <TextField label="Обери тип" value={quizType} onChange={handleChangeQuizType} select required>
+          <TextField
+            label="Обери тип"
+            value={quizType}
+            onChange={handleChangeQuizType}
+            select
+            required
+            disabled={readOnlyQuizType}
+          >
             {renderedQuizTypes}
           </TextField>
         </div>
         <div className="flex flex-col">
           <label className={labelClassname}>Мова вікторини {RedAsterisk}</label>
-          <LanguageAutocompleter value={language} onChange={handleChangeLanguage} required />
+          <LanguageAutocompleter
+            value={language}
+            onChange={handleChangeLanguage}
+            required
+            disabled={readOnlyLanguage}
+            disabledOptions={disabledLanguages}
+          />
         </div>
         <div className="flex flex-col">
           <label className={labelClassname}>Кількість питань {RedAsterisk}</label>
@@ -127,6 +132,7 @@ function GeneralInfoQuiz({
             onChange={handleChangeNumQuestions}
             select
             required
+            disabled={readOnlyNumQuestions}
           >
             {renderedNumQuestions}
           </TextField>

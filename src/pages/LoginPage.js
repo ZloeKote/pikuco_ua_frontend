@@ -6,28 +6,32 @@ import { ROUTES } from "../ROUTES";
 import SignupCover from "../img/Screenshot_2.png";
 import classNames from "classnames";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useLoginMutation, setCredentials } from "../store";
+import SnackbarsContext from "../context/snackbars";
 
 function LoginPage() {
+  const { handleEnqueueSnackbar, closeAllSnackbars } = useContext(SnackbarsContext);
   const userRef = useRef();
-  const errRef = useRef();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
 
-  const [login, { isLoading }] = useLoginMutation();
+  const [login, { isLoading, isSuccess }] = useLoginMutation();
   const dispatch = useDispatch();
   useEffect(() => {
     userRef.current.focus();
   }, []);
 
   useEffect(() => {
-    setErrMsg("");
-  }, [email, password]);
+    closeAllSnackbars();
+  }, [email, password, closeAllSnackbars]);
+
+  useEffect(() => {
+    if (isSuccess) handleEnqueueSnackbar("Авторизація пройшла успішно!", "default", false);
+  });
 
   const labelClassname = classNames("text-[26px] ml-[10px]");
 
@@ -41,15 +45,14 @@ function LoginPage() {
       navigate("/");
     } catch (err) {
       if (!err?.originalStatus) {
-        setErrMsg("No server response");
+        handleEnqueueSnackbar("Сервер не відповідає!", "error", false);
       } else if (err.originalStatus?.status === 400) {
-        setErrMsg("Missing email or password");
+        handleEnqueueSnackbar("Ви не ввели пошту чи пароль!", "error", false);
       } else if (err.originalStatus?.status === 403) {
-        setErrMsg("Unathorized");
+        handleEnqueueSnackbar("В авторизації відмовлено!", "error", false);
       } else {
-        setErrMsg("Login Failed");
+        handleEnqueueSnackbar("Ой! Сталася помилка ;(", "error", false);
       }
-      errRef.current.focus();
     }
   };
 
@@ -60,8 +63,6 @@ function LoginPage() {
     <h1>Loading...</h1>
   ) : (
     <div className="flex flex-col items-center justify-between w-[40%] text-[--dark-text]">
-      <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"}></p>
-
       <div className="flex flex-col h-full justify-center">
         <h2 className="text-[52px] mb-[15px] text-center">Увійти</h2>
         <form className="flex flex-col" onSubmit={handleSubmitLogin}>

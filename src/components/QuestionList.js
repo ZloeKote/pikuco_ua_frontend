@@ -1,10 +1,26 @@
 import ShowQuestion from "./ShowQuestion";
+import { types } from "../predefined/QuestionTypes";
+import classNames from "classnames";
 
-function QuestionList({ questions, type, individual, lang }) {
-  const renderedQuestions = questions.map((question) => {
-    return <ShowQuestion key={question.place} question={question} type={type} individual={individual} lang={lang} />;
+function QuestionList({ questions, questionType, variant, lang, onClickReset, onClickQuiz, currNumQuestion, className }) {
+  const classname = classNames(className, "flex flex-col items-center gap-[15px] my-[15px]");
+
+  const renderedQuestions = questions.map((question, i) => {
+    return (
+      <ShowQuestion
+        key={variant === types.editingQuiz ? i : question.place}
+        question={question}
+        questionType={questionType}
+        variant={variant}
+        lang={lang}
+        numQuestion={i}
+        onClickReset={onClickReset}
+        onClickQuiz={onClickQuiz}
+        isHighlighted={i === currNumQuestion}
+      />
+    );
   });
-  return <div className="flex flex-col items-center gap-[15px] my-[15px]">{renderedQuestions}</div>;
+  return <div className={classname}>{renderedQuestions}</div>;
 }
 
 export default QuestionList;
