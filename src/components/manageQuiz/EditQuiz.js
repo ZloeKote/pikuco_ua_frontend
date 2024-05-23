@@ -24,7 +24,7 @@ function EditQuiz({ quiz }) {
   const [description, setDescription] = useState(quiz.description);
   const [quizType, setQuizType] = useState(quiz.type);
   const [language, setLanguage] = useState(iso6393.find((lang) => lang.iso6391 === quiz.language));
-  const [numQuestions, setNumQuestions] = useState(quiz.questions.length);
+  const [numQuestions, setNumQuestions] = useState(quiz.numQuestions);
   const [questions, setQuestions] = useState(quiz.questions);
   const [pseudoId, setPseudoId] = useState(quiz.pseudoId);
   const [activeStep, setActiveStep] = useState(0);

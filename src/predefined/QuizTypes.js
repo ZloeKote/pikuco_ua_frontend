@@ -1,4 +1,4 @@
-export const optionsType = [
+export const quizTypes = [
   {
     label: "Всі",
     value: "",

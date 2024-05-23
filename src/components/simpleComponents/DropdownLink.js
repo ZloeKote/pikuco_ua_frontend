@@ -4,7 +4,18 @@ import { useState } from "react";
 import { GoChevronDown, GoChevronUp } from "react-icons/go";
 import { twMerge } from "tailwind-merge";
 
-function DropdownLink({ options, children, onClick, OnClickTitle, isOpenExt, to, titleClassName, ...rest }) {
+function DropdownLink({
+  options,
+  children,
+  onClick,
+  OnClickTitle,
+  isOpenExt,
+  to,
+  titleClassName,
+  position = "left",
+  itemBordered = false,
+  ...rest
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleOpen = () => setIsOpen(true);
@@ -17,8 +28,8 @@ function DropdownLink({ options, children, onClick, OnClickTitle, isOpenExt, to,
   );
   const linkClassName = classNames(
     "hover:bg-[--dark-link-background-hover]",
-    "border-b-[1px] border-[--dark-link-background-hover]",
-    "px-2 py-1 last:border-0"
+    itemBordered && "border-b-[1px] border-[--dark-link-background-hover] last:border-0",
+    "px-2 py-1"
   );
   const layoutClassName = twMerge(classNames("relative z-30", rest.className));
   const titleClassNames = twMerge(
@@ -27,7 +38,7 @@ function DropdownLink({ options, children, onClick, OnClickTitle, isOpenExt, to,
 
   const renderedOptions = options.map((option) => {
     return (
-      <div className={linkClassName} key={option.label}>
+      <div className={linkClassName + " " + option.className} key={option.label}>
         <Link
           onClick={() => {
             setIsOpen(false);
@@ -91,7 +102,7 @@ function DropdownLink({ options, children, onClick, OnClickTitle, isOpenExt, to,
     <div {...defaultOpening} {...rest} className={layoutClassName}>
       {DropdownTitle}
       {(isOpen || isOpenExt) && (
-        <div className="absolute pt-2 min-w-full">
+        <div className={`absolute pt-2 min-w-full ${position === "right" && "right-0"}`}>
           <div className={listClassName}>{renderedOptions}</div>
         </div>
       )}

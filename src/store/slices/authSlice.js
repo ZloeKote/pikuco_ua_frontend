@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSelector, createSlice } from "@reduxjs/toolkit";
 
 const authSlice = createSlice({
   name: "auth",
@@ -27,8 +27,15 @@ const authSlice = createSlice({
 
 export const { setCredentials, logOut } = authSlice.actions;
 export default authSlice.reducer;
-export const selectCurrentUser = (state) => {
-  return { email: state?.auth?.email, nickname: state?.auth?.nickname };
-};
 export const selectCurrentToken = (state) => state?.auth?.token;
 export const selectCurrentAvatar = (state) => state?.auth?.avatar;
+
+export const selectCurrentUser = createSelector(
+  (state) => state.auth.email,
+  (state) => state.auth.nickname,
+  (email, nickname) => ({ email, nickname })
+);
+
+// export const selectCurrentUser = (state) => {
+//   return { email: state?.auth?.email, nickname: state?.auth?.nickname };
+// };

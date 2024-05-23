@@ -1,6 +1,6 @@
 import { createContext, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { optionsType } from "../predefined/OptionsType";
+import { quizTypes } from "../predefined/QuizTypes";
 
 const ParamsContext = createContext();
 
@@ -10,9 +10,9 @@ function Provider({ children }) {
     searchParams.toString() !== "" ? "?" + searchParams.toString() : ""
   );
  
-  const typeParamOption = optionsType.find((opt) => opt.value === searchParams.get("type"));
+  const typeParamOption = quizTypes.find((opt) => opt.value === searchParams.get("type"));
   const [quizzesTypeSelection, setQuizzesTypeSelection] = useState(
-    typeParamOption !== undefined ? typeParamOption : optionsType[0]
+    typeParamOption !== undefined ? typeParamOption : quizTypes[0]
   );
 
   const changeQuizzesSearchParams = (params) => {

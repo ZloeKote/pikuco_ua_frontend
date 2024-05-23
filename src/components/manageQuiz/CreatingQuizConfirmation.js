@@ -1,6 +1,6 @@
 import { useState } from "react";
 import classNames from "classnames";
-import { optionsType } from "../../predefined/OptionsType";
+import { quizTypes } from "../../predefined/QuizTypes";
 import QuestionList from "../QuestionList";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa6";
 import { types } from "../../predefined/QuestionTypes";
@@ -28,7 +28,7 @@ function CreatingQuizConfirmation({ title, description, quizType, language, numQ
           <div className="flex flex-col">
             <label className={labelClassname}>Тип вікторини</label>
             <span className="text-[22px] italic">
-              {optionsType.find((type) => type.value === quizType).label}
+              {quizTypes.find((type) => type.value === quizType).label}
             </span>
           </div>
         </div>

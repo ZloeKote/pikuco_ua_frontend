@@ -10,7 +10,7 @@ import ShowPublicUserProfile from "../components/userProfile/ShowPublicUserProfi
 function UserProfilePage() {
   const { nickname } = useParams();
   const { nickname: authPersonNickname } = useSelector(selectCurrentUser);
-  const { data: user, isLoading, error, isSuccess } = useFetchUserByNicknameQuery(nickname);
+  const { data: user, error, isSuccess } = useFetchUserByNicknameQuery(nickname);
 
   let userContent = <LinearProgress />;
   if (error) userContent = `Виникла помилка! Код: ${error.status}`;

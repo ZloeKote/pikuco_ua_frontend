@@ -5,7 +5,7 @@ import Dropdown from "./simpleComponents/Dropdown";
 import classNames from "classnames";
 import { useSearchParams } from "react-router-dom";
 import ParamsContext from "../context/searchParams";
-import { optionsType } from "../predefined/OptionsType";
+import { quizTypes } from "../predefined/QuizTypes";
 
 function QuizFilterSort({ handleParams }) {
   const {quizzesTypeSelection, changeQuizzesTypeSelection} = useContext(ParamsContext);
@@ -126,7 +126,7 @@ function QuizFilterSort({ handleParams }) {
             onChange={handleChangeTitle}
           />
           <Dropdown
-            options={optionsType}
+            options={quizTypes}
             value={quizzesTypeSelection}
             param="type"
             onChange={handleChangeType}

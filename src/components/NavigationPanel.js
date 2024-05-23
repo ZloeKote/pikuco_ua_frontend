@@ -17,7 +17,7 @@ import {
 } from "../store";
 import { useContext } from "react";
 import ParamsContext from "../context/searchParams";
-import { optionsType } from "../predefined/OptionsType";
+import { quizTypes } from "../predefined/QuizTypes";
 
 function NavigationPanel() {
   const { changeQuizzesSearchParams, changeQuizzesTypeSelection } = useContext(ParamsContext);
@@ -38,6 +38,28 @@ function NavigationPanel() {
 
   const userOptions = [
     {
+      label: "Профіль",
+      to: ROUTES.Profile(nickname?.toLowerCase()),
+    },
+    {
+      label: "Конфіденційність",
+      to: ROUTES.Privacy(nickname?.toLowerCase()),
+      className: "mb-2",
+    },
+    {
+      label: "Пройдені вікторини",
+      to: ROUTES.UserCompletedQuizzes(nickname?.toLowerCase()),
+    },
+    {
+      label: "Мої вікторини",
+      to: ROUTES.UserQuizzes(nickname?.toLowerCase()),
+    },
+    {
+      label: "Список бажаного",
+      to: ROUTES.UserWishlistedQuizzes(nickname?.toLowerCase()),
+      className: "mb-2",
+    },
+    {
       label: "Вихід",
       handleClick: handleClick,
       to: location.pathname + location.search,
@@ -52,6 +74,7 @@ function NavigationPanel() {
         className="h-fit max-w-[260px] self-center mr-3"
         titleClassName="!rounded-full pr-1"
         to={ROUTES.Profile(nickname.toLowerCase())}
+        position="right"
       >
         <div className="flex">
           <img src={userAvatar === "some path" ? avatar : userAvatar} alt="creator" className="h-9 mr-2" />
@@ -66,7 +89,7 @@ function NavigationPanel() {
     );
   } else {
     userContent = (
-      <div className="flex gap-3 items-center">
+      <>
         <Link className={classnames} to={ROUTES.Signup}>
           Реєстрація
         </Link>
@@ -78,7 +101,7 @@ function NavigationPanel() {
             <FiLogIn className="text-[26px]" />
           </Button>
         </Link>
-      </div>
+      </>
     );
   }
 
@@ -89,7 +112,7 @@ function NavigationPanel() {
       param: "?type=TOURNAMENT_VIDEO",
       handleClick: () => {
         changeQuizzesSearchParams("?type=TOURNAMENT_VIDEO");
-        changeQuizzesTypeSelection(optionsType[1]);
+        changeQuizzesTypeSelection(quizTypes[1]);
         navigate({
           pathname: ROUTES.QuizzesList,
           search: "?type=TOURNAMENT_VIDEO",
@@ -102,7 +125,7 @@ function NavigationPanel() {
       param: "?type=TOURNAMENT_PICTURE",
       handleClick: () => {
         changeQuizzesSearchParams("?type=TOURNAMENT_PICTURE");
-        changeQuizzesTypeSelection(optionsType[2]);
+        changeQuizzesTypeSelection(quizTypes[2]);
         navigate({
           pathname: ROUTES.QuizzesList,
           search: "?type=TOURNAMENT_PICTURE",
@@ -113,7 +136,7 @@ function NavigationPanel() {
 
   const handleClickTournierTitle = () => {
     changeQuizzesSearchParams("");
-    changeQuizzesTypeSelection(optionsType[0]);
+    changeQuizzesTypeSelection(quizTypes[0]);
   };
 
   return (
@@ -128,6 +151,7 @@ function NavigationPanel() {
             to={ROUTES.QuizzesList}
             OnClickTitle={handleClickTournierTitle}
             titleClassName="px-2"
+            itemBordered
           >
             Турніри
           </DropdownLink>
@@ -138,12 +162,14 @@ function NavigationPanel() {
           <Link className={classnames} to={ROUTES.Contacts}>
             Контакти
           </Link>
-          <Link className={classnames} to={ROUTES.CreateQuiz}>
-            Створити турнір
-          </Link>
         </div>
       </div>
-      {userContent}
+      <div className="flex gap-3 items-center">
+        <Link className={classnames + " mr-4"} to={ROUTES.CreateQuiz}>
+          Створити турнір
+        </Link>
+        {userContent}
+      </div>
     </nav>
   );
 }

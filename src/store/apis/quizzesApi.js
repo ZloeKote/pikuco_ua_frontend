@@ -22,6 +22,7 @@ const quizzesApi = createApi({
               pseudoId: generalInfo.pseudoId,
               isRoughDraft: false,
               language: generalInfo.language.iso6391,
+              numQuestions: generalInfo.numQuestions
             },
             headers: { Authorization: `Bearer ${token}` },
           };
@@ -40,6 +41,7 @@ const quizzesApi = createApi({
               pseudoId: generalInfo.pseudoId,
               isRoughDraft: true,
               language: generalInfo.language.iso6391,
+              numQuestions: generalInfo.numQuestions
             },
             headers: { Authorization: `Bearer ${token}` },
           };
@@ -58,6 +60,7 @@ const quizzesApi = createApi({
               pseudoId: generalInfo.pseudoId,
               isRoughDraft: generalInfo.isRoughDraft,
               language: generalInfo.language.iso6391,
+              numQuestions: generalInfo.numQuestions
             },
             headers: { Authorization: `Bearer ${token}` },
           };
@@ -135,6 +138,15 @@ const quizzesApi = createApi({
           };
         },
       }),
+      fetchUserWishlistedQuizzes: builder.query({
+        query: ({token, param}) => {
+          return {
+            url: `/user/wishlist${!!param ? param : ""}`,
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        }
+      })
     };
   },
 });
@@ -144,6 +156,7 @@ export const {
   useFetchQuizQuery,
   useFetchQuizMainQuery,
   useFetchUserCompletedQuizzesQuery,
+  useFetchUserWishlistedQuizzesQuery,
   useCreateQuizMutation,
   useCreateQuizAsRoughDraftMutation,
   useDeleteQuizMutation,

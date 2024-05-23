@@ -1,5 +1,5 @@
 import "../css/QuizCard.css";
-import { useState } from "react";
+import { useState, memo } from "react";
 import classNames from "classnames";
 import Button from "./simpleComponents/Button";
 import { BsFillPlayFill } from "react-icons/bs";
@@ -41,7 +41,7 @@ function QuizCard({ quiz, showActions = false, onDelete }) {
       </Link>
 
       <Button className="quizcard-playbutton w-full h-full self-end" success rounded>
-        <Link to={ROUTES.PlayQuiz}>
+        <Link to={ROUTES.PlayQuiz(quiz.pseudoId)}>
           <BsFillPlayFill className="text-5xl" />
         </Link>
       </Button>
@@ -163,7 +163,7 @@ function QuizCard({ quiz, showActions = false, onDelete }) {
   );
 }
 
-export default QuizCard;
+export default memo(QuizCard);
 
 // дизайн меню дій
 // slotProps={{

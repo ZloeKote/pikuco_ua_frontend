@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import classNames from "classnames";
 import Link from "../components/simpleComponents/Link";
 import Button from "./simpleComponents/Button";
@@ -6,57 +6,94 @@ import { ROUTES } from "../ROUTES";
 import { GoChevronUp, GoChevronDown } from "react-icons/go";
 import avatar from "../img/avatar.png";
 import quizCover from "../img/quizCover.png";
-import LanguagePicker from "./simpleComponents/LanguagePicker";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { CircularProgress, Tooltip } from "@mui/material";
+import { CircularProgress, Tooltip, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
-import { selectCurrentToken } from "../store/slices/authSlice";
 import SnackbarsContext from "../context/snackbars";
 import {
   useAddEvaluationQuizMutation,
   useDeleteEvaluationQuizMutation,
+  useAddQuizToWishlistMutation,
+  useDeleteQuizFromWishlistMutation,
+  useLazyCheckIsInWishlistQuery,
   useLazyFetchEvaluationQuizQuery,
-} from "../store";
+  selectCurrentToken,
+} from "../store/";
+import { WishlistIcon } from "../custom-materials";
+import { quizTypes } from "../predefined/QuizTypes";
 
-function ShowQuiz({ quiz }) {
-  const navigate = useNavigate();
+function ShowQuiz({ quiz, language }) {
   const token = useSelector(selectCurrentToken);
-  const [searchParams] = useSearchParams();
-  const languages = [quiz.language];
-
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
-  const [fetchEvaluation, fetchingResult] = useLazyFetchEvaluationQuizQuery();
-  const [addEvaluation, addingResult] = useAddEvaluationQuizMutation();
-  const [deleteEvaluation, deletingResult] = useDeleteEvaluationQuizMutation();
+  const [fetchEvaluation, fetchingEvalResult] = useLazyFetchEvaluationQuizQuery();
+  const [addEvaluation, addingEvalResult] = useAddEvaluationQuizMutation();
+  const [deleteEvaluation, deletingEvalResult] = useDeleteEvaluationQuizMutation();
+  const [checkWishlist, checkingWishlistResult] = useLazyCheckIsInWishlistQuery();
+  const [addToWishlist, addingWishlistResult] = useAddQuizToWishlistMutation();
+  const [deleteFromWishlist, deletingWishlistResult] = useDeleteQuizFromWishlistMutation();
+
+  const quizType = quizTypes.find((type) => type.value === quiz.type).label;
 
   useEffect(() => {
     fetchEvaluation({ pseudoId: quiz.pseudoId, token: token });
-  }, [fetchEvaluation, quiz.pseudoId, token]);
+    if (token) checkWishlist({ pseudoId: quiz.pseudoId, token });
+  }, [fetchEvaluation, checkWishlist, quiz.pseudoId, token]);
 
-  quiz.translations?.forEach((translation) => {
-    languages.push(translation.language);
-  });
+  useEffect(() => {
+    if (addingEvalResult.isSuccess) {
+      fetchEvaluation({ pseudoId: quiz.pseudoId, token: token });
+      addingEvalResult.reset();
+    } else if (addingEvalResult.isError) {
+      handleEnqueueSnackbar(
+        `Сталася помилка при оцінці вікторини! Код помилки ${addingEvalResult.error.originalStatus}: ${addingEvalResult.error.data}`,
+        "error",
+        false
+      );
+    } else if (deletingEvalResult.isSuccess) {
+      fetchEvaluation({ pseudoId: quiz.pseudoId, token: token });
+      deletingEvalResult.reset();
+    } else if (deletingEvalResult.isError) {
+      handleEnqueueSnackbar(
+        `Сталася помилка при оцінці вікторини! Код помилки ${deletingEvalResult.error.originalStatus}: ${deletingEvalResult.error.data}`,
+        "error",
+        false
+      );
+    }
+  }, [addingEvalResult, deletingEvalResult, fetchEvaluation, handleEnqueueSnackbar, quiz.pseudoId, token]);
 
-  const currLanguage =
-    (languages.includes(searchParams.get("lang")) ? searchParams.get("lang") : false) ||
-    (languages.includes("uk") ? "uk" : false) ||
-    quiz.language;
+  useEffect(() => {
+    if (addingWishlistResult.isSuccess) {
+      checkWishlist({ pseudoId: quiz.pseudoId, token });
+      handleEnqueueSnackbar("Вікторина успішно додана до списку бажаного", "default");
+      addingWishlistResult.reset();
+    } else if (addingWishlistResult.isError) {
+      handleEnqueueSnackbar(
+        `Сталася помилка при додаванні вікторини до списку бажаного. ${addingWishlistResult.error.data}`,
+        "error"
+      );
+    } else if (deletingWishlistResult.isSuccess) {
+      checkWishlist({ pseudoId: quiz.pseudoId, token });
+      deletingWishlistResult.reset();
+    } else if (deletingWishlistResult.isError) {
+      handleEnqueueSnackbar(
+        `Сталася помилка при видаленні вікторини зі списку бажаного. ${deletingWishlistResult.error.data}`,
+        "error"
+      );
+    }
+  }, [
+    addingWishlistResult,
+    deletingWishlistResult,
+    handleEnqueueSnackbar,
+    checkWishlist,
+    quiz.pseudoId,
+    token,
+  ]);
+
   let quizTitle =
-    currLanguage === quiz.language
-      ? quiz.title
-      : quiz.translations.find((tr) => tr.language === currLanguage).title;
+    language === quiz.language ? quiz.title : quiz.translations.find((tr) => tr.language === language).title;
   const quizDescription =
-    currLanguage === quiz.language
+    language === quiz.language
       ? quiz.description
-      : quiz.translations.find((tr) => tr.language === currLanguage).description;
-
-  const handleChangeLanguage = (newLang) => {
-    searchParams.set("lang", newLang);
-    navigate({
-      pathname: ROUTES.Quiz(quiz.pseudoId),
-      search: searchParams.toString().length !== 0 ? "?" + searchParams.toString() : "",
-    });
-  };
+      : quiz.translations.find((tr) => tr.language === language).description;
 
   if (quiz.isRoughDraft) {
     quizTitle = (
@@ -69,98 +106,102 @@ function ShowQuiz({ quiz }) {
   }
 
   const evalClassName = "hover:bg-[--dark-link-background-hover] hover:cursor-pointer rounded-full";
-  const likeClassname = classNames(evalClassName, { "text-[green]": fetchingResult.data?.liked });
-  const dislikeClassname = classNames(evalClassName, { "text-[red]": fetchingResult.data?.disliked });
+  const likeClassname = classNames(evalClassName, { "text-[green]": fetchingEvalResult.data?.liked });
+  const dislikeClassname = classNames(evalClassName, { "text-[red]": fetchingEvalResult.data?.disliked });
 
   const handleClickLike = () => {
-    if (addingResult.isLoading || deletingResult.isLoading) return;
+    if (addingEvalResult.isLoading || deletingEvalResult.isLoading) return;
 
-    if (fetchingResult.data?.liked) deleteEvaluation({ pseudoId: quiz.pseudoId, token: token });
+    if (fetchingEvalResult.data?.liked) deleteEvaluation({ pseudoId: quiz.pseudoId, token: token });
     else addEvaluation({ isLiked: true, pseudoId: quiz.pseudoId, token: token });
   };
   const handleClickDislike = () => {
-    if (addingResult.isLoading || deletingResult.isLoading) return;
+    if (addingEvalResult.isLoading || deletingEvalResult.isLoading) return;
 
-    if (fetchingResult.data?.disliked) deleteEvaluation({ pseudoId: quiz.pseudoId, token: token });
+    if (fetchingEvalResult.data?.disliked) deleteEvaluation({ pseudoId: quiz.pseudoId, token: token });
     else addEvaluation({ isLiked: false, pseudoId: quiz.pseudoId, token: token });
   };
-
-  useEffect(() => {
-    if (addingResult.isSuccess) {
-      fetchEvaluation({ pseudoId: quiz.pseudoId, token: token });
-      addingResult.reset();
-    } else if (addingResult.isError) {
+  const handleClickWishlist = () => {
+    if (
+      token &&
+      checkingWishlistResult.isSuccess &&
+      !checkingWishlistResult.isLoading &&
+      !addingWishlistResult.isLoading &&
+      !deletingWishlistResult.isLoading
+    ) {
+      if (checkingWishlistResult.data.isWishlisted)
+        deleteFromWishlist({ pseudoId: quiz.pseudoId, token: token });
+      else addToWishlist({ pseudoId: quiz.pseudoId, token: token });
+    } else if (token === null) {
       handleEnqueueSnackbar(
-        `Сталася помилка при оцінці вікторини! Код помилки ${addingResult.error.originalStatus}: ${addingResult.error.data}`,
-        "error",
-        false
-      );
-    } else if (deletingResult.isSuccess) {
-      fetchEvaluation({ pseudoId: quiz.pseudoId, token: token });
-      deletingResult.reset();
-    } else if (deletingResult.isError) {
-      handleEnqueueSnackbar(
-        `Сталася помилка при оцінці вікторини! Код помилки ${deletingResult.error.originalStatus}: ${deletingResult.error.data}`,
-        "error",
-        false
+        "Тільки авторизовані користувачі можуть додавати вікторину до списку бажаного",
+        "error"
       );
     }
-  }, [addingResult, deletingResult, fetchEvaluation, handleEnqueueSnackbar, quiz.pseudoId, token]);
+  };
 
   let evaluationContent = "";
-  if (fetchingResult.isLoading) evaluationContent = <CircularProgress />;
-  else if (fetchingResult.isError) {
+  if (fetchingEvalResult.isLoading) evaluationContent = <CircularProgress />;
+  else if (fetchingEvalResult.isError) {
     evaluationContent = 0;
     handleEnqueueSnackbar(
-      `Не вдалося отримати оцінку. Код помилки ${fetchingResult.error.status} ${fetchingResult.error.data}`,
+      `Не вдалося отримати оцінку. Код помилки ${fetchingEvalResult.error.status} ${fetchingEvalResult.error.data}`,
       "error",
       false
     );
-  } else if (fetchingResult.isSuccess) evaluationContent = fetchingResult.data.evaluation;
+  } else if (fetchingEvalResult.isSuccess) evaluationContent = fetchingEvalResult.data.evaluation;
 
   return (
     <div className="mt-[10px]">
       <div className="bg-[--dark-quizcard-background] border border-[--dark-quizcard-border] w-[75rem] rounded-2xl">
         <div className="flex items-center justify-between py-[10px] border-b border-[--dark-quizcard-border]">
           {quizTitle}
-          <div className="flex gap-[6rem]">
-            <div>
-              <LanguagePicker
-                currLanguageCode={currLanguage}
-                languageCodes={languages}
-                handleChangeLanguage={handleChangeLanguage}
-              />
-            </div>
-            <div className="flex items-center text-[36px] gap-[5px]">
-              <GoChevronUp
-                className={
-                  fetchingResult.isLoading ||
-                  addingResult.isLoading ||
-                  deletingResult.isLoading ||
-                  likeClassname
-                }
-                onClick={handleClickLike}
-              />
-              {evaluationContent}
-              <GoChevronDown
-                className={
-                  fetchingResult.isLoading ||
-                  addingResult.isLoading ||
-                  deletingResult.isLoading ||
-                  dislikeClassname
-                }
-                onClick={handleClickDislike}
-              />
-            </div>
-            <div className="quizcard-creator flex items-center border border-[--dark-quizcard-border] w-[170px] h-fit rounded-full self-center mr-3 z-10 bg-[--dark-quizcard-background]">
-              <img src={avatar} alt="creator" className="h-[40px] mr-2" />
-              <span
-                className="quizcard-creator-nickname text-[--dark-text] leading-none text-[20px] italic"
-                title={quiz.creator.nickname}
-              >
-                {quiz.creator.nickname}
-              </span>
-            </div>
+          <div className="flex gap-[4rem]">
+            {!quiz.isRoughDraft && (
+              <>
+                <div className="self-center">
+                  <WishlistIcon
+                    title="Додати вікторину до списку бажаного"
+                    wishlisted={checkingWishlistResult.data?.isWishlisted}
+                    onClick={handleClickWishlist}
+                  />
+                </div>
+                <div className="flex items-center text-[36px] gap-[5px]">
+                  <GoChevronUp
+                    className={
+                      fetchingEvalResult.isLoading ||
+                      addingEvalResult.isLoading ||
+                      deletingEvalResult.isLoading ||
+                      likeClassname
+                    }
+                    onClick={handleClickLike}
+                  />
+                  {evaluationContent}
+                  <GoChevronDown
+                    className={
+                      fetchingEvalResult.isLoading ||
+                      addingEvalResult.isLoading ||
+                      deletingEvalResult.isLoading ||
+                      dislikeClassname
+                    }
+                    onClick={handleClickDislike}
+                  />
+                </div>
+              </>
+            )}
+            <Link
+              to={`/user/${quiz.creator.nickname.toLowerCase()}`}
+              className="quizcard-creator z-10 mr-3 w-[170px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]"
+            >
+              <div className="flex items-center">
+                <img src={avatar} alt="creator" className="h-[40px] mr-2" />
+                <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
+                  <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[20px] italic">
+                    {quiz.creator.nickname}
+                  </span>
+                </Tooltip>
+              </div>
+            </Link>
           </div>
         </div>
         <div className="flex flex-col items-center text-center text-[24px]">
@@ -168,7 +209,7 @@ function ShowQuiz({ quiz }) {
             <img src={quizCover} alt="cover" />
           </div>
           <div className="w-[60rem]">
-            <p className="my-[5px]">{quiz.type}</p>
+            <p className="my-[5px]">{quizType}</p>
             <p className="mb-[5px]">{quizDescription}</p>
             <p className="mb-[15px]">{quiz.amountQuestions} варіанти</p>
           </div>
