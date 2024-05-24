@@ -22,7 +22,7 @@ const quizzesApi = createApi({
               pseudoId: generalInfo.pseudoId,
               isRoughDraft: false,
               language: generalInfo.language.iso6391,
-              numQuestions: generalInfo.numQuestions
+              numQuestions: generalInfo.numQuestions,
             },
             headers: { Authorization: `Bearer ${token}` },
           };
@@ -41,7 +41,7 @@ const quizzesApi = createApi({
               pseudoId: generalInfo.pseudoId,
               isRoughDraft: true,
               language: generalInfo.language.iso6391,
-              numQuestions: generalInfo.numQuestions
+              numQuestions: generalInfo.numQuestions,
             },
             headers: { Authorization: `Bearer ${token}` },
           };
@@ -60,7 +60,7 @@ const quizzesApi = createApi({
               pseudoId: generalInfo.pseudoId,
               isRoughDraft: generalInfo.isRoughDraft,
               language: generalInfo.language.iso6391,
-              numQuestions: generalInfo.numQuestions
+              numQuestions: generalInfo.numQuestions,
             },
             headers: { Authorization: `Bearer ${token}` },
           };
@@ -91,7 +91,7 @@ const quizzesApi = createApi({
         },
       }),
       editQuizTranslation: builder.mutation({
-        query: ({ translation, pseudoId, token}) => {
+        query: ({ translation, pseudoId, token }) => {
           return {
             url: `/${pseudoId}/translations/${translation.language}`,
             method: "PUT",
@@ -102,8 +102,8 @@ const quizzesApi = createApi({
               language: translation.language,
               questions: translation.questions,
             },
-          }
-        }
+          };
+        },
       }),
       fetchQuizzes: builder.query({
         query: (param) => {
@@ -117,6 +117,14 @@ const quizzesApi = createApi({
         query: (pseudoId) => {
           return {
             url: `/${pseudoId}`,
+            method: "GET",
+          };
+        },
+      }),
+      fetchPopularQuizzes: builder.query({
+        query: (param) => {
+          return {
+            url: `/popular${param !== undefined ? param : ""}`,
             method: "GET",
           };
         },
@@ -139,20 +147,21 @@ const quizzesApi = createApi({
         },
       }),
       fetchUserWishlistedQuizzes: builder.query({
-        query: ({token, param}) => {
+        query: ({ token, param }) => {
           return {
             url: `/user/wishlist${!!param ? param : ""}`,
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
-          }
-        }
-      })
+          };
+        },
+      }),
     };
   },
 });
 
 export const {
   useFetchQuizzesQuery,
+  useFetchPopularQuizzesQuery,
   useFetchQuizQuery,
   useFetchQuizMainQuery,
   useFetchUserCompletedQuizzesQuery,

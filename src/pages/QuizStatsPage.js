@@ -53,7 +53,7 @@ function QuizStatsPage() {
               className="bg-[--dark-quizcard-background-hover] w-[60px] rounded-full flex justify-center hover:bg-[--dark-link-background-hover]"
               to={ROUTES.QuizzesList}
             >
-              <GoArrowLeft className="text-[30px]" />
+              <GoArrowLeft className="text-[30px] self-center" />
             </Link>
             <Link className={mainStatClassname} to={ROUTES.Quiz(pseudoId)} params={langParam}>
               Загальна інформація

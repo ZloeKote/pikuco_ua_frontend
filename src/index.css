@@ -41,9 +41,15 @@ body {
   height: 100%;
 }
 
-.layout {
+.full-layout {
   display: grid;
   grid-template-rows: 50px 1fr 100px;
+  height: 100%;
+}
+
+.nav-layout {
+  display: grid;
+  grid-template-rows: 50px 1fr;
   height: 100%;
 }
 

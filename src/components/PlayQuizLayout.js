@@ -21,7 +21,7 @@ function PlayQuizLayout({ quiz }) {
   const amountStages = Math.round(Math.pow(quiz.questions.length, 0.5));
 
   const [isCompleted, setIsCompleted] = useState(false);
-  const [ addResult ] = useAddQuizResultMutation();
+  const [addResult] = useAddQuizResultMutation();
   useEffect(() => {
     const addQuiz = async () => {
       if (token) {
@@ -97,7 +97,8 @@ function PlayQuizLayout({ quiz }) {
     }
 
     // if curr list has 2 elements
-    if (questionList.curr.length === 2) {
+    // друга умова може бути невірною
+    if (questionList.curr.length === 2 || questionList.stage !== amountStages) {
       setQuestionList((prevState) => ({
         ...prevState,
         curr: prevState.next,

@@ -5,6 +5,7 @@ import qualities from "../predefined/ytThumbnailQualities";
 import Button from "./simpleComponents/Button";
 import classNames from "classnames";
 import { Tooltip } from "@mui/material";
+import Link from "./simpleComponents/Link";
 
 function ShowQuestion({
   question,
@@ -18,7 +19,6 @@ function ShowQuestion({
 }) {
   let questionTitle = question.title;
   let questionDescription = question.description !== "null" ? question.description : "";
-  const isEditable = variant === types.editingQuiz;
   const isQuestionEmpty = question.url === "" && question.title === "" && question.description === "";
 
   if (
@@ -31,7 +31,7 @@ function ShowQuestion({
 
   let questionInfoClassname = classNames("w-[70%] pl-3");
 
-  if (isEditable) {
+  if (variant === types.editingQuiz) {
     questionInfoClassname = classNames("w-[77%] pl-3");
   } else if (variant === types.confirmingQuiz) {
     questionInfoClassname = classNames("w-max pl-3");
@@ -57,27 +57,33 @@ function ShowQuestion({
     if (validYtLink === "error" || validYtLink === "//www.youtube.com/embed/undefined") {
       previewQuestion = <img className="h-full w-auto rounded" src={ytEmptyImage} alt="YouTube video" />;
     } else {
-      previewQuestion = (
-        <img
-          className="h-full w-auto rounded"
-          src={getYtThumbnail(question.url, qualities.low)}
-          alt={questionTitle}
-        />
-        // <iframe
-        //   title="Youtube"
-        //   width="100%"
-        //   height="100px"
-        //   src={ytLinkToValid(question.url)}
-        //   allowFullScreen
-        // ></iframe>
-      );
+      if (variant === types.editingQuiz) {
+        previewQuestion = (
+          <img
+            className="h-full w-auto rounded"
+            src={getYtThumbnail(question.url, qualities.low)}
+            alt={questionTitle}
+          />
+        );
+      } else {
+        previewQuestion = (
+          <Link to={question.url} target="_blank">
+            <img
+              className="h-full w-auto rounded"
+              src={getYtThumbnail(question.url, qualities.low)}
+              alt={questionTitle}
+              title="Відкрити відео на новій сторінці"
+            />
+          </Link>
+        );
+      }
     }
   } else {
     previewQuestion = <img src={question.url} alt={questionTitle} />;
   }
 
-  let score = null;
-  if (variant === types.individual) {
+  let score = <div className="w-[10%]"></div>;
+  if (variant === types.general) {
     score = (
       <div className="w-[10%] text-[40px] flex items-center justify-center">
         {question.score ? question.score : 0}
@@ -94,17 +100,17 @@ function ShowQuestion({
 
   let content = (
     <div
-      className={layoutClassname + (isEditable ? " hover:cursor-pointer" : "")}
-      onClick={isEditable ? () => onClickQuiz(numQuestion) : undefined}
+      className={layoutClassname + (variant === types.editingQuiz ? " hover:cursor-pointer" : "")}
+      onClick={variant === types.editingQuiz ? () => onClickQuiz(numQuestion) : undefined}
     >
       {!isQuestionEmpty && (
         <>
-          {!isEditable ?? (
+          {(variant === types.individual || variant === types.general) && (
             <div className="w-[7%] text-[40px] flex items-center justify-center">{question.place}</div>
           )}
           <div className="ml-4 w-[13%] self-center">{previewQuestion}</div>
           {questionInfo}
-          {isEditable ? (
+          {variant === types.editingQuiz ? (
             <div className="flex justify-center items-center mr-4">
               <Button
                 type="button"
@@ -139,3 +145,11 @@ function ShowQuestion({
 }
 
 export default ShowQuestion;
+
+// <iframe
+//   title="Youtube"
+//   width="100%"
+//   height="100px"
+//   src={ytLinkToValid(question.url)}
+//   allowFullScreen
+// ></iframe>

@@ -32,7 +32,7 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
       (lang) => lang.iso6391 === quiz.translations?.find((tr) => tr.language === translationLanguage).language
     )
   );
-  const [numQuestions, setNumQuestions] = useState(quiz.questions.length);
+  const [numQuestions, setNumQuestions] = useState(quiz.numQuestions);
   const [questions, setQuestions] = useState(
     quiz.translations?.find((tr) => tr.language === translationLanguage).questions
   );
@@ -146,7 +146,7 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
     "bg-[--dark-quizcard-background]",
     "flex",
     "border border-[--dark-quizcard-border] rounded-2xl",
-    "w-[75rem] h-full text-[20px]"
+    "w-[75rem] h-[90%] text-[20px]"
   );
   const buttonClassname = classNames("w-[150px] h-[50px] rounded-xl leading-none");
 

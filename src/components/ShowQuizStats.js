@@ -110,6 +110,7 @@ function ShowQuizStats({ quiz, indResults, language }) {
   const indClassname = classNames("mr-[25px] text-[32px]", {
     "text-gray-500 cursor-no-drop": !isIndExists,
     "text-[--dark-text]": isIndExists,
+    "font-bold": isIndividual,
   });
 
   let quizTitle =
@@ -168,6 +169,7 @@ function ShowQuizStats({ quiz, indResults, language }) {
       false
     );
   } else if (fetchingResult.isSuccess) evaluationContent = fetchingResult.data.evaluation;
+  
   return (
     <div className="mt-[10px]">
       <div className="bg-[--dark-quizcard-background] border border-[--dark-quizcard-border] w-[75rem] rounded-2xl">
@@ -226,7 +228,7 @@ function ShowQuizStats({ quiz, indResults, language }) {
             <button className={indClassname} onClick={isIndExists ? handleClickIndividual : null}>
               Індивідуальна
             </button>
-            <button className="text-[32px]" onClick={handleClickGeneral}>
+            <button className={`${isIndividual ? "" : "font-bold"} text-[32px]`} onClick={handleClickGeneral}>
               Загальна
             </button>
           </div>
@@ -239,6 +241,7 @@ function ShowQuizStats({ quiz, indResults, language }) {
             <LinearProgress />
           ) : (
             <QuestionList
+              className="w-[95%] self-center"
               questions={questions}
               questionType={quiz.type}
               variant={isIndividual ? types.individual : types.general}

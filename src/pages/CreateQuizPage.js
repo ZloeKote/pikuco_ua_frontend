@@ -163,7 +163,7 @@ function CreateQuizPage() {
     "bg-[--dark-quizcard-background]",
     "flex",
     "border border-[--dark-quizcard-border] rounded-2xl",
-    "w-[75rem] h-full text-[20px]"
+    "w-[75rem] h-[90%] text-[20px]"
   );
   const buttonClassname = classNames("w-[150px] h-[50px] rounded-xl leading-none");
 

@@ -8,8 +8,8 @@ import { TextField } from "@mui/material";
 
 function QuizQuestion({ question, readOnlyUrl, originalTitle, originalDescription, isCreatingTranslation, onChange }) {
   let isValid =
-    !(YtLinkToValid(question.url) === "error") &&
-    !(YtLinkToValid(question.url) === "//www.youtube.com/embed/undefined");
+    !(YtLinkToValid(question?.url) === "error") &&
+    !(YtLinkToValid(question?.url) === "//www.youtube.com/embed/undefined");
 
   const handleChangeURL = (e) => {
     onChange({ ...question, url: e.target.value });
@@ -67,7 +67,7 @@ function QuizQuestion({ question, readOnlyUrl, originalTitle, originalDescriptio
           </label>
           <Input
             className="text-[22px] !rounded"
-            value={question.url}
+            value={question?.url}
             onChange={handleChangeURL}
             placeholder="youtube.com/watch?v=dQw4w9WgXcQ"
             disabled={readOnlyUrl}

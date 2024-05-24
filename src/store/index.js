@@ -34,6 +34,7 @@ setupListeners(store.dispatch);
 
 export {
   useFetchQuizzesQuery,
+  useFetchPopularQuizzesQuery,
   useFetchQuizQuery,
   useFetchUserCompletedQuizzesQuery,
   useFetchUserWishlistedQuizzesQuery,

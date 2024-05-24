@@ -2,9 +2,9 @@ import { useEffect, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import Cookie from "universal-cookie";
 import { Outlet } from "react-router-dom";
-import { useRecreateTokenMutation, setCredentials } from "../store";
+import { useRecreateTokenMutation, setCredentials } from "../../store";
 
-function SimpleLayout() {
+function LoginLayout() {
   const [recreateToken, { isSuccess }] = useRecreateTokenMutation();
   const dispatch = useDispatch();
 
@@ -27,10 +27,10 @@ function SimpleLayout() {
 
   if (cookie.get("LoggedIn") ? isSuccess : true) outlet = <Outlet />;
   return (
-    <div className="font-serif">
+    <div className="font-serif h-full">
       {outlet}
     </div>
   );
 }
 
-export default SimpleLayout;
+export default LoginLayout;

@@ -4,8 +4,8 @@ import SignupPage from "./pages/SignupPage";
 import MainPage from "./pages/MainPage";
 import RequireAuth from "./components/RequireAuth";
 import QuizzesPage from "./pages/QuizzesPage";
-import SimpleLayout from "./components/SimpleLayout";
-import FullLayout from "./components/FullLayout";
+import LoginLayout from "./components/layouts/LoginLayout";
+import FullLayout from "./components/layouts/FullLayout";
 import PlayQuizPage from "./pages/PlayQuizPage";
 import { ROUTES } from "./ROUTES";
 import QuizPage from "./pages/QuizPage";
@@ -20,6 +20,7 @@ import CreateQuizPage from "./pages/CreateQuizPage";
 import EditQuizPage from "./pages/EditQuizPage";
 import CreateQuizTranslationPage from "./pages/CreateQuizTranslationPage";
 import EditQuizTranslationPage from "./pages/EditQuizTranslationPage";
+import LayoutWithNavigation from "./components/layouts/LayoutWithNavigation";
 
 const darkTheme = createTheme({
   palette: {
@@ -32,37 +33,40 @@ function App() {
     <ThemeProvider theme={darkTheme}>
       <Routes>
         {/* Public routes */}
-        <Route path={ROUTES.Main} element={<FullLayout />}>
-          <Route index element={<MainPage />} />
-          <Route path={ROUTES.QuizzesList} element={<QuizzesPage />} />
-          <Route path={ROUTES.About} element={<div>About</div>} />
-          <Route path={ROUTES.Contacts} element={<div>Contacts</div>} />
-          <Route path={ROUTES.Quiz()} element={<QuizPage />} />
-          <Route path={ROUTES.QuizStats()} element={<QuizStatsPage />} />
-          <Route path={ROUTES.Login} element={<LoginPage />} />
-          <Route path={ROUTES.Signup} element={<SignupPage />} />
+        <Route path={ROUTES.Main} element={<LoginLayout />}>
+          <Route element={<FullLayout />}>
+            <Route index element={<MainPage />} />
+            <Route path={ROUTES.QuizzesList} element={<QuizzesPage />} />
+            <Route path={ROUTES.About} element={<div>About</div>} />
+            <Route path={ROUTES.Contacts} element={<div>Contacts</div>} />
+            <Route path={ROUTES.Quiz()} element={<QuizPage />} />
+            <Route path={ROUTES.QuizStats()} element={<QuizStatsPage />} />
+            <Route path={ROUTES.Login} element={<LoginPage />} />
+            <Route path={ROUTES.Signup} element={<SignupPage />} />
+
+            {/* user profile routes */}
+            <Route path={ROUTES.Profile()}>
+              <Route index element={<UserProfilePage />} />
+              <Route path={ROUTES.Privacy()} element={<UserPrivacyPage />} />
+
+              <Route path={ROUTES.UserCompletedQuizzes()} element={<UserCQuizzesPage />} />
+              <Route path={ROUTES.UserQuizzes()} element={<UserQuizzesPage />} />
+              <Route path={ROUTES.UserWishlistedQuizzes()} element={<UserWQuizzesPage />} />
+            </Route>
+          </Route>
 
           {/* protected routes */}
           <Route element={<RequireAuth />}>
-            <Route path={ROUTES.CreateQuiz} element={<CreateQuizPage />} />
-            <Route path={ROUTES.EditQuiz} element={<EditQuizPage />} />
-            <Route path={ROUTES.CreateQuizTranslation} element={<CreateQuizTranslationPage />} />
-            <Route path={ROUTES.EditQuizTranslation} element={<EditQuizTranslationPage />} />
+            <Route element={<LayoutWithNavigation />}>
+              <Route path={ROUTES.CreateQuiz} element={<CreateQuizPage />} />
+              <Route path={ROUTES.EditQuiz} element={<EditQuizPage />} />
+              <Route path={ROUTES.CreateQuizTranslation} element={<CreateQuizTranslationPage />} />
+              <Route path={ROUTES.EditQuizTranslation} element={<EditQuizTranslationPage />} />
+            </Route>
           </Route>
-
-          {/* user profile routes */}
-          <Route path={ROUTES.Profile()}>
-            <Route index element={<UserProfilePage />} />
-            <Route path={ROUTES.Privacy()} element={<UserPrivacyPage />} />
-
-            <Route path={ROUTES.UserCompletedQuizzes()} element={<UserCQuizzesPage />} />
-            <Route path={ROUTES.UserQuizzes()} element={<UserQuizzesPage />} />
-            <Route path={ROUTES.UserWishlistedQuizzes()} element={<UserWQuizzesPage />} />
+          <Route path={ROUTES.PlayQuiz()}>
+            <Route index element={<PlayQuizPage />} />
           </Route>
-        </Route>
-
-        <Route path={ROUTES.PlayQuiz()} element={<SimpleLayout />}>
-          <Route index element={<PlayQuizPage />} />
         </Route>
       </Routes>
     </ThemeProvider>

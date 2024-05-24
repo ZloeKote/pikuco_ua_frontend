@@ -8,7 +8,7 @@ function Link({ to, state, className, children, disabled, ...rest }) {
   );
   if (disabled) {
     link = (
-      <span {...rest} className={className + " !text-gray-400 cursor-default"}>
+      <span {...rest} className={className + " !text-gray-500 cursor-default"}>
         {children}
       </span>
     );

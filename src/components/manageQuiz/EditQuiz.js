@@ -66,12 +66,22 @@ function EditQuiz({ quiz }) {
         quizType: quizType,
         pseudoId: pseudoId,
         language: language,
+        numQuestions: numQuestions,
       },
       questions: questions,
       token: token,
     });
   };
 
+  useEffect(() => {
+    if (questions.length !== numQuestions) {
+      let allQuestions = [...questions];
+      for (let i = 0; i < numQuestions - questions.length; i++) {
+        allQuestions.push({ url: "", title: "", description: "" });
+      }
+      setQuestions(allQuestions);
+    }
+  }, [numQuestions, questions]);
   useEffect(() => {
     if (resultRoughDraft.isSuccess) {
       handleEnqueueSnackbar("Чернетка успішно збережена!", "success", false);
@@ -112,6 +122,7 @@ function EditQuiz({ quiz }) {
         pseudoId: pseudoId,
         isRoughDraft: quiz.isRoughDraft,
         language: language,
+        numQuestions: numQuestions,
       },
       questions: questions,
       token: token,
@@ -163,7 +174,7 @@ function EditQuiz({ quiz }) {
     "bg-[--dark-quizcard-background]",
     "flex",
     "border border-[--dark-quizcard-border] rounded-2xl",
-    "w-[75rem] h-full text-[20px]"
+    "w-[75rem] h-[90%] text-[20px]"
   );
   const buttonClassname = classNames("w-[150px] h-[50px] rounded-xl leading-none");
 

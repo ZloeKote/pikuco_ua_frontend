@@ -1,5 +1,4 @@
 import ShowQuestion from "./ShowQuestion";
-import { types } from "../predefined/QuestionTypes";
 import classNames from "classnames";
 
 function QuestionList({ questions, questionType, variant, lang, onClickReset, onClickQuiz, currNumQuestion, className }) {
@@ -8,7 +7,7 @@ function QuestionList({ questions, questionType, variant, lang, onClickReset, on
   const renderedQuestions = questions.map((question, i) => {
     return (
       <ShowQuestion
-        key={variant === types.editingQuiz ? i : question.place}
+        key={i}
         question={question}
         questionType={questionType}
         variant={variant}
