@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import { Tooltip, Typography } from "@mui/material";
 import { BsInfoCircleFill } from "react-icons/bs";
-import defaultAvatar from "../../img/avatar.png";
+import GeneratedUserAvatar from "../simpleComponents/GeneratedUserAvatar";
 
 function ShowPublicUserProfile({ user }) {
   const classnameLayout = classNames(
@@ -9,7 +9,7 @@ function ShowPublicUserProfile({ user }) {
     "grid-rows-[25px_repeat(3,minmax(0,65px))_300px]",
     "bg-[--dark-quizcard-background]",
     "border border-[--dark-quizcard-border] rounded-2xl",
-    "w-[60rem] h-fit text-[20px]",
+    "w-[60rem] h-fit text-[20px]"
   );
 
   let userBirthdate = "Не вказано";
@@ -48,11 +48,16 @@ function ShowPublicUserProfile({ user }) {
         </div>
       </div>
       <div className="row-start-1 row-end-5 col-start-1 col-end-3 flex items-center justify-center">
-        <img
+        <GeneratedUserAvatar
+          username={user.nickname}
+          saturation="60"
+          className="w-40 h-40 bg-lime-300 rounded-full"
+        />
+        {/* <img
           className="w-40 h-40 rounded-sm"
           src={user.avatar === "some path" ? defaultAvatar : user.avatar}
           alt={`${user.nickname}'s profile`}
-        />
+        /> */}
       </div>
       <div className="col-start-3 col-end-4 row-start-2 row-end-5">
         <div className="mb-2 leading-tight">

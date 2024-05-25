@@ -71,6 +71,8 @@ function QuizPage() {
                 languageCodes={quiz.languages}
                 handleChangeLanguage={handleChangeLanguage}
                 label="Мова вікторини"
+                disabled={quiz.languages.length === 1}
+                title={quiz.languages.length === 1 ? "Вікторина має лише 1 мову" : "Оберіть мову вікторини"}
               />
             </div>
           )}

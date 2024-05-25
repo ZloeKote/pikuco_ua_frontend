@@ -5,7 +5,6 @@ import QuestionList from "./QuestionList";
 import ActiveButton from "./simpleComponents/ActiveButton";
 import { LinearProgress, CircularProgress, Tooltip, Typography } from "@mui/material";
 import classNames from "classnames";
-import avatar from "../img/avatar.png";
 import SnackbarsContext from "../context/snackbars";
 import {
   useAddEvaluationQuizMutation,
@@ -21,6 +20,7 @@ import { types } from "../predefined/QuestionTypes";
 import { useSelector } from "react-redux";
 import { WishlistIcon } from "../custom-materials";
 import Link from "./simpleComponents/Link";
+import GeneratedUserAvatar from "./simpleComponents/GeneratedUserAvatar";
 
 function ShowQuizStats({ quiz, indResults, language }) {
   const token = useSelector(selectCurrentToken);
@@ -97,7 +97,9 @@ function ShowQuizStats({ quiz, indResults, language }) {
     questions = location.state?.resultsAfterPassing || indResults.quizResults.questions;
   } else {
     if (!resultsIsLoading && results === undefined) {
-      questions = quiz.questions;
+      if (language !== quiz.language && quiz.translations.some((tr) => tr.language === language))
+        questions = quiz.translations.find((tr) => tr.language === language).questions;
+      else questions = quiz.questions;
     } else {
       questions = results?.quizResults.questions;
     }
@@ -169,7 +171,7 @@ function ShowQuizStats({ quiz, indResults, language }) {
       false
     );
   } else if (fetchingResult.isSuccess) evaluationContent = fetchingResult.data.evaluation;
-  
+
   return (
     <div className="mt-[10px]">
       <div className="bg-[--dark-quizcard-background] border border-[--dark-quizcard-border] w-[75rem] rounded-2xl">
@@ -213,7 +215,12 @@ function ShowQuizStats({ quiz, indResults, language }) {
               className="quizcard-creator z-10 mr-3 w-[170px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]"
             >
               <div className="flex items-center">
-                <img src={avatar} alt="creator" className="h-[40px] mr-2" />
+                <GeneratedUserAvatar
+                  username={quiz.creator.nickname}
+                  saturation="60"
+                  className="h-[40px] mr-2 bg-lime-300 rounded-full"
+                />
+                {/* <img src={avatar} alt="creator" className="h-[40px] mr-2" /> */}
                 <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
                   <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[20px] italic">
                     {quiz.creator.nickname}

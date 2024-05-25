@@ -1,6 +1,5 @@
 import Link from "./simpleComponents/Link";
 import Logo from "./simpleComponents/Logo";
-import avatar from "../img/avatar.png";
 import DropdownLink from "./simpleComponents/DropdownLink";
 import classNames from "classnames";
 import Button from "./simpleComponents/Button";
@@ -8,16 +7,11 @@ import { FiLogIn } from "react-icons/fi";
 import { ROUTES } from "../ROUTES";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  selectCurrentToken,
-  selectCurrentUser,
-  selectCurrentAvatar,
-  useLogoutMutation,
-  logOut,
-} from "../store";
+import { selectCurrentToken, selectCurrentUser, useLogoutMutation, logOut } from "../store";
 import { useContext } from "react";
 import ParamsContext from "../context/searchParams";
 import { quizTypes } from "../predefined/QuizTypes";
+import GeneratedUserAvatar from "./simpleComponents/GeneratedUserAvatar";
 
 function NavigationPanel() {
   const { changeQuizzesSearchParams, changeQuizzesTypeSelection } = useContext(ParamsContext);
@@ -27,7 +21,6 @@ function NavigationPanel() {
   const navigate = useNavigate();
   const token = useSelector(selectCurrentToken);
   const { nickname } = useSelector(selectCurrentUser);
-  const userAvatar = useSelector(selectCurrentAvatar);
   const classnames = classNames("hover:bg-[--dark-link-background-hover] hover:rounded-md px-2 flex");
 
   const handleClick = () => {
@@ -77,7 +70,12 @@ function NavigationPanel() {
         position="right"
       >
         <div className="flex">
-          <img src={userAvatar === "some path" ? avatar : userAvatar} alt="creator" className="h-9 mr-2" />
+          <GeneratedUserAvatar
+            username={nickname}
+            saturation="60"
+            className="h-9 mr-2 bg-lime-300 rounded-full"
+          />
+          {/* <img src={userAvatar === "some path" ? avatar : userAvatar} alt="creator" className="h-9 mr-2" /> */}
           <span
             className="self-center truncate text-[--dark-text] leading-none text-[16px] italic"
             title={nickname}

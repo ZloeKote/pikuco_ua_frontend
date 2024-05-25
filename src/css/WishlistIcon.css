@@ -1,7 +1,9 @@
 .ui-bookmark {
   --icon-size: 32px;
-  --icon-secondary-color: rgb(77, 77, 77);
-  --icon-hover-color: rgb(97, 97, 97);
+  /* rgb(77, 77, 77) */
+  --icon-secondary-color: #FFF;
+  /* rgb(97, 97, 97) */
+  --icon-hover-color: #ffffff7e;
   --icon-primary-color: rgb(252, 54, 54);
   --icon-circle-border: 1px solid var(--icon-primary-color);
   --icon-circle-size: 35px;

@@ -4,7 +4,6 @@ import Link from "../components/simpleComponents/Link";
 import Button from "./simpleComponents/Button";
 import { ROUTES } from "../ROUTES";
 import { GoChevronUp, GoChevronDown } from "react-icons/go";
-import avatar from "../img/avatar.png";
 import quizCover from "../img/quizCover.png";
 import { CircularProgress, Tooltip, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
@@ -20,6 +19,7 @@ import {
 } from "../store/";
 import { WishlistIcon } from "../custom-materials";
 import { quizTypes } from "../predefined/QuizTypes";
+import GeneratedUserAvatar from "./simpleComponents/GeneratedUserAvatar";
 
 function ShowQuiz({ quiz, language }) {
   const token = useSelector(selectCurrentToken);
@@ -194,7 +194,12 @@ function ShowQuiz({ quiz, language }) {
               className="quizcard-creator z-10 mr-3 w-[170px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]"
             >
               <div className="flex items-center">
-                <img src={avatar} alt="creator" className="h-[40px] mr-2" />
+                <GeneratedUserAvatar
+                  username={quiz.creator.nickname}
+                  saturation="60"
+                  className="h-[40px] mr-2 bg-lime-300 rounded-full"
+                />
+                {/* <img src={avatar} alt="creator" className="h-[40px] mr-2" /> */}
                 <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
                   <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[20px] italic">
                     {quiz.creator.nickname}
@@ -217,7 +222,7 @@ function ShowQuiz({ quiz, language }) {
         {!quiz.isRoughDraft && (
           <div className="flex justify-center mb-[20px]">
             <Button className="w-[200px] h-[90px] text-[32px]" success rounded>
-              <Link to={ROUTES.PlayQuiz(quiz.pseudoId)}>Грати</Link>
+              <Link to={ROUTES.PlayQuiz(quiz.pseudoId) + `?lang=${language}`}>Грати</Link>
             </Button>
           </div>
         )}

@@ -1,7 +1,7 @@
 import { Box, InputLabel, MenuItem, FormControl, Select } from "@mui/material";
 import { iso6393 } from "iso-639-3";
 
-export default function LanguagePicker({ currLanguageCode, languageCodes, handleChangeLanguage, label = "Мова", size = "small" }) {
+export default function LanguagePicker({ currLanguageCode, languageCodes, handleChangeLanguage, label = "Мова", size = "small", ...rest }) {
   const renderedLanguages = languageCodes.map((langCode) => {
     const langName = iso6393.find((lang) => lang.iso6391 === langCode).name;
     return (
@@ -22,6 +22,7 @@ export default function LanguagePicker({ currLanguageCode, languageCodes, handle
           onChange={handleChange}
           MenuProps={{ style: { maxHeight: 260 } }}
           size={size}
+          {...rest}
         >
           {renderedLanguages}
         </Select>

@@ -1,4 +1,4 @@
-import { useState, Fragment, useContext } from "react";
+import { useState, Fragment, useContext, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
@@ -23,7 +23,6 @@ function CreateQuizTranslation({ quiz }) {
   const token = useSelector(selectCurrentToken);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [quizType, setQuizType] = useState(quiz.type);
   const [language, setLanguage] = useState(
     iso6393.find(
       (lang) =>
@@ -33,15 +32,23 @@ function CreateQuizTranslation({ quiz }) {
           .at(0)
     )
   );
-  const [numQuestions, setNumQuestions] = useState(quiz.numQuestions);
   const [questions, setQuestions] = useState(
     quiz.questions?.map((q) => {
       return { ...q, title: "", description: "" };
     })
   );
   const [activeStep, setActiveStep] = useState(0);
-
   const [addTranslation, result] = useAddQuizTranslationMutation();
+
+  useEffect(() => {
+    if (questions.length !== quiz.numQuestions) {
+      let allQuestions = [...questions];
+      for (let i = 0; i < quiz.numQuestions - questions.length; i++) {
+        allQuestions.push({ url: "", title: "", description: "" });
+      }
+      setQuestions(allQuestions);
+    }
+  }, [quiz.numQuestions, questions]);
 
   const handleNext = (e) => {
     e?.preventDefault();
@@ -50,17 +57,7 @@ function CreateQuizTranslation({ quiz }) {
 
   const handleBack = () => setActiveStep((prevActiveStep) => prevActiveStep - 1);
 
-  const handleChangeQuizType = (quizType) => setQuizType(quizType);
   const handleChangeLanguage = (lang) => setLanguage(lang);
-  const handleChangeNumQuestions = (numQuestions) => {
-    setNumQuestions(numQuestions);
-
-    const emptyQuestion = { url: "", title: "", description: "" };
-    let emptyQuestions = [];
-    for (let i = 0; i < numQuestions; i++) emptyQuestions.push(emptyQuestion);
-
-    setQuestions(emptyQuestions);
-  };
   const handleChangeTitle = (title) => setTitle(title);
   const handleChangeDescription = (description) => setDescription(description);
   const handleChangeQuestion = (question, numQuestion) => {
@@ -104,14 +101,12 @@ function CreateQuizTranslation({ quiz }) {
           description={description}
           originalDescription={quiz.description}
           onChangeDescription={handleChangeDescription}
-          quizType={quizType}
-          onChangeQuizType={handleChangeQuizType}
+          quizType={quiz.quizType}
           readOnlyQuizType
           language={language}
           onChangeLanguage={handleChangeLanguage}
           disabledLanguages={quiz.languages}
-          numQuestions={numQuestions}
-          onChangeNumQuestions={handleChangeNumQuestions}
+          numQuestions={quiz.numQuestions}
           readOnlyNumQuestions
         />
       ),
@@ -122,7 +117,7 @@ function CreateQuizTranslation({ quiz }) {
         <QuizQuestionsInfo
           questions={questions}
           originalQuestions={quiz.questions}
-          questionType={quizType}
+          questionType={quiz.quizType}
           readOnlyUrl
           onChange={handleChangeQuestion}
         />
@@ -134,9 +129,9 @@ function CreateQuizTranslation({ quiz }) {
         <CreatingQuizConfirmation
           title={title}
           description={description}
-          quizType={quizType}
+          quizType={quiz.quizType}
           language={language.name}
-          numQuestions={numQuestions}
+          numQuestions={quiz.numQuestions}
           questions={questions}
         />
       ),

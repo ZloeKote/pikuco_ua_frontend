@@ -26,13 +26,9 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
   const [description, setDescription] = useState(
     quiz.translations?.find((tr) => tr.language === translationLanguage).description
   );
-  const [quizType, setQuizType] = useState(quiz.type);
-  const [language, setLanguage] = useState(
-    iso6393.find(
-      (lang) => lang.iso6391 === quiz.translations?.find((tr) => tr.language === translationLanguage).language
-    )
+  const language = iso6393.find(
+    (lang) => lang.iso6391 === quiz.translations?.find((tr) => tr.language === translationLanguage).language
   );
-  const [numQuestions, setNumQuestions] = useState(quiz.numQuestions);
   const [questions, setQuestions] = useState(
     quiz.translations?.find((tr) => tr.language === translationLanguage).questions
   );
@@ -47,17 +43,6 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
 
   const handleBack = () => setActiveStep((prevActiveStep) => prevActiveStep - 1);
 
-  const handleChangeQuizType = (quizType) => setQuizType(quizType);
-  const handleChangeLanguage = (lang) => setLanguage(lang);
-  const handleChangeNumQuestions = (numQuestions) => {
-    setNumQuestions(numQuestions);
-
-    const emptyQuestion = { url: "", title: "", description: "" };
-    let emptyQuestions = [];
-    for (let i = 0; i < numQuestions; i++) emptyQuestions.push(emptyQuestion);
-
-    setQuestions(emptyQuestions);
-  };
   const handleChangeTitle = (title) => setTitle(title);
   const handleChangeDescription = (description) => setDescription(description);
   const handleChangeQuestion = (question, numQuestion) => {
@@ -101,14 +86,11 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
           description={description}
           originalDescription={quiz.description}
           onChangeDescription={handleChangeDescription}
-          quizType={quizType}
-          onChangeQuizType={handleChangeQuizType}
+          quizType={quiz.type}
           readOnlyQuizType
           language={language}
-          onChangeLanguage={handleChangeLanguage}
           readOnlyLanguage
-          numQuestions={numQuestions}
-          onChangeNumQuestions={handleChangeNumQuestions}
+          numQuestions={quiz.numQuestions}
           readOnlyNumQuestions
         />
       ),
@@ -119,7 +101,7 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
         <QuizQuestionsInfo
           questions={questions}
           originalQuestions={quiz.questions}
-          questionType={quizType}
+          questionType={quiz.type}
           readOnlyUrl
           onChange={handleChangeQuestion}
         />
@@ -131,9 +113,9 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
         <CreatingQuizConfirmation
           title={title}
           description={description}
-          quizType={quizType}
+          quizType={quiz.type}
           language={language.name}
-          numQuestions={numQuestions}
+          numQuestions={quiz.numQuestions}
           questions={questions}
         />
       ),

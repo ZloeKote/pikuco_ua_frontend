@@ -23,7 +23,7 @@ function PlayQuizLayout({ quiz }) {
   const [isCompleted, setIsCompleted] = useState(false);
   const [addResult] = useAddQuizResultMutation();
   useEffect(() => {
-    const addQuiz = async () => {
+    const addQuizResult = async () => {
       if (token) {
         const pseudoId = quiz.pseudoId;
         const questionsToAdd = [...questionList.excluded];
@@ -33,7 +33,7 @@ function PlayQuizLayout({ quiz }) {
     };
 
     if (!questionList.curr.length) {
-      addQuiz();
+      addQuizResult();
     }
   }, [questionList, navigate, quiz.pseudoId, addResult, token]);
   if (isCompleted) {

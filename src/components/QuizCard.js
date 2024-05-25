@@ -3,7 +3,6 @@ import { useState, memo } from "react";
 import classNames from "classnames";
 import Button from "./simpleComponents/Button";
 import { BsFillPlayFill } from "react-icons/bs";
-import avatar from "../img/avatar.png";
 import quizCover from "../img/quizCover.png";
 import Link from "./simpleComponents/Link";
 import { ROUTES } from "../ROUTES";
@@ -16,6 +15,7 @@ import { MdDelete } from "react-icons/md";
 import { FaChevronRight } from "react-icons/fa6";
 import { IconMenuItem, NestedMenuItem } from "mui-nested-menu";
 import { iso6393 } from "iso-639-3";
+import GeneratedUserAvatar from "./simpleComponents/GeneratedUserAvatar";
 
 function QuizCard({ quiz, showActions = false, onDelete }) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -41,7 +41,7 @@ function QuizCard({ quiz, showActions = false, onDelete }) {
       </Link>
 
       <Button className="quizcard-playbutton w-full h-full self-end" success rounded>
-        <Link to={ROUTES.PlayQuiz(quiz.pseudoId)}>
+        <Link to={ROUTES.PlayQuiz(quiz.pseudoId) + `?lang=${quiz.language}`}>
           <BsFillPlayFill className="text-5xl" />
         </Link>
       </Button>
@@ -51,7 +51,8 @@ function QuizCard({ quiz, showActions = false, onDelete }) {
         className="quizcard-creator z-10 mr-3 w-[120px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]"
       >
         <div className="flex items-center">
-          <img src={avatar} alt="creator" className="h-7 mr-1" />
+          <GeneratedUserAvatar username={quiz.creator.nickname} saturation="60" className="h-7 mr-1 bg-lime-300 rounded-full"/>
+          {/* <img src={avatar} alt="creator" className="h-7 mr-1" /> */}
           <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
             <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[16px] italic">
               {quiz.creator.nickname}
@@ -121,6 +122,8 @@ function QuizCard({ quiz, showActions = false, onDelete }) {
                   Додати переклад
                 </Link>
               }
+              
+              disabled={quiz.isRoughDraft}
             />
             <NestedMenuItem
               leftIcon={<BsTranslate />}

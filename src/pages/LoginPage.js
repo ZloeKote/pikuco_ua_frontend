@@ -67,7 +67,7 @@ function LoginPage() {
         <h2 className="text-[52px] mb-[15px] text-center">Увійти</h2>
         <form className="flex flex-col" onSubmit={handleSubmitLogin}>
           <div className="flex flex-col">
-            <label for="email" className={labelClassname}>
+            <label htmlFor="email" className={labelClassname}>
               Пошта
             </label>
             <Input
@@ -82,7 +82,7 @@ function LoginPage() {
             />
           </div>
           <div className="flex flex-col mt-[15px]">
-            <label for="password" className={labelClassname}>
+            <label htmlFor="password" className={labelClassname}>
               Пароль
             </label>
             <PasswordInput

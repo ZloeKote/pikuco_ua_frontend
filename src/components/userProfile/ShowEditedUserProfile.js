@@ -9,7 +9,7 @@ import Input from "../simpleComponents/Input";
 import { selectCurrentToken, useUpdateUserPublicMutation } from "../../store";
 import { useSelector } from "react-redux";
 import { ROUTES } from "../../ROUTES";
-import defaultAvatar from "../../img/avatar.png";
+import GeneratedUserAvatar from "../simpleComponents/GeneratedUserAvatar";
 
 function ShowEditedUserProfile({ user }) {
   const token = useSelector(selectCurrentToken);
@@ -114,11 +114,16 @@ function ShowEditedUserProfile({ user }) {
         </div>
       </div>
       <div className="row-start-1 row-end-5 col-start-1 col-end-3 flex items-center justify-center">
-        <img
+        <GeneratedUserAvatar
+          username={user.nickname}
+          saturation="60"
+          className="w-40 h-40 bg-lime-300 rounded-full"
+        />
+        {/* <img
           className="w-40 h-40 rounded-sm"
           src={user.avatar === "some path" ? defaultAvatar : user.avatar}
           alt={`${user.nickname}'s profile`}
-        />
+        /> */}
       </div>
       <div className="col-start-3 col-end-4 row-start-2 row-end-5">
         <div className="mb-2 leading-tight">
