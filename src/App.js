@@ -21,6 +21,7 @@ import EditQuizPage from "./pages/EditQuizPage";
 import CreateQuizTranslationPage from "./pages/CreateQuizTranslationPage";
 import EditQuizTranslationPage from "./pages/EditQuizTranslationPage";
 import LayoutWithNavigation from "./components/layouts/LayoutWithNavigation";
+import TestPage from "./pages/TestPage";
 
 const darkTheme = createTheme({
   palette: {
@@ -32,7 +33,6 @@ function App() {
   return (
     <ThemeProvider theme={darkTheme}>
       <Routes>
-        {/* Public routes */}
         <Route path={ROUTES.Main} element={<LoginLayout />}>
           <Route element={<FullLayout />}>
             <Route index element={<MainPage />} />
@@ -67,6 +67,8 @@ function App() {
           <Route path={ROUTES.PlayQuiz()}>
             <Route index element={<PlayQuizPage />} />
           </Route>
+
+          <Route path={"/test"} element={<TestPage />}/>
         </Route>
       </Routes>
     </ThemeProvider>

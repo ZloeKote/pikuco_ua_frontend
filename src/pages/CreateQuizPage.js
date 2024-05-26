@@ -16,6 +16,8 @@ import SnackbarsContext from "../context/snackbars";
 import { CircularProgress } from "@mui/material";
 import Link from "../components/simpleComponents/Link";
 import { ROUTES } from "../ROUTES";
+import { createCover, getYtThumbnail } from "../hooks/yt-hooks";
+import thumbnailQualities from "../predefined/ytThumbnailQualities";
 
 function CreateQuizPage() {
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
@@ -59,18 +61,49 @@ function CreateQuizPage() {
   };
 
   const handleClickCreateQuiz = () => {
-    createQuiz({
-      generalInfo: {
-        title: title,
-        description: description,
-        quizType: quizType,
-        pseudoId: pseudoId,
-        language: language,
-        numQuestions: numQuestions,
-      },
-      questions: questions,
-      token: token,
-    });
+    // add cover to quiz if at least 2 questions are exist
+    const actualNumQuestions = questions.filter(
+      (question) => question.url !== "" || question.title !== ""
+    ).length;
+    if (actualNumQuestions >= 2) {
+      const firstRandomIndex = Math.floor(Math.random() * actualNumQuestions);
+      let secondRandomIndex;
+      while (true) {
+        secondRandomIndex = Math.floor(Math.random() * actualNumQuestions);
+        if (secondRandomIndex !== firstRandomIndex) break;
+      }
+      createCover(
+        getYtThumbnail(questions.at(firstRandomIndex).url, thumbnailQualities.high),
+        getYtThumbnail(questions.at(secondRandomIndex).url, thumbnailQualities.high)
+      ).then((dataUrl) => {
+        createQuiz({
+          generalInfo: {
+            title: title,
+            description: description,
+            quizType: quizType,
+            pseudoId: pseudoId,
+            language: language,
+            numQuestions: numQuestions,
+            cover: dataUrl,
+          },
+          questions: questions,
+          token: token,
+        });
+      });
+    } else {
+      createQuiz({
+        generalInfo: {
+          title: title,
+          description: description,
+          quizType: quizType,
+          pseudoId: pseudoId,
+          language: language,
+          numQuestions: numQuestions,
+        },
+        questions: questions,
+        token: token,
+      });
+    }
   };
 
   useEffect(() => {
@@ -80,11 +113,7 @@ function CreateQuizPage() {
       resultRoughDraft.reset();
     }
     if (result.isSuccess) setPseudoId(result.data);
-  }, [
-    resultRoughDraft,
-    result,
-    handleEnqueueSnackbar,
-  ]);
+  }, [resultRoughDraft, result, handleEnqueueSnackbar]);
 
   const handleClickSaveRoughDraft = () => {
     if (title === "") {
@@ -103,19 +132,49 @@ function CreateQuizPage() {
       handleEnqueueSnackbar("Поле кількості питань вікторини не може бути пустим!", "error", false);
       return;
     }
-
-    createQuizAsRoughDraft({
-      generalInfo: {
-        title: title,
-        description: description,
-        quizType: quizType,
-        pseudoId: pseudoId,
-        language: language,
-        numQuestions: numQuestions,
-      },
-      questions: questions,
-      token: token,
-    });
+    // add cover to quiz if at least 2 questions are exist
+    const actualNumQuestions = questions.filter(
+      (question) => question.url !== "" || question.title !== ""
+    ).length;
+    if (actualNumQuestions >= 2) {
+      const firstRandomIndex = Math.floor(Math.random() * actualNumQuestions);
+      let secondRandomIndex;
+      while (true) {
+        secondRandomIndex = Math.floor(Math.random() * actualNumQuestions);
+        if (secondRandomIndex !== firstRandomIndex) break;
+      }
+      createCover(
+        getYtThumbnail(questions.at(firstRandomIndex).url, thumbnailQualities.high),
+        getYtThumbnail(questions.at(secondRandomIndex).url, thumbnailQualities.high)
+      ).then((dataUrl) => {
+        createQuizAsRoughDraft({
+          generalInfo: {
+            title: title,
+            description: description,
+            quizType: quizType,
+            pseudoId: pseudoId,
+            language: language,
+            numQuestions: numQuestions,
+            cover: dataUrl,
+          },
+          questions: questions,
+          token: token,
+        });
+      });
+    } else {
+      createQuizAsRoughDraft({
+        generalInfo: {
+          title: title,
+          description: description,
+          quizType: quizType,
+          pseudoId: pseudoId,
+          language: language,
+          numQuestions: numQuestions,
+        },
+        questions: questions,
+        token: token,
+      });
+    }
   };
 
   const steps = [
@@ -220,16 +279,7 @@ function CreateQuizPage() {
         })}
       </Stepper>
       {activeStep === steps.length ? (
-        <div className="flex flex-col gap-4 text-[22px] items-center max-w-[1200px]">
-          {lastContent}
-          {/* <Typography sx={{ mt: 2, mb: 1 }}>All steps completed - you&apos;re finished</Typography>
-          <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-            <Box sx={{ flex: "1 1 auto" }} />
-            <Button className={buttonClassname} onClick={handleReset} danger>
-              Скинути
-            </Button>
-          </Box> */}
-        </div>
+        <div className="flex flex-col gap-4 text-[22px] items-center max-w-[1200px]">{lastContent}</div>
       ) : (
         <Fragment>
           <div className={classnameLayout}>

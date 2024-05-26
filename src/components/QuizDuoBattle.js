@@ -1,5 +1,6 @@
 import Button from "./simpleComponents/Button";
 import toValidIframeYTLink from "../toValidIframeYTLink";
+import imgVs from "../img/img-vs.png"
 
 function QuizDuoBattle({ question1, question2, type, handleWinner }) {
   return (
@@ -23,8 +24,8 @@ function QuizDuoBattle({ question1, question2, type, handleWinner }) {
             allowFullScreen
           ></iframe>
         </div>
-        <div className="absolute text-red-600 text-[120px] italic font-bold top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%]">
-          VS
+        <div className="absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%]">
+          <img src={imgVs} alt="VS" width="250" />
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import ytEmptyImage from "../img/youtube_480x270_bw.jpg";
-import { YtLinkToValid, getYtThumbnail } from "../hooks/YtLinkToValid";
+import { YtLinkToValid, getYtThumbnail } from "../hooks/yt-hooks";
 import { types } from "../predefined/QuestionTypes";
 import qualities from "../predefined/ytThumbnailQualities";
 import Button from "./simpleComponents/Button";

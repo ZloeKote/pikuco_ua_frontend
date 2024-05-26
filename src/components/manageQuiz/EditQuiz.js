@@ -16,6 +16,8 @@ import SnackbarsContext from "../../context/snackbars";
 import { CircularProgress } from "@mui/material";
 import Link from "../simpleComponents/Link";
 import { ROUTES } from "../../ROUTES";
+import { createCover, getYtThumbnail } from "../../hooks/yt-hooks";
+import thumbnailQualities from "../../predefined/ytThumbnailQualities";
 
 function EditQuiz({ quiz }) {
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
@@ -59,18 +61,49 @@ function EditQuiz({ quiz }) {
   };
 
   const handleClickCreateQuiz = () => {
-    createQuiz({
-      generalInfo: {
-        title: title,
-        description: description,
-        quizType: quizType,
-        pseudoId: pseudoId,
-        language: language,
-        numQuestions: numQuestions,
-      },
-      questions: questions,
-      token: token,
-    });
+    // add cover to quiz if at least 2 questions are exist
+    const actualNumQuestions = questions.filter(
+      (question) => question.url !== "" || question.title !== ""
+    ).length;
+    if (actualNumQuestions >= 2) {
+      const firstRandomIndex = Math.floor(Math.random() * actualNumQuestions);
+      let secondRandomIndex;
+      while (true) {
+        secondRandomIndex = Math.floor(Math.random() * actualNumQuestions);
+        if (secondRandomIndex !== firstRandomIndex) break;
+      }
+      createCover(
+        getYtThumbnail(questions.at(firstRandomIndex).url, thumbnailQualities.high),
+        getYtThumbnail(questions.at(secondRandomIndex).url, thumbnailQualities.high)
+      ).then((dataUrl) => {
+        createQuiz({
+          generalInfo: {
+            title: title,
+            description: description,
+            quizType: quizType,
+            pseudoId: pseudoId,
+            language: language,
+            numQuestions: numQuestions,
+            cover: dataUrl,
+          },
+          questions: questions,
+          token: token,
+        });
+      });
+    } else {
+      createQuiz({
+        generalInfo: {
+          title: title,
+          description: description,
+          quizType: quizType,
+          pseudoId: pseudoId,
+          language: language,
+          numQuestions: numQuestions,
+        },
+        questions: questions,
+        token: token,
+      });
+    }
   };
 
   useEffect(() => {
@@ -113,20 +146,49 @@ function EditQuiz({ quiz }) {
       handleEnqueueSnackbar("Поле кількості питань вікторини не може бути пустим!", "error", false);
       return;
     }
-
-    createQuizAsRoughDraft({
-      generalInfo: {
-        title: title,
-        description: description,
-        quizType: quizType,
-        pseudoId: pseudoId,
-        isRoughDraft: quiz.isRoughDraft,
-        language: language,
-        numQuestions: numQuestions,
-      },
-      questions: questions,
-      token: token,
-    });
+    // add cover to quiz if at least 2 questions are exist
+    const actualNumQuestions = questions.filter(
+      (question) => question.url !== "" || question.title !== ""
+    ).length;
+    if (actualNumQuestions >= 2) {
+      const firstRandomIndex = Math.floor(Math.random() * actualNumQuestions);
+      let secondRandomIndex;
+      while (true) {
+        secondRandomIndex = Math.floor(Math.random() * actualNumQuestions);
+        if (secondRandomIndex !== firstRandomIndex) break;
+      }
+      createCover(
+        getYtThumbnail(questions.at(firstRandomIndex).url, thumbnailQualities.high),
+        getYtThumbnail(questions.at(secondRandomIndex).url, thumbnailQualities.high)
+      ).then((dataUrl) => {
+        createQuizAsRoughDraft({
+          generalInfo: {
+            title: title,
+            description: description,
+            quizType: quizType,
+            pseudoId: pseudoId,
+            language: language,
+            numQuestions: numQuestions,
+            cover: dataUrl,
+          },
+          questions: questions,
+          token: token,
+        });
+      });
+    } else {
+      createQuizAsRoughDraft({
+        generalInfo: {
+          title: title,
+          description: description,
+          quizType: quizType,
+          pseudoId: pseudoId,
+          language: language,
+          numQuestions: numQuestions,
+        },
+        questions: questions,
+        token: token,
+      });
+    }
   };
 
   const steps = [

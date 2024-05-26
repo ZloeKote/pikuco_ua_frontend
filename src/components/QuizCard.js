@@ -1,9 +1,9 @@
 import "../css/QuizCard.css";
-import { useState, memo } from "react";
+import { useState, useEffect, memo } from "react";
 import classNames from "classnames";
 import Button from "./simpleComponents/Button";
 import { BsFillPlayFill } from "react-icons/bs";
-import quizCover from "../img/quizCover.png";
+import placeholderCover from "../img/placeholderCover.png";
 import Link from "./simpleComponents/Link";
 import { ROUTES } from "../ROUTES";
 import { IconButton, Menu, Typography, MenuItem, ListItemText } from "@mui/material";
@@ -16,8 +16,19 @@ import { FaChevronRight } from "react-icons/fa6";
 import { IconMenuItem, NestedMenuItem } from "mui-nested-menu";
 import { iso6393 } from "iso-639-3";
 import GeneratedUserAvatar from "./simpleComponents/GeneratedUserAvatar";
+import thumbnailQualities from "../predefined/ytThumbnailQualities";
+import { createCover, getYtThumbnail } from "../hooks/yt-hooks";
 
 function QuizCard({ quiz, showActions = false, onDelete }) {
+  const [mergedImgs, setMergedImgs] = useState(null);
+  const ytThumbnail1 = getYtThumbnail("https://www.youtube.com/watch?v=50KHhMibA6g", thumbnailQualities.high);
+  const ytThumbnail2 = getYtThumbnail("https://www.youtube.com/watch?v=pv0cE-3Y3ZI", thumbnailQualities.high);
+  useEffect(() => {
+    createCover(ytThumbnail1, ytThumbnail2).then((dataUrl) => {
+      setMergedImgs(dataUrl);
+    });
+  }, [ytThumbnail1, ytThumbnail2]);
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -37,7 +48,7 @@ function QuizCard({ quiz, showActions = false, onDelete }) {
   return (
     <div className={classnames}>
       <Link className="quiz-cover" to={ROUTES.Quiz(quiz.pseudoId)}>
-        <img className="rounded-t-2xl" src={quizCover} alt="cover" />
+        <img className="rounded-t-2xl h-full w-full object-cover" src={quiz.cover || placeholderCover} alt="cover" />
       </Link>
 
       <Button className="quizcard-playbutton w-full h-full self-end" success rounded>

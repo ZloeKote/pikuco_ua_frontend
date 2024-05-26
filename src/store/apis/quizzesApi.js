@@ -23,6 +23,7 @@ const quizzesApi = createApi({
               isRoughDraft: false,
               language: generalInfo.language.iso6391,
               numQuestions: generalInfo.numQuestions,
+              cover: generalInfo.cover
             },
             headers: { Authorization: `Bearer ${token}` },
           };
@@ -42,6 +43,7 @@ const quizzesApi = createApi({
               isRoughDraft: true,
               language: generalInfo.language.iso6391,
               numQuestions: generalInfo.numQuestions,
+              cover: generalInfo.cover,
             },
             headers: { Authorization: `Bearer ${token}` },
           };

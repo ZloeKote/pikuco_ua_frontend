@@ -1,4 +1,4 @@
-import { YtLinkToValid } from "../../hooks/YtLinkToValid";
+import { YtLinkToValid } from "../../hooks/yt-hooks";
 import ytEmptyImage from "../../img/youtube_480x270_bw.jpg";
 import { RedAsterisk } from "../../custom-materials";
 import classNames from "classnames";

@@ -1,7 +1,7 @@
 const thumbnailQualities = {
-  low: "sddefault",
   mid: "mqdefault",
-  high: "hqdefault"
+  high: "hqdefault",
+  highest: "sddefault",
 }
 
 export default thumbnailQualities;
