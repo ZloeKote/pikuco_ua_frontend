@@ -101,7 +101,7 @@ function CreateQuizTranslation({ quiz }) {
           description={description}
           originalDescription={quiz.description}
           onChangeDescription={handleChangeDescription}
-          quizType={quiz.quizType}
+          quizType={quiz.type}
           readOnlyQuizType
           language={language}
           onChangeLanguage={handleChangeLanguage}
@@ -117,7 +117,7 @@ function CreateQuizTranslation({ quiz }) {
         <QuizQuestionsInfo
           questions={questions}
           originalQuestions={quiz.questions}
-          questionType={quiz.quizType}
+          questionType={quiz.type}
           readOnlyUrl
           onChange={handleChangeQuestion}
         />
@@ -129,7 +129,7 @@ function CreateQuizTranslation({ quiz }) {
         <CreatingQuizConfirmation
           title={title}
           description={description}
-          quizType={quiz.quizType}
+          quizType={quiz.type}
           language={language.name}
           numQuestions={quiz.numQuestions}
           questions={questions}

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import classNames from "classnames";
 import Link from "../components/simpleComponents/Link";
 import Button from "./simpleComponents/Button";
@@ -20,19 +20,8 @@ import {
 import { WishlistIcon } from "../custom-materials";
 import { quizTypes } from "../predefined/QuizTypes";
 import GeneratedUserAvatar from "./simpleComponents/GeneratedUserAvatar";
-import thumbnailQualities from "../predefined/ytThumbnailQualities";
-import { createCover, getYtThumbnail } from "../hooks/yt-hooks";
 
 function ShowQuiz({ quiz, language }) {
-  const [mergedImgs, setMergedImgs] = useState(null);
-  const ytThumbnail1 = getYtThumbnail("https://www.youtube.com/watch?v=50KHhMibA6g", thumbnailQualities.high);
-  const ytThumbnail2 = getYtThumbnail("https://www.youtube.com/watch?v=pv0cE-3Y3ZI", thumbnailQualities.high);
-  useEffect(() => {
-    createCover(ytThumbnail1, ytThumbnail2).then((dataUrl) => {
-      setMergedImgs(dataUrl);
-    });
-  }, [ytThumbnail1, ytThumbnail2]);
-
   const token = useSelector(selectCurrentToken);
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
   const [fetchEvaluation, fetchingEvalResult] = useLazyFetchEvaluationQuizQuery();
@@ -210,7 +199,6 @@ function ShowQuiz({ quiz, language }) {
                   saturation="60"
                   className="h-[40px] mr-2 bg-lime-300 rounded-full"
                 />
-                {/* <img src={avatar} alt="creator" className="h-[40px] mr-2" /> */}
                 <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
                   <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[20px] italic">
                     {quiz.creator.nickname}
@@ -222,7 +210,7 @@ function ShowQuiz({ quiz, language }) {
         </div>
         <div className="flex flex-col items-center text-center text-[24px]">
           <div className=" mt-[10px] flex justify-center">
-            <img src={quiz.cover || placeholderCover} alt="cover"/>
+            <img src={quiz.cover || placeholderCover} alt="cover" />
           </div>
           <div className="w-[60rem]">
             <p className="my-[5px]">{quizType}</p>

@@ -96,9 +96,7 @@ function PlayQuizLayout({ quiz }) {
       });
     }
 
-    // if curr list has 2 elements
-    // друга умова може бути невірною
-    if (questionList.curr.length === 2 || questionList.stage !== amountStages) {
+    if (questionList.curr.length === 2) {
       setQuestionList((prevState) => ({
         ...prevState,
         curr: prevState.next,

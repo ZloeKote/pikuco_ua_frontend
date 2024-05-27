@@ -1,5 +1,5 @@
-import { useLocation, useParams } from "react-router-dom";
-import { useState, useContext, useEffect } from "react";
+import { useLocation, useParams, useSearchParams } from "react-router-dom";
+import { useContext, useEffect } from "react";
 import { GoChevronUp, GoChevronDown } from "react-icons/go";
 import QuestionList from "./QuestionList";
 import ActiveButton from "./simpleComponents/ActiveButton";
@@ -22,13 +22,24 @@ import { WishlistIcon } from "../custom-materials";
 import Link from "./simpleComponents/Link";
 import GeneratedUserAvatar from "./simpleComponents/GeneratedUserAvatar";
 
-function ShowQuizStats({ quiz, indResults, language }) {
+function ShowQuizStats({
+  quiz,
+  indResults,
+  individualParams,
+  generalParams,
+  onChangeParam,
+  isIndividual,
+  onChangeIndividual,
+  language,
+}) {
   const token = useSelector(selectCurrentToken);
   const location = useLocation();
   const { pseudoId } = useParams();
-  const [isIndividual, setIsIndividual] = useState(location.state?.isIndividual ? true : false);
-
-  const { data: results, isLoading: resultsIsLoading } = useFetchQuizResultsQuery(pseudoId);
+  const [searchParams] = useSearchParams();
+  const { data: results, isLoading: resultsIsLoading } = useFetchQuizResultsQuery({
+    pseudoId: pseudoId,
+    param: generalParams,
+  });
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
   const [fetchEvaluation, fetchingResult] = useLazyFetchEvaluationQuizQuery();
   const [addEvaluation, addingResult] = useAddEvaluationQuizMutation();
@@ -94,7 +105,7 @@ function ShowQuizStats({ quiz, indResults, language }) {
 
   let questions;
   if (isIndividual) {
-    questions = location.state?.resultsAfterPassing || indResults.quizResults.questions;
+    questions = location.state?.resultsAfterPassing || indResults?.quizResults.questions;
   } else {
     if (!resultsIsLoading && results === undefined) {
       if (language !== quiz.language && quiz.translations.some((tr) => tr.language === language))
@@ -157,9 +168,23 @@ function ShowQuizStats({ quiz, indResults, language }) {
       );
     }
   };
+  const handleClickSort = (sortBy) => {
+    if (searchParams.has("sort")) {
+      if (searchParams.get("sort") === "PLACE_ASC" && sortBy === "title")
+        searchParams.set("sort", "TITLE_ASC");
+      else if (searchParams.get("sort") === "TITLE_ASC" && sortBy === "place")
+        searchParams.set("sort", "PLACE_ASC");
+      else searchParams.delete("sort");
+    } else {
+      if (sortBy === "place") searchParams.set("sort", "PLACE_ASC");
+      else if (sortBy === "title") searchParams.set("sort", "TITLE_ASC");
+    }
+    searchParams.delete("page");
+    onChangeParam(searchParams.toString());
+  };
 
-  const handleClickIndividual = () => setIsIndividual(true);
-  const handleClickGeneral = () => setIsIndividual(false);
+  const handleClickIndividual = () => onChangeIndividual(true);
+  const handleClickGeneral = () => onChangeIndividual(false);
 
   let evaluationContent = "";
   if (fetchingResult.isLoading) evaluationContent = <CircularProgress />;
@@ -177,7 +202,7 @@ function ShowQuizStats({ quiz, indResults, language }) {
       <div className="bg-[--dark-quizcard-background] border border-[--dark-quizcard-border] w-[75rem] rounded-2xl">
         <div className="flex items-center justify-between py-[10px] border-b border-[--dark-quizcard-border]">
           <span className="text-[36px] ml-[15px]">{quizTitle}</span>
-          <div className="flex gap-[6rem]">
+          <div className="flex gap-[4rem]">
             {!quiz.isRoughDraft && (
               <>
                 <div className="self-center">
@@ -220,7 +245,6 @@ function ShowQuizStats({ quiz, indResults, language }) {
                   saturation="60"
                   className="h-[40px] mr-2 bg-lime-300 rounded-full"
                 />
-                {/* <img src={avatar} alt="creator" className="h-[40px] mr-2" /> */}
                 <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
                   <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[20px] italic">
                     {quiz.creator.nickname}
@@ -241,8 +265,22 @@ function ShowQuizStats({ quiz, indResults, language }) {
           </div>
           <div className="flex items-center gap-[20px] self-start ml-[15px] text-[28px]">
             <span>Сортування по:</span>
-            <ActiveButton className="w-[150px] h-[50px] rounded-full">Місцю</ActiveButton>
-            <ActiveButton className="w-[150px] h-[50px] rounded-full">Назві</ActiveButton>
+            <ActiveButton
+              className="w-[150px] h-[50px] rounded-full"
+              isActive={
+                searchParams.get("sort") === "PLACE_ASC" || searchParams.get("sort") === null ? true : false
+              }
+              onClick={() => handleClickSort("place")}
+            >
+              Місцю
+            </ActiveButton>
+            <ActiveButton
+              className="w-[150px] h-[50px] rounded-full"
+              isActive={searchParams.get("sort") === "TITLE_ASC"}
+              onClick={() => handleClickSort("title")}
+            >
+              Назві
+            </ActiveButton>
           </div>
           {resultsIsLoading ? (
             <LinearProgress />
@@ -253,6 +291,9 @@ function ShowQuizStats({ quiz, indResults, language }) {
               questionType={quiz.type}
               variant={isIndividual ? types.individual : types.general}
               lang={language}
+              numPages={results.numPages}
+              handlePageParam={onChangeParam}
+              hiddenPagination={results.numPages < 2}
             />
           )}
         </div>

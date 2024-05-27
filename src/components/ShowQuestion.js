@@ -61,7 +61,7 @@ function ShowQuestion({
         previewQuestion = (
           <img
             className="h-full w-auto rounded"
-            src={getYtThumbnail(question.url, qualities.low)}
+            src={getYtThumbnail(question.url, qualities.mid)}
             alt={questionTitle}
           />
         );
@@ -70,7 +70,7 @@ function ShowQuestion({
           <Link to={question.url} target="_blank">
             <img
               className="h-full w-auto rounded"
-              src={getYtThumbnail(question.url, qualities.low)}
+              src={getYtThumbnail(question.url, qualities.mid)}
               alt={questionTitle}
               title="Відкрити відео на новій сторінці"
             />
@@ -106,7 +106,7 @@ function ShowQuestion({
       {!isQuestionEmpty && (
         <>
           {(variant === types.individual || variant === types.general) && (
-            <div className="w-[7%] text-[40px] flex items-center justify-center">{question.place}</div>
+            <div className="w-[7%] text-[40px] flex items-center justify-center">{question.place || numQuestion+1}</div>
           )}
           <div className="ml-4 w-[13%] self-center">{previewQuestion}</div>
           {questionInfo}

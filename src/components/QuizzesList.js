@@ -32,14 +32,14 @@ function QuizzesList({
   const quizzesClassName = classNames(`flex flex-wrap ${gapXVariants[gapX]} ${gapYVariants[gapY]}`);
   const layoutClassname = twMerge(classNames(rest.className, "flex flex-col "));
 
-  const handleChangePage = (e, value) => {
+  const handleChangePage = (_, value) => {
     if (value !== 1) searchParams.set("page", value);
     else searchParams.delete("page");
     setPage(value);
     handlePageParam(searchParams.toString() !== "" ? "?" + searchParams.toString() : "");
   };
   const renderedQuizzes = quizzes?.map((quiz) => {
-    return <QuizCard key={quiz.pseudoId} quiz={quiz} showActions={showActions} onDelete={onDelete}/>;
+    return <QuizCard key={quiz.pseudoId} quiz={quiz} showActions={showActions} onDelete={onDelete} />;
   });
 
   return (
@@ -49,7 +49,7 @@ function QuizzesList({
       <div className="flex justify-center mt-[20px]">
         <Pagination
           count={numPages}
-          page={Number(page) }
+          page={Number(page)}
           onChange={handleChangePage}
           size="large"
           showFirstButton

@@ -21,9 +21,9 @@ const quizResultsApi = createApi({
         providesTags: (result, error, args) => {
           return [{ type: "quizResults" }];
         },
-        query: (pseudoId) => {
+        query: ({pseudoId, param}) => {
           return {
-            url: `/${pseudoId}`,
+            url: `/${pseudoId}${!!param ? "?" + param : ""}`,
             method: "GET",
           };
         },
@@ -32,27 +32,28 @@ const quizResultsApi = createApi({
         providesTags: (result, error, args) => {
           return [{ type: "quizIndResults" }];
         },
-        query: ({pseudoId, token}) => {
+        query: ({ pseudoId, token, param }) => {
           return {
-            url: `/${pseudoId}/user`,
+            url: `/${pseudoId}/user${!!param ? "?" + param : ""}`,
             method: "GET",
-            headers: { "Authorization": `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}` },
           };
         },
       }),
       addQuizResult: builder.mutation({
-        query: ({pseudoId, results, token}) => {
+        query: ({ pseudoId, results, token }) => {
           return {
             url: `/${pseudoId}`,
             method: "POST",
-            headers: { "Authorization": `Bearer ${token}`},
-            body: {questions: results},
-          }
-        }
-      })
+            headers: { Authorization: `Bearer ${token}` },
+            body: { questions: results },
+          };
+        },
+      }),
     };
   },
 });
 
-export const { useFetchQuizResultsQuery, useFetchIndividualResultsQuery, useAddQuizResultMutation } = quizResultsApi;
+export const { useFetchQuizResultsQuery, useFetchIndividualResultsQuery, useAddQuizResultMutation } =
+  quizResultsApi;
 export { quizResultsApi };

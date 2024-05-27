@@ -8,6 +8,7 @@ import { useFetchQuizQuery, useFetchIndividualResultsQuery, selectCurrentToken }
 import { LinearProgress } from "@mui/material";
 import ShowQuizStats from "../components/ShowQuizStats";
 import LanguagePicker from "../components/simpleComponents/LanguagePicker";
+import { useState } from "react";
 
 function QuizStatsPage() {
   const token = useSelector(selectCurrentToken);
@@ -15,9 +16,14 @@ function QuizStatsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { pseudoId } = useParams();
+  const [isIndividual, setIsIndividual] = useState(location.state?.isIndividual ? true : false);
+  const [generalParams, setGeneralParams] = useState(searchParams.toString());
+  const [individualParams, setIndividualParams] = useState(
+    searchParams.has("lang") ? "lang=" + searchParams.get("lang") : ""
+  );
   const { data: quiz, isLoading: quizIsLoading, isSuccess } = useFetchQuizQuery(pseudoId);
   const { data: indResults } = useFetchIndividualResultsQuery(
-    { pseudoId, token },
+    { pseudoId: pseudoId, token: token, param: individualParams },
     {
       skip: location.state?.resultsAfterPassing ? true : false || token ? false : true,
     }
@@ -35,13 +41,61 @@ function QuizStatsPage() {
       (quiz.languages.includes("uk") && "uk") ||
       quiz.language;
   }
-
   const handleChangeLanguage = (newLang) => {
     searchParams.set("lang", newLang);
+    if (!isIndividual) {
+      setGeneralParams(searchParams.toString());
+      if (individualParams.includes("lang=")) {
+        let newIndividualParams = individualParams.split("lang=");
+        newIndividualParams = `lang=${newLang}${newIndividualParams[0]}${
+          !!newIndividualParams[2] ? newIndividualParams[2].slice(2) : ""
+        }`;
+        setIndividualParams(newIndividualParams);
+      } else
+        setIndividualParams(!!individualParams ? individualParams + `&lang=${newLang}` : `lang=${newLang}`);
+    } else {
+      setIndividualParams(searchParams.toString());
+      if (generalParams.includes("lang=")) {
+        let newGeneralParams = generalParams.split("lang=");
+        newGeneralParams = `lang=${newLang}${newGeneralParams[0]}${
+          !!newGeneralParams[2] ? newGeneralParams[2].slice(2) : ""
+        }`;
+        setGeneralParams(newGeneralParams);
+      } else setGeneralParams(!!generalParams ? generalParams + `&lang=${newLang}` : `lang=${newLang}`);
+    }
     navigate({
       pathname: ROUTES.QuizStats(quiz.pseudoId),
-      search: searchParams.toString().length !== 0 ? "?" + searchParams.toString() : "",
+      search: searchParams.size !== 0 ? "?" + searchParams.toString() : "",
     });
+  };
+  const handleChangeIndividual = (isIndividual) => {
+    setIsIndividual(isIndividual);
+    if (isIndividual) {
+      navigate({
+        pathname: ROUTES.QuizStats(quiz.pseudoId),
+        search: !!individualParams ? "?" + individualParams : "",
+      });
+    } else {
+      navigate({
+        pathname: ROUTES.QuizStats(quiz.pseudoId),
+        search: !!generalParams ? "?" + generalParams : "",
+      });
+    }
+  };
+  const handleClickChangeParam = (param) => {
+    if (isIndividual) {
+      setIndividualParams(param);
+      navigate({
+        pathname: ROUTES.QuizStats(quiz.pseudoId),
+        search: !!param ? "?" + param : "",
+      });
+    } else {
+      setGeneralParams(param);
+      navigate({
+        pathname: ROUTES.QuizStats(quiz.pseudoId),
+        search: !!param ? "?" + param : "",
+      });
+    }
   };
 
   return (
@@ -68,6 +122,8 @@ function QuizStatsPage() {
                 currLanguageCode={currLanguage}
                 languageCodes={quiz.languages}
                 handleChangeLanguage={handleChangeLanguage}
+                disabled={quiz.languages.length === 1}
+                title={quiz.languages.length === 1 ? "Вікторина має лише 1 мову" : "Оберіть мову вікторини"}
                 label="Мова вікторини"
               />
             </div>
@@ -76,7 +132,16 @@ function QuizStatsPage() {
         {quizIsLoading ? (
           <LinearProgress />
         ) : (
-          <ShowQuizStats quiz={quiz} indResults={indResults} language={currLanguage} />
+          <ShowQuizStats
+            quiz={quiz}
+            indResults={indResults}
+            isIndividual={isIndividual}
+            onChangeIndividual={handleChangeIndividual}
+            language={currLanguage}
+            generalParams={generalParams}
+            individualParams={individualParams}
+            onChangeParam={handleClickChangeParam}
+          />
         )}
       </div>
     </div>

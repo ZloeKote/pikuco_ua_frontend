@@ -80,6 +80,7 @@ function QuizQuestionsInfo({ questions, originalQuestions = [], questionType, re
               variant={types.editingQuiz}
               onClickQuiz={handleClickQuestion}
               onClickReset={handleClickResetQuestion}
+              hiddenPagination
             />
           </div>
         )}
