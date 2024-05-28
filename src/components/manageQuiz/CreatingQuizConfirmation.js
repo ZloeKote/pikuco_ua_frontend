@@ -56,7 +56,7 @@ function CreatingQuizConfirmation({ title, description, quizType, language, numQ
           <div className="self-center">{isOpenedQuestionList ? <FaChevronDown /> : <FaChevronUp />}</div>
         </div>
         {isOpenedQuestionList && (
-          <div className="max-h-[305px] overflow-y-auto w-full flex justify-center">
+          <div className="max-h-[355px] overflow-y-auto w-full flex justify-center">
             <QuestionList
               className="w-[95%] gap-[5px]"
               questions={questions}

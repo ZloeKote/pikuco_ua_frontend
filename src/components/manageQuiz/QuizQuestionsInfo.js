@@ -44,7 +44,7 @@ function QuizQuestionsInfo({ questions, originalQuestions = [], questionType, re
     "border-b border-[--dark-quizcard-border]"
   );
   return (
-    <div>
+    <div className="flex flex-col">
       <div className="flex justify-center text-[26px]">
         <span>{numQuestion + 1}</span>/<span>{questions.length}</span>
       </div>
@@ -65,13 +65,13 @@ function QuizQuestionsInfo({ questions, originalQuestions = [], questionType, re
           onClick={handleClickNextQuestion}
         />
       </div>
-      <div className="mt-4 flex flex-col items-center">
+      <div className="mt-4 flex flex-col items-center h-full">
         <div className={questionListHeaderClassname} onClick={handleClickOpenQuestionList}>
           <h2>Список питань</h2>
           <div className="self-center">{isOpenedQuestionList ? <FaChevronDown /> : <FaChevronUp />}</div>
         </div>
         {isOpenedQuestionList && (
-          <div className="max-h-[250px] overflow-y-auto w-full flex justify-center">
+          <div className="max-h-[300px] overflow-y-auto w-full flex justify-center">
             <QuestionList
               className="w-[95%] gap-[5px]"
               currNumQuestion={numQuestion}

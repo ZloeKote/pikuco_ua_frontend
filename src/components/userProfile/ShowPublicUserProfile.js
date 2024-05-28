@@ -19,11 +19,23 @@ function ShowPublicUserProfile({ user }) {
     userBirthdate = `${
       userBirthdate.getDate() < 10 ? "0" + userBirthdate.getDate() : userBirthdate.getDate()
     }.${
-      userBirthdate.getMonth() < 10 ? "0" + userBirthdate.getMonth() : userBirthdate.getMonth()
+      userBirthdate.getMonth() + 1 < 10 ? "0" + (userBirthdate.getMonth() + 1) : userBirthdate.getMonth() + 1
     }.${userBirthdate.getFullYear()}`;
   }
-  const formattedShortCreationDate = `${userCreationDate.getDate()}.${userCreationDate.getMonth()}.${userCreationDate.getFullYear()}`;
-  const formattedFullCreationDate = `${userCreationDate.getDate()}.${userCreationDate.getMonth()}.${userCreationDate.getFullYear()}, ${
+  const formattedShortCreationDate = `${
+    userCreationDate.getDate() < 10 ? "0" + userCreationDate.getDate() : userCreationDate.getDate()
+  }.${
+    userCreationDate.getMonth() + 1 < 10
+      ? "0" + (userCreationDate.getMonth() + 1)
+      : userCreationDate.getMonth() + 1
+  }.${userCreationDate.getFullYear()}`;
+  const formattedFullCreationDate = `${
+    userCreationDate.getDate() < 10 ? "0" + userCreationDate.getDate() : userCreationDate.getDate()
+  }.${
+    userCreationDate.getMonth() + 1 < 10
+      ? "0" + (userCreationDate.getMonth() + 1)
+      : userCreationDate.getMonth() + 1
+  }.${userCreationDate.getFullYear()}, ${
     userCreationDate.getHours() < 10 ? "0" + userCreationDate.getHours() : userCreationDate.getHours()
   }:${
     userCreationDate.getMinutes() < 10 ? "0" + userCreationDate.getMinutes() : userCreationDate.getMinutes()

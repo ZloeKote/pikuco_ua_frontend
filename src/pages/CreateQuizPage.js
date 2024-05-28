@@ -264,7 +264,8 @@ function CreateQuizPage() {
   }
 
   return (
-    <Box sx={{ display: "flex", marginTop: 4, gap: 2, flexDirection: "column", alignItems: "center" }}>
+    <Box sx={{ display: "flex", marginY: 2, gap: 2, flexDirection: "column", alignItems: "center" }}>
+      <div className="text-[32px] leading-none">СТВОРЕННЯ ВІКТОРИНИ</div>
       <Stepper activeStep={activeStep} sx={{ width: "80rem" }}>
         {steps.map((step) => {
           const stepProps = {};
