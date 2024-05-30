@@ -4,7 +4,6 @@ import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Typography from "@mui/material/Typography";
-import Button from "../components/simpleComponents/Button";
 import classNames from "classnames";
 import GeneralInfoQuiz from "../components/manageQuiz/GeneralInfoQuiz";
 import QuizQuestionsInfo from "../components/manageQuiz/QuizQuestionsInfo";
@@ -13,11 +12,14 @@ import { iso6393 } from "iso-639-3";
 import { selectCurrentToken, useCreateQuizAsRoughDraftMutation, useCreateQuizMutation } from "../store";
 import { useSelector } from "react-redux";
 import SnackbarsContext from "../context/snackbars";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Button } from "@mui/material";
 import Link from "../components/simpleComponents/Link";
 import { ROUTES } from "../ROUTES";
 import { createCover, getYtThumbnail } from "../hooks/yt-hooks";
 import thumbnailQualities from "../predefined/ytThumbnailQualities";
+import { validateQuizDescription, validateQuizTitle } from "../hooks/validate-hooks";
+import { LoadingButton } from "@mui/lab";
+import { RiDraftFill, RiSave3Fill } from "react-icons/ri";
 
 function CreateQuizPage() {
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
@@ -30,9 +32,23 @@ function CreateQuizPage() {
   const [questions, setQuestions] = useState([]);
   const [pseudoId, setPseudoId] = useState(0);
   const [activeStep, setActiveStep] = useState(0);
+  const [isTitleError, setIsTitleError] = useState(false);
+  const [titleErrorMsg, setTitleErrorMsg] = useState("");
+  const [isDescrError, setIsDescrError] = useState(false);
+  const [descrErrorMsg, setDescrErrorMsg] = useState("");
+  const [isLoadingCreatingCover, setIsLoadingCreatingCover] = useState(false);
 
   const [createQuiz, result] = useCreateQuizMutation();
   const [createQuizAsRoughDraft, resultRoughDraft] = useCreateQuizAsRoughDraftMutation();
+
+  useEffect(() => {
+    if (resultRoughDraft.isSuccess) {
+      handleEnqueueSnackbar("Чернетка успішно збережена!", "success", false);
+      setPseudoId(resultRoughDraft.data);
+      resultRoughDraft.reset();
+    }
+    if (result.isSuccess) setPseudoId(result.data);
+  }, [resultRoughDraft, result, handleEnqueueSnackbar]);
 
   const handleNext = (e) => {
     e?.preventDefault();
@@ -52,84 +68,38 @@ function CreateQuizPage() {
 
     setQuestions(emptyQuestions);
   };
-  const handleChangeTitle = (title) => setTitle(title);
-  const handleChangeDescription = (description) => setDescription(description);
+  const handleChangeTitle = (title) => {
+    setTitle(title);
+    validateQuizTitle(title, setIsTitleError, setTitleErrorMsg);
+    setActiveStep(0);
+  };
+  const handleChangeDescription = (description) => {
+    setDescription(description);
+    validateQuizDescription(description, setIsDescrError, setDescrErrorMsg, false);
+    setActiveStep(0);
+  };
   const handleChangeQuestion = (question, numQuestion) => {
     let changedQuestions = [...questions];
     changedQuestions[numQuestion] = question;
     setQuestions(changedQuestions);
   };
 
-  const handleClickCreateQuiz = () => {
-    // add cover to quiz if at least 2 questions are exist
-    const actualNumQuestions = questions.filter(
-      (question) => question.url !== "" || question.title !== ""
-    ).length;
-    if (actualNumQuestions >= 2) {
-      const firstRandomIndex = Math.floor(Math.random() * actualNumQuestions);
-      let secondRandomIndex;
-      while (true) {
-        secondRandomIndex = Math.floor(Math.random() * actualNumQuestions);
-        if (secondRandomIndex !== firstRandomIndex) break;
-      }
-      createCover(
-        getYtThumbnail(questions.at(firstRandomIndex).url, thumbnailQualities.high),
-        getYtThumbnail(questions.at(secondRandomIndex).url, thumbnailQualities.high)
-      ).then((dataUrl) => {
-        createQuiz({
-          generalInfo: {
-            title: title,
-            description: description,
-            quizType: quizType,
-            pseudoId: pseudoId,
-            language: language,
-            numQuestions: numQuestions,
-            cover: dataUrl,
-          },
-          questions: questions,
-          token: token,
-        });
-      });
-    } else {
-      createQuiz({
-        generalInfo: {
-          title: title,
-          description: description,
-          quizType: quizType,
-          pseudoId: pseudoId,
-          language: language,
-          numQuestions: numQuestions,
-        },
-        questions: questions,
-        token: token,
-      });
-    }
-  };
-
-  useEffect(() => {
-    if (resultRoughDraft.isSuccess) {
-      handleEnqueueSnackbar("Чернетка успішно збережена!", "success", false);
-      setPseudoId(resultRoughDraft.data);
-      resultRoughDraft.reset();
-    }
-    if (result.isSuccess) setPseudoId(result.data);
-  }, [resultRoughDraft, result, handleEnqueueSnackbar]);
-
   const handleClickSaveRoughDraft = () => {
-    if (title === "") {
-      handleEnqueueSnackbar("Поле назви не може бути пустим!", "error", false);
+    const validQuizTitle = validateQuizTitle(title, setIsTitleError, setTitleErrorMsg);
+    const validQuizDescr = validateQuizDescription(description, setIsDescrError, setDescrErrorMsg, false);
+    if (!validQuizTitle || !validQuizDescr) {
+      setActiveStep(0);
       return;
-    } else if (description === "") {
-      handleEnqueueSnackbar("Поле опису вікторини не може бути пустим!", "error", false);
-      return;
-    } else if (quizType === "") {
-      handleEnqueueSnackbar("Поле типу вікторини не може бути пустим!", "error", false);
+    }
+
+    if (quizType === "") {
+      handleEnqueueSnackbar("Поле типу вікторини не може бути пустим!", "error");
       return;
     } else if (language === null) {
-      handleEnqueueSnackbar("Поле мови вікторини не може бути пустим!", "error", false);
+      handleEnqueueSnackbar("Поле мови вікторини не може бути пустим!", "error");
       return;
     } else if (numQuestions === "") {
-      handleEnqueueSnackbar("Поле кількості питань вікторини не може бути пустим!", "error", false);
+      handleEnqueueSnackbar("Поле кількості питань вікторини не може бути пустим!", "error");
       return;
     }
     // add cover to quiz if at least 2 questions are exist
@@ -177,6 +147,59 @@ function CreateQuizPage() {
     }
   };
 
+  const handleClickCreateQuiz = () => {
+    const validQuizTitle = validateQuizTitle(title, setIsTitleError, setTitleErrorMsg);
+    const validQuizDescr = validateQuizDescription(description, setIsDescrError, setDescrErrorMsg);
+    if (!validQuizTitle || !validQuizDescr) {
+      setActiveStep(0);
+      return;
+    }
+    if (quizType === "") {
+      handleEnqueueSnackbar("Поле типу вікторини не може бути пустим!", "error");
+      return;
+    } else if (language === null) {
+      handleEnqueueSnackbar("Поле мови вікторини не може бути пустим!", "error");
+      return;
+    } else if (numQuestions === "") {
+      handleEnqueueSnackbar("Поле кількості питань вікторини не може бути пустим!", "error");
+      return;
+    }
+    const actualNumQuestions = questions.filter(
+      (question) => question.url !== "" || question.title !== ""
+    ).length;
+    if (actualNumQuestions === numQuestions) {
+      const firstRandomIndex = Math.floor(Math.random() * actualNumQuestions);
+      let secondRandomIndex;
+      while (true) {
+        secondRandomIndex = Math.floor(Math.random() * actualNumQuestions);
+        if (secondRandomIndex !== firstRandomIndex) break;
+      }
+      setIsLoadingCreatingCover(true);
+      createCover(
+        getYtThumbnail(questions.at(firstRandomIndex).url, thumbnailQualities.high),
+        getYtThumbnail(questions.at(secondRandomIndex).url, thumbnailQualities.high)
+      ).then((dataUrl) => {
+        setIsLoadingCreatingCover(false);
+        createQuiz({
+          generalInfo: {
+            title: title,
+            description: description,
+            quizType: quizType,
+            pseudoId: pseudoId,
+            language: language,
+            numQuestions: numQuestions,
+            cover: dataUrl,
+          },
+          questions: questions,
+          token: token,
+        });
+        setActiveStep(activeStep + 1);
+      });
+    } else {
+      handleEnqueueSnackbar("Для створення вікторини потрібно заповнити всі питання", "error");
+    }
+  };
+
   const steps = [
     {
       label: "Заповнення загальної інформації",
@@ -192,6 +215,10 @@ function CreateQuizPage() {
           onChangeLanguage={handleChangeLanguage}
           numQuestions={numQuestions}
           onChangeNumQuestions={handleChangeNumQuestions}
+          isTitleError={isTitleError}
+          titleErrorMsg={titleErrorMsg}
+          isDescrError={isDescrError}
+          descrErrorMsg={descrErrorMsg}
         />
       ),
     },
@@ -224,7 +251,7 @@ function CreateQuizPage() {
     "border border-[--dark-quizcard-border] rounded-2xl",
     "w-[75rem] h-[90%] text-[20px]"
   );
-  const buttonClassname = classNames("w-[150px] h-[50px] rounded-xl leading-none");
+  const buttonClassname = classNames("w-[150px] h-[50px] leading-none");
 
   const content = steps[activeStep]?.element;
 
@@ -241,10 +268,10 @@ function CreateQuizPage() {
       <>
         <span>Вікторина успішно створена!</span>
         <div className="flex gap-4">
-          <Button className={buttonClassname} primary>
+          <Button className={buttonClassname} color="primary" variant="contained">
             <Link to={ROUTES.Main}>Головна сторінка</Link>
           </Button>
-          <Button className={buttonClassname} primary>
+          <Button className={buttonClassname} color="primary" variant="contained">
             <Link to={ROUTES.Quiz(pseudoId)}>Сторінка вікторини</Link>
           </Button>
         </div>
@@ -256,7 +283,7 @@ function CreateQuizPage() {
         <span>На жаль, сталася помилка при створенні вікторини!</span>
         <span>Деталі помилки {result.error.status}:</span>
         <p>{result.error.message}</p>
-        <Button className={buttonClassname} warning onClick={handleBack}>
+        <Button className={buttonClassname} color="warning" variant="contained" onClick={handleBack}>
           Повернутися
         </Button>
       </>
@@ -288,32 +315,44 @@ function CreateQuizPage() {
               <form className="h-full flex flex-col justify-between" onSubmit={handleNext}>
                 {content}
                 <div className="w-full flex justify-between mb-2">
-                  <div>
+                  <div className="ml-2">
                     <Button
-                      className={buttonClassname + " ml-2"}
+                      className={buttonClassname}
                       disabled={activeStep === 0}
                       onClick={handleBack}
-                      warning
+                      color="warning"
+                      variant="contained"
                       type="button"
                     >
                       Назад
                     </Button>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      className={buttonClassname}
-                      type="button"
-                      secondary
+                  <div className="flex gap-2 mr-2">
+                    <LoadingButton
+                      className={"w-[240px] " + buttonClassname}
+                      loading={resultRoughDraft.isLoading}
+                      loadingPosition="start"
+                      startIcon={<RiDraftFill />}
+                      color="secondary"
+                      variant="contained"
                       onClick={handleClickSaveRoughDraft}
                     >
-                      Зберегти як чернетку
-                    </Button>
+                      <span>Зберегти як чернетку</span>
+                    </LoadingButton>
                     {isLastStep ? (
-                      <Button className={buttonClassname + " mr-2"} onClick={handleClickCreateQuiz} success>
-                        Створити
-                      </Button>
+                      <LoadingButton
+                        loading={isLoadingCreatingCover}
+                        loadingPosition="start"
+                        startIcon={<RiSave3Fill />}
+                        className={buttonClassname}
+                        onClick={handleClickCreateQuiz}
+                        color="success"
+                        variant="contained"
+                      >
+                        <span>Створити</span>
+                      </LoadingButton>
                     ) : (
-                      <Button className={buttonClassname + " mr-2"} primary>
+                      <Button className={buttonClassname} type="submit" color="primary" variant="contained">
                         Далі
                       </Button>
                     )}

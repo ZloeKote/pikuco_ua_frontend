@@ -2,9 +2,8 @@ import ytEmptyImage from "../img/youtube_480x270_bw.jpg";
 import { YtLinkToValid, getYtThumbnail } from "../hooks/yt-hooks";
 import { types } from "../predefined/QuestionTypes";
 import qualities from "../predefined/ytThumbnailQualities";
-import Button from "./simpleComponents/Button";
 import classNames from "classnames";
-import { Tooltip } from "@mui/material";
+import { Tooltip, Button } from "@mui/material";
 import Link from "./simpleComponents/Link";
 
 function ShowQuestion({
@@ -106,7 +105,9 @@ function ShowQuestion({
       {!isQuestionEmpty && (
         <>
           {(variant === types.individual || variant === types.general) && (
-            <div className="w-[7%] text-[40px] flex items-center justify-center">{question.place || numQuestion+1}</div>
+            <div className="w-[7%] text-[40px] flex items-center justify-center">
+              {question.place || numQuestion + 1}
+            </div>
           )}
           <div className="ml-4 w-[13%] self-center">{previewQuestion}</div>
           {questionInfo}
@@ -116,7 +117,8 @@ function ShowQuestion({
                 type="button"
                 className="w-[135px] h-[50px] rounded-xl z-20"
                 onClick={() => onClickReset(numQuestion)}
-                secondary
+                color="info"
+                variant="contained"
               >
                 Очистити
               </Button>

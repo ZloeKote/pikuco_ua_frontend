@@ -1,5 +1,4 @@
 import classNames from "classnames";
-import Input from "../simpleComponents/Input";
 import { useState } from "react";
 import { MenuItem, TextField, Typography } from "@mui/material";
 import InfoIcon from "../simpleComponents/InfoIcon";
@@ -13,6 +12,7 @@ function GeneralInfoQuiz({
   onChangeTitle,
   readOnlyTitle,
   description,
+  descriptionRequired,
   originalDescription,
   onChangeDescription,
   readOnlyDescription,
@@ -26,9 +26,12 @@ function GeneralInfoQuiz({
   numQuestions,
   onChangeNumQuestions,
   readOnlyNumQuestions,
+  isTitleError,
+  titleErrorMsg,
+  isDescrError,
+  descrErrorMsg,
 }) {
   const [numDescriptionSymbolsLeft, setNumDescriptionSymbolsLeft] = useState(80);
-
   const renderedQuizTypes = QuizTypes.filter((type) => type.value !== "").map((type) => {
     return (
       <MenuItem key={type.value} value={type.value}>
@@ -56,7 +59,7 @@ function GeneralInfoQuiz({
   const handleChangeTitle = (e) => onChangeTitle(e.target.value);
   const handleChangeDescription = (e) => {
     onChangeDescription(e.target.value);
-    setNumDescriptionSymbolsLeft(255 - e.target.value.length);
+    setNumDescriptionSymbolsLeft(80 - e.target.value.length);
   };
 
   return (
@@ -69,14 +72,17 @@ function GeneralInfoQuiz({
               Назва вікторини повинна мати довжину від 3 до 30 символів
             </InfoIcon>
           </label>
-          <Input
-            className="text-[22px] !rounded"
+          <TextField
             value={title}
             onChange={handleChangeTitle}
-            placeholder={originalTitle || "Найкраща пісня останнього десятиліття"}
+            placeholder={"Найкраща пісня останнього десятиліття"}
             autoFocus
             required
             disabled={readOnlyTitle}
+            size="small"
+            inputProps={{ style: { fontSize: "22px" } }}
+            error={isTitleError}
+            helperText={isTitleError ? titleErrorMsg : (originalTitle || " ")}
           />
         </div>
         <div className="flex flex-col">
@@ -84,7 +90,9 @@ function GeneralInfoQuiz({
             Опис вікторини {RedAsterisk}
             <InfoIcon className="ml-2 self-center">
               Опис вікторини повинен мати довжину від 5 до 80 символів.
-              <br /> <span>{numDescriptionSymbolsLeft}</span>
+              <br />
+              Чернетка не обов'язково повинна мати опис
+              <br /> <span>Залишилося символів {numDescriptionSymbolsLeft}</span>
             </InfoIcon>
           </label>
           <TextField
@@ -92,19 +100,20 @@ function GeneralInfoQuiz({
             inputProps={{ style: { fontSize: "22px" } }}
             onChange={handleChangeDescription}
             multiline
-            rows={8}
-            required
+            rows={6}
             disabled={readOnlyDescription}
-            helperText={originalDescription}
+            error={isDescrError}
+            helperText={isDescrError ? descrErrorMsg : originalDescription}
+            required={descriptionRequired}
           />
         </div>
       </div>
 
-      <div className="flex flex-col w-[300px] gap-6">
+      <div className="flex flex-col w-[300px] gap-5">
         <div className="flex flex-col">
           <label className={labelClassname}>Тип вікторини {RedAsterisk}</label>
           <TextField
-            label="Обери тип"
+            label="Оберіть тип"
             value={quizType}
             onChange={handleChangeQuizType}
             select
@@ -127,7 +136,7 @@ function GeneralInfoQuiz({
         <div className="flex flex-col">
           <label className={labelClassname}>Кількість питань {RedAsterisk}</label>
           <TextField
-            label="Обери кількість"
+            label="Оберіть кількість"
             value={numQuestions}
             onChange={handleChangeNumQuestions}
             select

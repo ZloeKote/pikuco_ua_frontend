@@ -4,7 +4,6 @@ import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Typography from "@mui/material/Typography";
-import Button from "../simpleComponents/Button";
 import classNames from "classnames";
 import GeneralInfoQuiz from "../manageQuiz/GeneralInfoQuiz";
 import QuizQuestionsInfo from "../manageQuiz/QuizQuestionsInfo";
@@ -13,11 +12,14 @@ import { iso6393 } from "iso-639-3";
 import { selectCurrentToken, useCreateQuizAsRoughDraftMutation, useCreateQuizMutation } from "../../store";
 import { useSelector } from "react-redux";
 import SnackbarsContext from "../../context/snackbars";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Button } from "@mui/material";
 import Link from "../simpleComponents/Link";
 import { ROUTES } from "../../ROUTES";
 import { createCover, getYtThumbnail } from "../../hooks/yt-hooks";
 import thumbnailQualities from "../../predefined/ytThumbnailQualities";
+import { validateQuizDescription, validateQuizTitle } from "../../hooks/validate-hooks";
+import { LoadingButton } from "@mui/lab";
+import { RiDraftFill, RiSave3Fill } from "react-icons/ri";
 
 function EditQuiz({ quiz }) {
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
@@ -30,81 +32,14 @@ function EditQuiz({ quiz }) {
   const [questions, setQuestions] = useState(quiz.questions);
   const [pseudoId, setPseudoId] = useState(quiz.pseudoId);
   const [activeStep, setActiveStep] = useState(0);
+  const [isTitleError, setIsTitleError] = useState(false);
+  const [titleErrorMsg, setTitleErrorMsg] = useState("");
+  const [isDescrError, setIsDescrError] = useState(false);
+  const [descrErrorMsg, setDescrErrorMsg] = useState("");
+  const [isLoadingCreatingCover, setIsLoadingCreatingCover] = useState(false);
 
   const [createQuiz, result] = useCreateQuizMutation();
   const [createQuizAsRoughDraft, resultRoughDraft] = useCreateQuizAsRoughDraftMutation();
-
-  const handleNext = (e) => {
-    e?.preventDefault();
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => setActiveStep((prevActiveStep) => prevActiveStep - 1);
-
-  const handleChangeQuizType = (quizType) => setQuizType(quizType);
-  const handleChangeLanguage = (lang) => setLanguage(lang);
-  const handleChangeNumQuestions = (numQuestions) => {
-    setNumQuestions(numQuestions);
-
-    const emptyQuestion = { url: "", title: "", description: "" };
-    let emptyQuestions = [];
-    for (let i = 0; i < numQuestions; i++) emptyQuestions.push(emptyQuestion);
-
-    setQuestions(emptyQuestions);
-  };
-  const handleChangeTitle = (title) => setTitle(title);
-  const handleChangeDescription = (description) => setDescription(description);
-  const handleChangeQuestion = (question, numQuestion) => {
-    let changedQuestions = [...questions];
-    changedQuestions[numQuestion] = question;
-    setQuestions(changedQuestions);
-  };
-
-  const handleClickCreateQuiz = () => {
-    // add cover to quiz if at least 2 questions are exist
-    const actualNumQuestions = questions.filter(
-      (question) => question.url !== "" || question.title !== ""
-    ).length;
-    if (actualNumQuestions >= 2) {
-      const firstRandomIndex = Math.floor(Math.random() * actualNumQuestions);
-      let secondRandomIndex;
-      while (true) {
-        secondRandomIndex = Math.floor(Math.random() * actualNumQuestions);
-        if (secondRandomIndex !== firstRandomIndex) break;
-      }
-      createCover(
-        getYtThumbnail(questions.at(firstRandomIndex).url, thumbnailQualities.high),
-        getYtThumbnail(questions.at(secondRandomIndex).url, thumbnailQualities.high)
-      ).then((dataUrl) => {
-        createQuiz({
-          generalInfo: {
-            title: title,
-            description: description,
-            quizType: quizType,
-            pseudoId: pseudoId,
-            language: language,
-            numQuestions: numQuestions,
-            cover: dataUrl,
-          },
-          questions: questions,
-          token: token,
-        });
-      });
-    } else {
-      createQuiz({
-        generalInfo: {
-          title: title,
-          description: description,
-          quizType: quizType,
-          pseudoId: pseudoId,
-          language: language,
-          numQuestions: numQuestions,
-        },
-        questions: questions,
-        token: token,
-      });
-    }
-  };
 
   useEffect(() => {
     if (questions.length !== numQuestions) {
@@ -124,26 +59,60 @@ function EditQuiz({ quiz }) {
     if (result.isSuccess) setPseudoId(result.data);
   }, [resultRoughDraft, result, handleEnqueueSnackbar]);
 
+  const handleNext = (e) => {
+    e?.preventDefault();
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = () => setActiveStep((prevActiveStep) => prevActiveStep - 1);
+
+  const handleChangeQuizType = (quizType) => setQuizType(quizType);
+  const handleChangeLanguage = (lang) => setLanguage(lang);
+  const handleChangeNumQuestions = (numQuestions) => {
+    setNumQuestions(numQuestions);
+
+    const emptyQuestion = { url: "", title: "", description: "" };
+    let emptyQuestions = [];
+    for (let i = 0; i < numQuestions; i++) emptyQuestions.push(emptyQuestion);
+
+    setQuestions(emptyQuestions);
+  };
+  const handleChangeTitle = (title) => {
+    setTitle(title);
+    validateQuizTitle(title, setIsTitleError, setTitleErrorMsg);
+    setActiveStep(0);
+  };
+  const handleChangeDescription = (description) => {
+    setDescription(description);
+    validateQuizDescription(description, setIsDescrError, setDescrErrorMsg, false);
+    setActiveStep(0);
+  };
+  const handleChangeQuestion = (question, numQuestion) => {
+    let changedQuestions = [...questions];
+    changedQuestions[numQuestion] = question;
+    setQuestions(changedQuestions);
+  };
+
   const handleClickSaveRoughDraft = () => {
     if (!quiz.isRoughDraft) {
       handleEnqueueSnackbar("Ви не можете зберігати чернетку вже опублікованого турніру", "error", false);
       return;
     }
+    const validQuizTitle = validateQuizTitle(title, setIsTitleError, setTitleErrorMsg);
+    const validQuizDescr = validateQuizDescription(description, setIsDescrError, setDescrErrorMsg, false);
+    if (!validQuizTitle || !validQuizDescr) {
+      setActiveStep(0);
+      return;
+    }
 
-    if (title === "") {
-      handleEnqueueSnackbar("Поле назви не може бути пустим!", "error", false);
-      return;
-    } else if (description === "") {
-      handleEnqueueSnackbar("Поле опису вікторини не може бути пустим!", "error", false);
-      return;
-    } else if (quizType === "") {
-      handleEnqueueSnackbar("Поле типу вікторини не може бути пустим!", "error", false);
+    if (quizType === "") {
+      handleEnqueueSnackbar("Поле типу вікторини не може бути пустим!", "error");
       return;
     } else if (language === null) {
-      handleEnqueueSnackbar("Поле мови вікторини не може бути пустим!", "error", false);
+      handleEnqueueSnackbar("Поле мови вікторини не може бути пустим!", "error");
       return;
     } else if (numQuestions === "") {
-      handleEnqueueSnackbar("Поле кількості питань вікторини не може бути пустим!", "error", false);
+      handleEnqueueSnackbar("Поле кількості питань вікторини не може бути пустим!", "error");
       return;
     }
     // add cover to quiz if at least 2 questions are exist
@@ -191,6 +160,59 @@ function EditQuiz({ quiz }) {
     }
   };
 
+  const handleClickCreateQuiz = () => {
+    const validQuizTitle = validateQuizTitle(title, setIsTitleError, setTitleErrorMsg);
+    const validQuizDescr = validateQuizDescription(description, setIsDescrError, setDescrErrorMsg);
+    if (!validQuizTitle || !validQuizDescr) {
+      setActiveStep(0);
+      return;
+    }
+    if (quizType === "") {
+      handleEnqueueSnackbar("Поле типу вікторини не може бути пустим!", "error");
+      return;
+    } else if (language === null) {
+      handleEnqueueSnackbar("Поле мови вікторини не може бути пустим!", "error");
+      return;
+    } else if (numQuestions === "") {
+      handleEnqueueSnackbar("Поле кількості питань вікторини не може бути пустим!", "error");
+      return;
+    }
+    const actualNumQuestions = questions.filter(
+      (question) => question.url !== "" || question.title !== ""
+    ).length;
+    if (actualNumQuestions === numQuestions) {
+      const firstRandomIndex = Math.floor(Math.random() * actualNumQuestions);
+      let secondRandomIndex;
+      while (true) {
+        secondRandomIndex = Math.floor(Math.random() * actualNumQuestions);
+        if (secondRandomIndex !== firstRandomIndex) break;
+      }
+      setIsLoadingCreatingCover(true);
+      createCover(
+        getYtThumbnail(questions.at(firstRandomIndex).url, thumbnailQualities.high),
+        getYtThumbnail(questions.at(secondRandomIndex).url, thumbnailQualities.high)
+      ).then((dataUrl) => {
+        setIsLoadingCreatingCover(false);
+        createQuiz({
+          generalInfo: {
+            title: title,
+            description: description,
+            quizType: quizType,
+            pseudoId: pseudoId,
+            language: language,
+            numQuestions: numQuestions,
+            cover: dataUrl,
+          },
+          questions: questions,
+          token: token,
+        });
+        setActiveStep(activeStep + 1);
+      });
+    } else {
+      handleEnqueueSnackbar("Для створення вікторини потрібно заповнити всі питання", "error");
+    }
+  };
+
   const steps = [
     {
       label: "Заповнення загальної інформації",
@@ -206,6 +228,14 @@ function EditQuiz({ quiz }) {
           onChangeLanguage={handleChangeLanguage}
           numQuestions={numQuestions}
           onChangeNumQuestions={handleChangeNumQuestions}
+          isTitleError={isTitleError}
+          setIsTitleError={setIsTitleError}
+          titleErrorMsg={titleErrorMsg}
+          setTitleErrorMsg={setTitleErrorMsg}
+          isDescrError={isDescrError}
+          setIsDescrError={setIsDescrError}
+          descrErrorMsg={descrErrorMsg}
+          setDescrErrorMsg={setDescrErrorMsg}
         />
       ),
     },
@@ -255,10 +285,10 @@ function EditQuiz({ quiz }) {
       <>
         <span>Вікторина успішно відредагована!</span>
         <div className="flex gap-4">
-          <Button className={buttonClassname} primary>
+          <Button className={buttonClassname} color="primary" variant="contained">
             <Link to={ROUTES.Main}>Головна сторінка</Link>
           </Button>
-          <Button className={buttonClassname} primary>
+          <Button className={buttonClassname} color="primary" variant="contained">
             <Link to={ROUTES.Quiz(pseudoId)}>Сторінка вікторини</Link>
           </Button>
         </div>
@@ -270,7 +300,7 @@ function EditQuiz({ quiz }) {
         <span>На жаль, сталася помилка при редагуванні вікторини!</span>
         <span>Деталі помилки {result.error.status}:</span>
         <p>{result.error.message}</p>
-        <Button className={buttonClassname} warning onClick={handleBack}>
+        <Button className={buttonClassname} color="warning" variant="contained" onClick={handleBack}>
           Повернутися
         </Button>
       </>
@@ -302,34 +332,46 @@ function EditQuiz({ quiz }) {
               <form className="h-full flex flex-col justify-between" onSubmit={handleNext}>
                 {content}
                 <div className="w-full flex justify-between mb-2">
-                  <div>
+                  <div className="ml-2">
                     <Button
-                      className={buttonClassname + " ml-2"}
+                      className={buttonClassname}
                       disabled={activeStep === 0}
                       onClick={handleBack}
-                      warning
+                      color="warning"
+                      variant="contained"
                       type="button"
                     >
                       Назад
                     </Button>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mr-2">
                     {quiz.isRoughDraft && (
-                      <Button
-                        className={buttonClassname}
-                        type="button"
-                        secondary
+                      <LoadingButton
+                        className={"w-[240px] " + buttonClassname}
+                        loading={resultRoughDraft.isLoading}
+                        loadingPosition="start"
+                        startIcon={<RiDraftFill />}
+                        color="secondary"
+                        variant="contained"
                         onClick={handleClickSaveRoughDraft}
                       >
-                        Зберегти як чернетку
-                      </Button>
+                        <span>Зберегти як чернетку</span>
+                      </LoadingButton>
                     )}
                     {isLastStep ? (
-                      <Button className={buttonClassname + " mr-2"} onClick={handleClickCreateQuiz} success>
-                        Відредагувати
-                      </Button>
+                      <LoadingButton
+                        loading={isLoadingCreatingCover}
+                        loadingPosition="start"
+                        startIcon={<RiSave3Fill />}
+                        className={"w-[200px] " + buttonClassname}
+                        onClick={handleClickCreateQuiz}
+                        color="success"
+                        variant="contained"
+                      >
+                        <span>Відредагувати</span>
+                      </LoadingButton>
                     ) : (
-                      <Button className={buttonClassname + " mr-2"} primary>
+                      <Button className={buttonClassname} type="submit" color="primary" variant="contained">
                         Далі
                       </Button>
                     )}

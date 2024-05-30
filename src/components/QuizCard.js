@@ -1,12 +1,11 @@
 import "../css/QuizCard.css";
-import { useState, useEffect, memo } from "react";
+import { useState, memo } from "react";
 import classNames from "classnames";
-import Button from "./simpleComponents/Button";
 import { BsFillPlayFill } from "react-icons/bs";
 import placeholderCover from "../img/placeholderCover.png";
 import Link from "./simpleComponents/Link";
 import { ROUTES } from "../ROUTES";
-import { IconButton, Menu, Typography, MenuItem, ListItemText } from "@mui/material";
+import { IconButton, Menu, Typography, MenuItem, ListItemText, CircularProgress } from "@mui/material";
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 import { IoMenu, IoClose } from "react-icons/io5";
 import { BiEditAlt } from "react-icons/bi";
@@ -17,9 +16,15 @@ import { IconMenuItem, NestedMenuItem } from "mui-nested-menu";
 import { iso6393 } from "iso-639-3";
 import GeneratedUserAvatar from "./simpleComponents/GeneratedUserAvatar";
 
-function QuizCard({ quiz, showActions = false, onDelete }) {
+function QuizCard({ quiz, showActions = false, onDelete, isLoadingDeleting }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  const playbuttonClassname = classNames(
+    "quizcard-playbutton flex items-center justify-center",
+    "w-full h-full self-end rounded-full",
+    "border-green-400 bg-green-600 text-white hover:bg-green-500"
+  );
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -37,22 +42,29 @@ function QuizCard({ quiz, showActions = false, onDelete }) {
   return (
     <div className={classnames}>
       <Link className="quiz-cover" to={ROUTES.Quiz(quiz.pseudoId)}>
-        <img className="rounded-t-2xl h-full w-full object-cover" src={quiz.cover || placeholderCover} alt="cover" />
+        <img
+          className="rounded-t-2xl h-full w-full object-cover"
+          src={quiz.cover || placeholderCover}
+          alt="cover"
+        />
       </Link>
 
-      <Button className="quizcard-playbutton w-full h-full self-end" success rounded>
+      <div className={playbuttonClassname}>
         <Link to={ROUTES.PlayQuiz(quiz.pseudoId) + `?lang=${quiz.language}`}>
           <BsFillPlayFill className="text-5xl" />
         </Link>
-      </Button>
+      </div>
 
       <Link
         to={`/user/${quiz.creator.nickname.toLowerCase()}`}
         className="quizcard-creator z-10 mr-3 w-[120px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]"
       >
         <div className="flex items-center">
-          <GeneratedUserAvatar username={quiz.creator.nickname} saturation="60" className="h-7 mr-1 bg-lime-300 rounded-full"/>
-          {/* <img src={avatar} alt="creator" className="h-7 mr-1" /> */}
+          <GeneratedUserAvatar
+            username={quiz.creator.nickname}
+            saturation="60"
+            className="h-7 mr-1 bg-lime-300 rounded-full"
+          />
           <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
             <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[16px] italic">
               {quiz.creator.nickname}
@@ -88,15 +100,19 @@ function QuizCard({ quiz, showActions = false, onDelete }) {
       </Link>
 
       {showActions && (
-        <div className="absolute top-0 right-0">
+        <div className="absolute top-1 right-1">
           <IconButton
             id="long-button"
             aria-label="more"
             aria-controls={open ? "long-menu" : undefined}
             aria-expanded={open ? "true" : undefined}
             aria-haspopup="true"
-            size="large"
+            size="medium"
             onClick={handleClick}
+            sx={{
+              backgroundColor: "var(--dark-background-quiz-card-menu-button)",
+              "&:hover": { backgroundColor: "var(--dark-background-quiz-card-menu-button-hover)" },
+            }}
           >
             {anchorEl === null ? <IoMenu /> : <IoClose />}
           </IconButton>
@@ -122,7 +138,6 @@ function QuizCard({ quiz, showActions = false, onDelete }) {
                   Додати переклад
                 </Link>
               }
-              
               disabled={quiz.isRoughDraft}
             />
             <NestedMenuItem
@@ -148,9 +163,9 @@ function QuizCard({ quiz, showActions = false, onDelete }) {
               })}
             </NestedMenuItem>
             <IconMenuItem
-              onClick={() => onDelete(quiz.pseudoId)}
+              onClick={() => (isLoadingDeleting ? undefined : onDelete(quiz.pseudoId))}
               className="hover:!bg-red-600"
-              leftIcon={<MdDelete />}
+              leftIcon={isLoadingDeleting ? <CircularProgress size={20} /> : <MdDelete />}
               label="Видалити"
             />
           </Menu>

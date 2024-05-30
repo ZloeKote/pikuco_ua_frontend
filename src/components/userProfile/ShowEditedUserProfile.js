@@ -1,15 +1,16 @@
 import classNames from "classnames";
-import { Alert, TextField, Tooltip, Typography } from "@mui/material";
+import { Alert, TextField, Tooltip, Typography, Button } from "@mui/material";
 import { BsInfoCircleFill } from "react-icons/bs";
-import Button from "../simpleComponents/Button";
 import { useState, useEffect } from "react";
 import { BiEditAlt } from "react-icons/bi";
 import { IoCheckbox } from "react-icons/io5";
-import Input from "../simpleComponents/Input";
 import { selectCurrentToken, useUpdateUserPublicMutation } from "../../store";
 import { useSelector } from "react-redux";
 import { ROUTES } from "../../ROUTES";
 import GeneratedUserAvatar from "../simpleComponents/GeneratedUserAvatar";
+import { validateNickname, validateUserDescription } from "../../hooks/validate-hooks";
+import { LoadingButton } from "@mui/lab";
+import { RiSave3Fill } from "react-icons/ri";
 
 function ShowEditedUserProfile({ user }) {
   const token = useSelector(selectCurrentToken);
@@ -19,51 +20,93 @@ function ShowEditedUserProfile({ user }) {
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [actualNickname, setActualNickname] = useState(editedNickname);
   const [actualDescription, setActualDescription] = useState(editedDescription);
+  const [isNicknameError, setIsNicknameError] = useState(false);
+  const [nicknameErrorMsg, setNicknameErrorMsg] = useState("");
+  const [isDescrError, setIsDescrError] = useState(false);
+  const [descrErrorMsg, setDescrErrorMsg] = useState("");
+
   const [updateUser, result] = useUpdateUserPublicMutation();
+
+  useEffect(() => {
+    setEditedNickname(user.nickname);
+    setActualNickname(user.nickname);
+    setEditedDescription(user.description);
+    setActualDescription(user.description);
+  }, [user]);
 
   const classnameLayout = classNames(
     "grid grid-cols-[200px_100px_1fr_1fr]",
-    "grid-rows-[25px_repeat(3,minmax(0,65px))_300px_1fr]"
+    "grid-rows-[25px_repeat(3,minmax(0,80px))_255px_1fr]"
   );
-  const editedInfoClassname = classNames("italic", "hover:cursor-pointer hover:underline");
+  const editedInfoClassname = classNames("italic break-words", "hover:cursor-pointer hover:underline");
 
   const handleEditNickname = () => setIsEditingNickname(true);
-  const handleCompleteEditingNickname = () => {
-    setIsEditingNickname(false);
-    setActualNickname(editedNickname);
+
+  const handleCompleteEditingNickname = (e) => {
+    e.preventDefault();
+    if (validateNickname(editedNickname, setIsNicknameError, setNicknameErrorMsg)) {
+      setIsEditingNickname(false);
+      setActualNickname(editedNickname);
+    }
   };
   const handleCloseEditingNicknameOnEscape = (e) => {
     if (e.code === "Escape") {
       setIsEditingNickname(false);
       setEditedNickname(actualNickname);
+
+      setIsNicknameError(false);
+      setNicknameErrorMsg("");
     }
   };
-  const handleChangeNickname = (e) => setEditedNickname(e.target.value);
+  const handleChangeNickname = (e) => {
+    setEditedNickname(e.target.value);
+    validateNickname(e.target.value, setIsNicknameError, setNicknameErrorMsg);
+  };
   const handleEditDescription = () => setIsEditingDescription(true);
-  const handleChangeDescription = (e) => setEditedDescription(e.target.value);
+  const handleChangeDescription = (e) => {
+    setEditedDescription(e.target.value);
+    validateUserDescription(e.target.value, setIsDescrError, setDescrErrorMsg);
+  };
   const handleKeyDownDescription = (e) => {
     if (e.code === "Enter" && !e.shiftKey) {
-      setIsEditingDescription(false);
-      setActualDescription(editedDescription);
+      e.preventDefault();
+      if (validateUserDescription(editedDescription, setIsDescrError, setDescrErrorMsg)) {
+        setIsEditingDescription(false);
+        setActualDescription(editedDescription);
+      }
     } else if (e.code === "Escape") {
       setIsEditingDescription(false);
       setEditedDescription(actualDescription);
+
+      setIsDescrError(false);
+      setDescrErrorMsg("");
     }
   };
   const handleClickReset = () => {
     setEditedNickname(user.nickname);
+    setActualNickname(user.nickname);
     setEditedDescription(user.description);
+    setActualDescription(user.description);
     setIsEditingNickname(false);
     setIsEditingDescription(false);
+    setIsNicknameError(false);
+    setNicknameErrorMsg("");
+    setIsDescrError(false);
+    setDescrErrorMsg("");
   };
 
   const handleClickSave = () => {
-    updateUser({
-      newNickname: editedNickname,
-      newDescription: editedDescription,
-      nickname: user.nickname,
-      token: token,
-    });
+    const validNickname = validateNickname(actualNickname, setIsNicknameError, nicknameErrorMsg);
+    const validDescription = validateUserDescription(actualDescription, setIsDescrError, setDescrErrorMsg);
+    if (validNickname && validDescription) {
+      updateUser({
+        newNickname: editedNickname,
+        newDescription: editedDescription,
+        nickname: user.nickname,
+        token: token,
+      });
+    } else if (!validNickname) setIsEditingNickname(true);
+    else if (!validDescription) setIsEditingDescription(true);
   };
   useEffect(() => {
     if (result.isSuccess) window.location.replace(ROUTES.Profile(editedNickname.toLowerCase()));
@@ -79,35 +122,10 @@ function ShowEditedUserProfile({ user }) {
   }
 
   let userBirthdate = "Не вказано";
-  const userCreationDate = new Date(user.creationDate);
-  if (user.birthdate) {
-    userBirthdate = new Date(user.birthdate);
-    userBirthdate = `${
-      userBirthdate.getDate() < 10 ? "0" + userBirthdate.getDate() : userBirthdate.getDate()
-    }.${
-      userBirthdate.getMonth() + 1 < 10 ? "0" + (userBirthdate.getMonth() + 1) : userBirthdate.getMonth() + 1
-    }.${userBirthdate.getFullYear()}`;
-  }
-  const formattedShortCreationDate = `${
-    userCreationDate.getDate() < 10 ? "0" + userCreationDate.getDate() : userCreationDate.getDate()
-  }.${
-    userCreationDate.getMonth() + 1 < 10
-      ? "0" + (userCreationDate.getMonth() + 1)
-      : userCreationDate.getMonth() + 1
-  }.${userCreationDate.getFullYear()}`;
-  const formattedFullCreationDate = `${
-    userCreationDate.getDate() < 10 ? "0" + userCreationDate.getDate() : userCreationDate.getDate()
-  }.${
-    userCreationDate.getMonth() + 1 < 10
-      ? "0" + (userCreationDate.getMonth() + 1)
-      : userCreationDate.getMonth() + 1
-  }.${userCreationDate.getFullYear()}, ${
-    userCreationDate.getHours() < 10 ? "0" + userCreationDate.getHours() : userCreationDate.getHours()
-  }:${
-    userCreationDate.getMinutes() < 10 ? "0" + userCreationDate.getMinutes() : userCreationDate.getMinutes()
-  }:${
-    userCreationDate.getSeconds() < 10 ? "0" + userCreationDate.getSeconds() : userCreationDate.getSeconds()
-  }`;
+  if (user.birthdate) userBirthdate = formatDate(new Date(user.birthdate));
+
+  const formattedShortCreationDate = formatDate(new Date(user.creationDate));
+  const formattedFullCreationDate = formatDate(new Date(user.creationDate), true);
 
   return (
     <div className={classnameLayout}>
@@ -129,54 +147,53 @@ function ShowEditedUserProfile({ user }) {
         <GeneratedUserAvatar
           username={user.nickname}
           saturation="60"
-          className="w-40 h-40 bg-lime-300 rounded-full"
+          className="w-52 h-52 bg-lime-300 rounded-full"
         />
-        {/* <img
-          className="w-40 h-40 rounded-sm"
-          src={user.avatar === "some path" ? defaultAvatar : user.avatar}
-          alt={`${user.nickname}'s profile`}
-        /> */}
       </div>
-      <div className="col-start-3 col-end-4 row-start-2 row-end-5">
-        <div className="mb-2 leading-tight">
-          <h3>Нікнейм</h3>
-          {isEditingNickname ? (
-            <form onSubmit={handleCompleteEditingNickname} className="flex gap-1 text-[20px]">
-              <Input
-                className="w-[150px]"
-                value={editedNickname}
-                onChange={handleChangeNickname}
-                autoFocus
-                onKeyDown={handleCloseEditingNicknameOnEscape}
-              />
-              <button type="submit">
-                <IoCheckbox className="text-[27px] text-green-500 hover:text-green-400" />
-              </button>
-            </form>
-          ) : (
-            <div className="flex gap-2">
-              <Tooltip title={<Typography>Натисніть, щоб змінити нікнейм</Typography>} arrow>
-                <span className={editedInfoClassname} onClick={handleEditNickname}>
-                  {actualNickname}
-                </span>
-              </Tooltip>
-              <button
-                onClick={handleEditNickname}
-                className="text-[--dark-link-text-hover] hover:text-[--dark-quizcard-description]"
-              >
-                <BiEditAlt />
-              </button>
-            </div>
-          )}
-        </div>
-        <div className="mb-2 leading-tight">
-          <h3>Роль</h3>
-          <span className="italic">{user.role}</span>
-        </div>
-        <div className="leading-tight">
-          <h3>Дата народження</h3>
-          <span className="italic">{userBirthdate}</span>
-        </div>
+      <div className="leading-tight col-start-3 col-end-4 row-start-2 row-end-3">
+        <h3>Нікнейм</h3>
+        {isEditingNickname ? (
+          <form onSubmit={handleCompleteEditingNickname} className="flex gap-1">
+            <TextField
+              id="nickname"
+              value={editedNickname}
+              onChange={handleChangeNickname}
+              autoFocus
+              onKeyDown={handleCloseEditingNicknameOnEscape}
+              size="small"
+              error={isNicknameError}
+              helperText={isNicknameError && nicknameErrorMsg}
+              FormHelperTextProps={{ style: { marginLeft: 0, marginTop: 0 } }}
+              fullWidth
+              inputProps={{ style: { padding: 2, fontSize: "20px" } }}
+            />
+            <button className="self-start" type="submit">
+              <IoCheckbox className="text-[32px] text-green-500 hover:text-green-400" />
+            </button>
+          </form>
+        ) : (
+          <div className="flex gap-2">
+            <Tooltip title={<Typography>Натисніть, щоб змінити нікнейм</Typography>} arrow>
+              <span className={editedInfoClassname} onClick={handleEditNickname}>
+                {actualNickname}
+              </span>
+            </Tooltip>
+            <button
+              onClick={handleEditNickname}
+              className="text-[--dark-link-text-hover] hover:text-[--dark-quizcard-description]"
+            >
+              <BiEditAlt />
+            </button>
+          </div>
+        )}
+      </div>
+      <div className="leading-tight col-start-3 col-end-4 row-start-3 row-end-4">
+        <h3>Роль</h3>
+        <span className="italic">{user.role}</span>
+      </div>
+      <div className="leading-tight col-start-3 col-end-4 row-start-4 row-end-5">
+        <h3>Дата народження</h3>
+        <span className="italic">{userBirthdate}</span>
       </div>
       <div className="px-5 row-start-5 row-end-6 col-span-full border-t border-[--dark-link-text-hover]">
         <h2 className="text-[28px]">Опис</h2>
@@ -188,9 +205,11 @@ function ShowEditedUserProfile({ user }) {
             onChange={handleChangeDescription}
             fullWidth
             multiline
-            maxRows={9}
+            maxRows={8}
             onKeyDownCapture={handleKeyDownDescription}
             autoFocus
+            error={isDescrError}
+            helperText={isDescrError && descrErrorMsg}
           />
         ) : (
           <Tooltip title={<Typography>Натисніть, щоб змінити опис</Typography>} arrow placement="left">
@@ -201,18 +220,28 @@ function ShowEditedUserProfile({ user }) {
         )}
       </div>
       <div className="pl-5 mt-5 mb-4 row-start-6 row-end-7 col-span-full flex gap-5 items-end">
-        <Button
+        <LoadingButton
+          loading={result.isLoading}
+          loadingPosition="start"
+          startIcon={<RiSave3Fill />}
           className="w-[150px] h-[50px]"
-          success
-          rounded
+          color="success"
+          type="submit"
+          variant="contained"
           onClick={handleClickSave}
           disabled={
             result.isLoading || (user.nickname === actualNickname && user.description === actualDescription)
           }
         >
-          Зберегти
-        </Button>
-        <Button className="w-[150px] h-[50px]" danger rounded onClick={handleClickReset}>
+          <span>Зберегти</span>
+        </LoadingButton>
+        <Button
+          className="w-[150px] h-[50px]"
+          type="button"
+          color="primary"
+          variant="contained"
+          onClick={handleClickReset}
+        >
           Скинути
         </Button>
       </div>
@@ -222,3 +251,17 @@ function ShowEditedUserProfile({ user }) {
 }
 
 export default ShowEditedUserProfile;
+
+function formatDate(date, detailed) {
+  if (detailed) {
+    return `${date.getDate() < 10 ? "0" + date.getDate() : date.getDate()}.${
+      date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1
+    }.${date.getFullYear()}, ${date.getHours() < 10 ? "0" + date.getHours() : date.getHours()}:${
+      date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()
+    }:${date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds()}`;
+  } else {
+    return `${date.getDate() < 10 ? "0" + date.getDate() : date.getDate()}.${
+      date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1
+    }.${date.getFullYear()}`;
+  }
+}

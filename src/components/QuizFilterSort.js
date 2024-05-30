@@ -1,14 +1,15 @@
 import { useState, useContext } from "react";
-import Button from "./simpleComponents/Button";
+import { FaFilter } from "react-icons/fa6";
 import ActiveButton from "./simpleComponents/ActiveButton";
 import Dropdown from "./simpleComponents/Dropdown";
 import classNames from "classnames";
 import { useSearchParams } from "react-router-dom";
 import ParamsContext from "../context/searchParams";
 import { quizTypes } from "../predefined/QuizTypes";
+import { LoadingButton } from "@mui/lab";
 
-function QuizFilterSort({ handleParams }) {
-  const {quizzesTypeSelection, changeQuizzesTypeSelection} = useContext(ParamsContext);
+function QuizFilterSort({ isLoading, handleParams }) {
+  const { quizzesTypeSelection, changeQuizzesTypeSelection } = useContext(ParamsContext);
   const [searchParams] = useSearchParams();
   const inputClassname = classNames(
     "w-[350px]",
@@ -17,7 +18,7 @@ function QuizFilterSort({ handleParams }) {
     "bg-[--dark-quizcard-background]",
     "hover:bg-[--dark-quizcard-background-hover] focus:bg-[--dark-quizcard-background-hover]"
   );
-  
+
   const optionsQuestions = [
     {
       label: "Всі",
@@ -57,7 +58,6 @@ function QuizFilterSort({ handleParams }) {
     },
   ];
 
-  
   const [questionsSelection, setQuestionsSelection] = useState(
     searchParams.get("numberQuestions") !== null
       ? optionsQuestions.find((opt) => opt.value === searchParams.get("numberQuestions"))
@@ -73,7 +73,7 @@ function QuizFilterSort({ handleParams }) {
 
   const handleChangeType = (option) => {
     changeQuizzesTypeSelection(option);
-  }
+  };
   const handleChangeQuestions = (option) => {
     setQuestionsSelection(option);
   };
@@ -139,9 +139,17 @@ function QuizFilterSort({ handleParams }) {
             onChange={handleChangeQuestions}
             className="h-[40px] w-[100px] z-20 text-white border border-[--dark-quizcard-border] rounded-2xl bg-[--dark-quizcard-background] hover:bg-[--dark-quizcard-background-hover]"
           />
-          <Button type="submit" success rounded className="h-[40px] w-[200px]">
-            Застосувати
-          </Button>
+          <LoadingButton
+            loading={isLoading}
+            loadingPosition="start"
+            startIcon={<FaFilter />}
+            type="submit"
+            color="success"
+            variant="contained"
+            className="h-[40px] w-[200px]"
+          >
+            <span>Застосувати</span>
+          </LoadingButton>
         </form>
       </div>
       <div className="flex gap-[40px]">

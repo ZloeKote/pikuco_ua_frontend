@@ -13,35 +13,10 @@ function ShowPublicUserProfile({ user }) {
   );
 
   let userBirthdate = "Не вказано";
-  const userCreationDate = new Date(user.creationDate);
-  if (user.birthdate) {
-    userBirthdate = new Date(user.birthdate);
-    userBirthdate = `${
-      userBirthdate.getDate() < 10 ? "0" + userBirthdate.getDate() : userBirthdate.getDate()
-    }.${
-      userBirthdate.getMonth() + 1 < 10 ? "0" + (userBirthdate.getMonth() + 1) : userBirthdate.getMonth() + 1
-    }.${userBirthdate.getFullYear()}`;
-  }
-  const formattedShortCreationDate = `${
-    userCreationDate.getDate() < 10 ? "0" + userCreationDate.getDate() : userCreationDate.getDate()
-  }.${
-    userCreationDate.getMonth() + 1 < 10
-      ? "0" + (userCreationDate.getMonth() + 1)
-      : userCreationDate.getMonth() + 1
-  }.${userCreationDate.getFullYear()}`;
-  const formattedFullCreationDate = `${
-    userCreationDate.getDate() < 10 ? "0" + userCreationDate.getDate() : userCreationDate.getDate()
-  }.${
-    userCreationDate.getMonth() + 1 < 10
-      ? "0" + (userCreationDate.getMonth() + 1)
-      : userCreationDate.getMonth() + 1
-  }.${userCreationDate.getFullYear()}, ${
-    userCreationDate.getHours() < 10 ? "0" + userCreationDate.getHours() : userCreationDate.getHours()
-  }:${
-    userCreationDate.getMinutes() < 10 ? "0" + userCreationDate.getMinutes() : userCreationDate.getMinutes()
-  }:${
-    userCreationDate.getSeconds() < 10 ? "0" + userCreationDate.getSeconds() : userCreationDate.getSeconds()
-  }`;
+  if (user.birthdate) userBirthdate = formatDate(new Date(user.birthdate));
+
+  const formattedShortCreationDate = formatDate(new Date(user.creationDate));
+  const formattedFullCreationDate = formatDate(new Date(user.creationDate), true)
 
   return (
     <div className={classnameLayout}>
@@ -94,3 +69,17 @@ function ShowPublicUserProfile({ user }) {
 }
 
 export default ShowPublicUserProfile;
+
+function formatDate(date, detailed) {
+  if (detailed) {
+    return `${date.getDate() < 10 ? "0" + date.getDate() : date.getDate()}.${
+      date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1
+    }.${date.getFullYear()}, ${date.getHours() < 10 ? "0" + date.getHours() : date.getHours()}:${
+      date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()
+    }:${date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds()}`;
+  } else {
+    return `${date.getDate() < 10 ? "0" + date.getDate() : date.getDate()}.${
+      date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1
+    }.${date.getFullYear()}`;
+  }
+}

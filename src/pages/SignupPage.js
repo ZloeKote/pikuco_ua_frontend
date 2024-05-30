@@ -1,4 +1,3 @@
-import Button from "../components/simpleComponents/Button";
 import Link from "../components/simpleComponents/Link";
 import { ROUTES } from "../ROUTES";
 import SignupCover from "../img/Screenshot_2.png";
@@ -15,9 +14,11 @@ import {
   validateNickname,
   validatePassword,
 } from "../hooks/validate-hooks";
+import { LoadingButton } from "@mui/lab";
+import { IoMdCheckmarkCircle } from "react-icons/io";
 
 function Signup() {
-  const [signup] = useSignupMutation();
+  const [signup, result] = useSignupMutation();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isEmailError, setIsEmailError] = useState(false);
   const [emailErrorMsg, setEmailErrorMsg] = useState("");
@@ -113,10 +114,11 @@ function Signup() {
         <div className="flex flex-col items-center w-[40%] text-[--dark-text]">
           <div className="flex flex-col h-full justify-center">
             <h2 className="text-[52px] mb-[15px] self-center">Реєстрація</h2>
-            <form className="flex flex-col gap-2" onSubmit={handleSubmitSignup}>
+            <form className="flex flex-col" onSubmit={handleSubmitSignup}>
               <div className="flex flex-col">
                 <label className={labelClassname}>Електронна пошта {redAsterix}</label>
                 <TextField
+                  id="email"
                   type="email"
                   value={user.email}
                   onChange={handleChangeEmail}
@@ -127,12 +129,13 @@ function Signup() {
                   required
                   autoFocus
                   error={isEmailError}
-                  helperText={isEmailError && emailErrorMsg}
+                  helperText={isEmailError ? emailErrorMsg : " "}
                 />
               </div>
               <div className="flex flex-col">
                 <label className={labelClassname}>Нікнейм {redAsterix}</label>
                 <TextField
+                  id="nickname"
                   value={user.username}
                   onChange={handleChangeUsername}
                   placeholder="Username"
@@ -141,7 +144,7 @@ function Signup() {
                   inputProps={{ style: { fontSize: "26px" } }}
                   required
                   error={isNicknameError}
-                  helperText={isNicknameError && nicknameErrorMsg}
+                  helperText={isNicknameError ? nicknameErrorMsg : " "}
                 />
               </div>
               <div className="flex flex-col">
@@ -169,11 +172,9 @@ function Signup() {
                   required
                   error={isPasswordError}
                 />
-                {isPasswordError && (
-                  <FormHelperText sx={{ marginX: "14px" }} error={isPasswordError}>
-                    {passwordErrorMsg}
-                  </FormHelperText>
-                )}
+                <FormHelperText sx={{ marginX: "14px" }} error={isPasswordError}>
+                  {isPasswordError ? passwordErrorMsg : " "}
+                </FormHelperText>
               </div>
               <div className="flex flex-col">
                 <label className={labelClassname}>Дата народження</label>
@@ -185,16 +186,20 @@ function Signup() {
                   size="small"
                   inputProps={{ style: { fontSize: "26px" } }}
                   error={isBirthdateError}
-                  helperText={isBirthdateError && birthdateErrorMsg}
+                  helperText={isBirthdateError ? birthdateErrorMsg : " "}
                 />
               </div>
-              <Button
-                className="w-[15rem] h-[3rem] text-[26px] rounded-2xl self-center mt-[15px]"
+              <LoadingButton
+                className="self-center w-[15rem] h-[3rem]"
+                loading={result.isLoading}
+                loadingPosition="start"
+                startIcon={<IoMdCheckmarkCircle />}
                 type="submit"
-                success
+                color="success"
+                variant="contained"
               >
-                Зареєструватися
-              </Button>
+                <span className="text-[18px]">Зареєструватися</span>
+              </LoadingButton>
             </form>
           </div>
           <div className="ml-[15px] mb-1 flex self-start text-[22px]">

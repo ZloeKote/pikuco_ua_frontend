@@ -1,6 +1,6 @@
-import Button from "./simpleComponents/Button";
 import toValidIframeYTLink from "../toValidIframeYTLink";
-import imgVs from "../img/img-vs.png"
+import imgVs from "../img/img-vs.png";
+import { Button } from "@mui/material";
 
 function QuizDuoBattle({ question1, question2, type, handleWinner }) {
   return (
@@ -35,11 +35,19 @@ function QuizDuoBattle({ question1, question2, type, handleWinner }) {
           onClick={() => {
             handleWinner(1);
           }}
-          success
+          color="success"
+          variant="contained"
+          sx={{ fontSize: "38px", borderRadius: 0, boxShadow: 0 }}
         >
           Вибрати
         </Button>
-        <Button className="w-[50%] border-none h-full" onClick={() => handleWinner(2)} primary>
+        <Button
+          className="w-[50%] border-none h-full"
+          color="info"
+          variant="contained"
+          onClick={() => handleWinner(2)}
+          sx={{ fontSize: "38px", borderRadius: 0, boxShadow: 0 }}
+        >
           Вибрати
         </Button>
       </div>

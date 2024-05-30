@@ -17,6 +17,9 @@ import { CircularProgress } from "@mui/material";
 import Link from "../simpleComponents/Link";
 import { ROUTES } from "../../ROUTES";
 import predefinedLanguages from "../../predefined/AvailableLanguages";
+import { validateQuizTitle, validateQuizDescription } from "../../hooks/validate-hooks";
+import { RiSave3Fill } from "react-icons/ri";
+import { LoadingButton } from "@mui/lab";
 
 function CreateQuizTranslation({ quiz }) {
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
@@ -38,6 +41,11 @@ function CreateQuizTranslation({ quiz }) {
     })
   );
   const [activeStep, setActiveStep] = useState(0);
+  const [isTitleError, setIsTitleError] = useState(false);
+  const [titleErrorMsg, setTitleErrorMsg] = useState("");
+  const [isDescrError, setIsDescrError] = useState(false);
+  const [descrErrorMsg, setDescrErrorMsg] = useState("");
+
   const [addTranslation, result] = useAddQuizTranslationMutation();
 
   useEffect(() => {
@@ -52,14 +60,25 @@ function CreateQuizTranslation({ quiz }) {
 
   const handleNext = (e) => {
     e?.preventDefault();
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    const validTitle = validateQuizTitle(title, setIsTitleError, setTitleErrorMsg);
+    const validDescription = validateQuizDescription(description, setIsDescrError, setDescrErrorMsg);
+    if ((!validTitle || !validDescription) && activeStep === 0) setActiveStep(0);
+    else setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
   const handleBack = () => setActiveStep((prevActiveStep) => prevActiveStep - 1);
 
   const handleChangeLanguage = (lang) => setLanguage(lang);
-  const handleChangeTitle = (title) => setTitle(title);
-  const handleChangeDescription = (description) => setDescription(description);
+  const handleChangeTitle = (title) => {
+    setTitle(title);
+    validateQuizTitle(title, setIsTitleError, setTitleErrorMsg);
+    setActiveStep(0);
+  };
+  const handleChangeDescription = (description) => {
+    setDescription(description);
+    validateQuizDescription(description, setIsDescrError, setDescrErrorMsg);
+    setActiveStep(0);
+  };
   const handleChangeQuestion = (question, numQuestion) => {
     let changedQuestions = [...questions];
     changedQuestions[numQuestion] = question;
@@ -67,27 +86,33 @@ function CreateQuizTranslation({ quiz }) {
   };
 
   const handleClickAddTranslation = () => {
-    if (title === "") {
-      handleEnqueueSnackbar("Поле назви не може бути пустим!", "error", false);
-      return;
-    } else if (description === "") {
-      handleEnqueueSnackbar("Поле опису вікторини не може бути пустим!", "error", false);
+    const validQuizTitle = validateQuizTitle(title, setIsTitleError, setTitleErrorMsg);
+    const validQuizDescr = validateQuizDescription(description, setIsDescrError, setDescrErrorMsg);
+    if (!validQuizTitle || !validQuizDescr) {
+      setActiveStep(0);
       return;
     } else if (language === null) {
       handleEnqueueSnackbar("Поле мови вікторини не може бути пустим!", "error", false);
       return;
     }
 
-    addTranslation({
-      translation: {
-        title: title,
-        description: description,
-        language: language.iso6391,
-        questions: questions,
-      },
-      pseudoId: quiz.pseudoId,
-      token: token,
-    });
+    const actualNumQuestions = questions.filter(
+      (question) => question.url !== "" || question.title !== ""
+    ).length;
+    if (actualNumQuestions === quiz.numQuestions) {
+      addTranslation({
+        translation: {
+          title: title,
+          description: description,
+          language: language.iso6391,
+          questions: questions,
+        },
+        pseudoId: quiz.pseudoId,
+        token: token,
+      });
+    } else {
+      handleEnqueueSnackbar("Для створення вікторини потрібно заповнити всі питання", "error");
+    }
   };
 
   const steps = [
@@ -108,6 +133,11 @@ function CreateQuizTranslation({ quiz }) {
           disabledLanguages={quiz.languages}
           numQuestions={quiz.numQuestions}
           readOnlyNumQuestions
+          isTitleError={isTitleError}
+          titleErrorMsg={titleErrorMsg}
+          isDescrError={isDescrError}
+          descrErrorMsg={descrErrorMsg}
+          descriptionRequired={true}
         />
       ),
     },
@@ -124,7 +154,7 @@ function CreateQuizTranslation({ quiz }) {
       ),
     },
     {
-      label: "Підтвердження та редагування",
+      label: "Підтвердження та додавання",
       element: (
         <CreatingQuizConfirmation
           title={title}
@@ -163,10 +193,10 @@ function CreateQuizTranslation({ quiz }) {
       <>
         <span>Переклад успішно доданий!</span>
         <div className="flex gap-4">
-          <Button className={buttonClassname} primary>
+        <Button className={buttonClassname} color="primary" variant="contained">
             <Link to={ROUTES.Main}>Головна сторінка</Link>
           </Button>
-          <Button className={buttonClassname} primary>
+          <Button className={buttonClassname} color="primary" variant="contained">
             <Link to={ROUTES.Quiz(quiz.pseudoId)}>Сторінка вікторини</Link>
           </Button>
         </div>
@@ -178,7 +208,7 @@ function CreateQuizTranslation({ quiz }) {
         <span>На жаль, сталася помилка при додаванні перекладу!</span>
         <span>Деталі помилки {result.error.status}:</span>
         <p>{result.error.data}</p>
-        <Button className={buttonClassname} warning onClick={handleBack}>
+        <Button className={buttonClassname} color="warning" variant="contained" onClick={handleBack}>
           Повернутися
         </Button>
       </>
@@ -187,7 +217,7 @@ function CreateQuizTranslation({ quiz }) {
 
   return (
     <Box sx={{ display: "flex", marginY: 2, gap: 2, flexDirection: "column", alignItems: "center" }}>
-      <div className="text-[32px] leading-none">СТВОРЕННЯ ПЕРЕКЛАДУ ВІКТОРИНИ</div>
+      <div className="text-[32px] leading-none">ДОДАВАННЯ ПЕРЕКЛАДУ ВІКТОРИНИ</div>
       <Stepper activeStep={activeStep} sx={{ width: "80rem" }}>
         {steps.map((step) => {
           const stepProps = {};
@@ -210,28 +240,31 @@ function CreateQuizTranslation({ quiz }) {
               <form className="h-full flex flex-col justify-between" onSubmit={handleNext}>
                 {content}
                 <div className="w-full flex justify-between mb-2">
-                  <div>
+                  <div className="ml-2">
                     <Button
-                      className={buttonClassname + " ml-2"}
+                      className={buttonClassname}
                       disabled={activeStep === 0}
                       onClick={handleBack}
-                      warning
+                      color="warning"
+                      variant="contained"
                       type="button"
                     >
                       Назад
                     </Button>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mr-2">
                     {isLastStep ? (
-                      <Button
-                        className={buttonClassname + " mr-2"}
+                      <LoadingButton
+                        className={buttonClassname}
                         onClick={handleClickAddTranslation}
-                        success
+                        color="success"
+                        variant="contained"
+                        startIcon={<RiSave3Fill />}
                       >
                         Додати
-                      </Button>
+                      </LoadingButton>
                     ) : (
-                      <Button className={buttonClassname + " mr-2"} primary>
+                      <Button className={buttonClassname} type="submit" color="primary" variant="contained">
                         Далі
                       </Button>
                     )}

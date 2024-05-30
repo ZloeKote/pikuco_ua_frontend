@@ -7,10 +7,10 @@ import { LinearProgress } from "@mui/material";
 import UserProfileLayout from "../components/userProfile/UserProfileLayout";
 import ProfileSections from "../predefined/ProfileSections";
 import QuizzesList from "../components/QuizzesList";
-import Button from "../components/simpleComponents/Button";
 import Link from "../components/simpleComponents/Link";
 import { quizzesApi } from "../store/apis/quizzesApi";
 import SnackbarsContext from "../context/snackbars";
+import classNames from "classnames";
 
 function UserQuizzesPage() {
   const navigate = useNavigate();
@@ -24,6 +24,12 @@ function UserQuizzesPage() {
 
   const [fetchQuizzes, { data: quizzes, isLoading }] = quizzesApi.endpoints.fetchQuizzes.useLazyQuery();
   const [deleteQuiz, result] = useDeleteQuizMutation();
+
+  const createButtonClassname = classNames(
+    "w-40 h-9 rounded-2xl text-[26px] self-center mr-2",
+    "border-green-400 bg-green-600 text-white hover:bg-green-500",
+    "flex justify-center items-center"
+  );
 
   useEffect(() => {
     fetchQuizzes(
@@ -49,9 +55,9 @@ function UserQuizzesPage() {
   const title = (
     <div className="flex justify-between">
       <h2>МОЇ ВІКТОРИНИ</h2>
-      <Button className="w-40 h-9 rounded-2xl text-[26px] self-center mr-2" primary>
-        <Link to={ROUTES.CreateQuiz}>Створити</Link>
-      </Button>
+      <div className={createButtonClassname}>
+        <Link className="w-full text-center" to={ROUTES.CreateQuiz}>Створити</Link>
+      </div>
     </div>
   );
 
@@ -100,6 +106,7 @@ function UserQuizzesPage() {
             handlePageParam={handleChangeParam}
             showActions={true}
             onDelete={handleClickDeleteQuiz}
+            isLoadingDeleting={result.isLoading}
           />
         ) : (
           <LinearProgress />

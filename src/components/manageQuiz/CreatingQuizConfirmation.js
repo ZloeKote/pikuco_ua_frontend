@@ -45,7 +45,7 @@ function CreatingQuizConfirmation({ title, description, quizType, language, numQ
         </div>
       </div>
 
-      <div className="flex flex-col w-full h-[150px] mt-2 px-2">
+      <div className="flex flex-col w-full h-[100px] mt-2 px-2">
         <label className={labelClassname}>Опис вікторини</label>
         <span className="text-[20px] italic">{description}</span>
       </div>
@@ -56,7 +56,7 @@ function CreatingQuizConfirmation({ title, description, quizType, language, numQ
           <div className="self-center">{isOpenedQuestionList ? <FaChevronDown /> : <FaChevronUp />}</div>
         </div>
         {isOpenedQuestionList && (
-          <div className="max-h-[355px] overflow-y-auto w-full flex justify-center">
+          <div className="max-h-[405px] overflow-y-auto w-full flex justify-center">
             <QuestionList
               className="w-[95%] gap-[5px]"
               questions={questions}

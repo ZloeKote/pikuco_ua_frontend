@@ -1,7 +1,6 @@
 import { useContext, useEffect } from "react";
 import classNames from "classnames";
 import Link from "../components/simpleComponents/Link";
-import Button from "./simpleComponents/Button";
 import { ROUTES } from "../ROUTES";
 import { GoChevronUp, GoChevronDown } from "react-icons/go";
 import placeholderCover from "../img/placeholderCover.png";
@@ -32,6 +31,11 @@ function ShowQuiz({ quiz, language }) {
   const [deleteFromWishlist, deletingWishlistResult] = useDeleteQuizFromWishlistMutation();
 
   const quizType = quizTypes.find((type) => type.value === quiz.type).label;
+
+  const playButtonClassname = classNames(
+    "w-[200px] h-[90px] text-[32px] flex",
+    "border-green-400 bg-green-600 text-white hover:bg-green-500 rounded-full"
+  );
 
   useEffect(() => {
     fetchEvaluation({ pseudoId: quiz.pseudoId, token: token });
@@ -220,9 +224,14 @@ function ShowQuiz({ quiz, language }) {
         </div>
         {!quiz.isRoughDraft && (
           <div className="flex justify-center mb-[20px]">
-            <Button className="w-[200px] h-[90px] text-[32px]" success rounded>
-              <Link to={ROUTES.PlayQuiz(quiz.pseudoId) + `?lang=${language}`}>Грати</Link>
-            </Button>
+            <div className={playButtonClassname}>
+              <Link
+                className="w-full h-full flex justify-center items-center"
+                to={ROUTES.PlayQuiz(quiz.pseudoId) + `?lang=${language}`}
+              >
+                Грати
+              </Link>
+            </div>
           </div>
         )}
       </div>

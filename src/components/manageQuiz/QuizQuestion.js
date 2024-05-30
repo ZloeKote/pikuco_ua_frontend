@@ -3,31 +3,63 @@ import ytEmptyImage from "../../img/youtube_480x270_bw.jpg";
 import { RedAsterisk } from "../../custom-materials";
 import classNames from "classnames";
 import InfoIcon from "../simpleComponents/InfoIcon";
-import Input from "../simpleComponents/Input";
 import { TextField } from "@mui/material";
+import { useState, useEffect } from "react";
+import {
+  validateQuizQuestionDescription,
+  validateQuizQuestionTitle,
+  validateQuizQuestionUrl,
+} from "../../hooks/validate-hooks";
 
-function QuizQuestion({ question, readOnlyUrl, originalTitle, originalDescription, isCreatingTranslation, onChange }) {
+function QuizQuestion({ question, readOnlyUrl, originalTitle, originalDescription, onChange }) {
+  const [isUrlError, setIsUrlError] = useState(false);
+  const [urlErrorMsg, setUrlErrorMsg] = useState("");
+  const [isTitleError, setIsTitleError] = useState(false);
+  const [titleErrorMsg, setTitleErrorMsg] = useState("");
+  const [isDescrError, setIsDescrError] = useState(false);
+  const [descrErrorMsg, setDescrErrorMsg] = useState("");
+
+  useEffect(() => {
+    validateQuizQuestionUrl(question?.url, setIsUrlError, setUrlErrorMsg);
+    validateQuizQuestionTitle(question?.title, setIsTitleError, setTitleErrorMsg);
+    validateQuizQuestionDescription(question?.description, setIsDescrError, setDescrErrorMsg);
+  }, [question]);
+
   let isValid =
     !(YtLinkToValid(question?.url) === "error") &&
     !(YtLinkToValid(question?.url) === "//www.youtube.com/embed/undefined");
 
   const handleChangeURL = (e) => {
     onChange({ ...question, url: e.target.value });
+    validateQuizQuestionUrl(e.target.value, setIsUrlError, setUrlErrorMsg);
   };
-  const handleChangeTitle = (e) => onChange({ ...question, title: e.target.value });
+  const handleChangeTitle = (e) => {
+    onChange({ ...question, title: e.target.value });
+    validateQuizQuestionTitle(e.target.value, setIsTitleError, setTitleErrorMsg);
+  };
 
-  const handleChangeDescription = (e) => onChange({ ...question, description: e.target.value });
+  const handleChangeDescription = (e) => {
+    onChange({ ...question, description: e.target.value });
+    validateQuizQuestionDescription(e.target.value, setIsDescrError, setDescrErrorMsg);
+  };
 
   const handleClickClear = () => {
     if (readOnlyUrl) onChange({ ...question, title: "", description: "" });
     else onChange({ ...question, url: "", title: "", description: "" });
+
+    setIsUrlError(false);
+    setUrlErrorMsg("");
+    setIsTitleError(false);
+    setTitleErrorMsg("");
+    setIsDescrError(false);
+    setDescrErrorMsg("");
   };
 
   const labelClassname = classNames("text-[26px] ml-[10px] flex");
 
   return (
     <div className="flex gap-5">
-      <div className="w-[590px] h-[332px]">
+      <div className="w-[614px] h-[345px]">
         {isValid ? (
           <iframe
             className="rounded"
@@ -41,7 +73,7 @@ function QuizQuestion({ question, readOnlyUrl, originalTitle, originalDescriptio
           <img className="h-full w-auto rounded" src={ytEmptyImage} alt="YouTube video" />
         )}
       </div>
-      <div className="flex flex-col w-[450px] gap-2">
+      <div className="flex flex-col w-[450px]">
         <div className="flex flex-col">
           <label className={labelClassname + " justify-between"}>
             <div className="flex">
@@ -65,12 +97,16 @@ function QuizQuestion({ question, readOnlyUrl, originalTitle, originalDescriptio
               </span>
             </div>
           </label>
-          <Input
-            className="text-[22px] !rounded"
+          <TextField
+            id="question-url"
             value={question?.url}
             onChange={handleChangeURL}
             placeholder="youtube.com/watch?v=dQw4w9WgXcQ"
             disabled={readOnlyUrl}
+            size="small"
+            error={isUrlError}
+            helperText={isUrlError ? urlErrorMsg : " "}
+            inputProps={{ style: { fontSize: "20px" } }}
           />
         </div>
         <div className="flex flex-col">
@@ -80,11 +116,15 @@ function QuizQuestion({ question, readOnlyUrl, originalTitle, originalDescriptio
               Назва питання повинна мати довжину від 3 до 30 символів
             </InfoIcon>
           </label>
-          <Input
-            className="text-[22px] !rounded"
-            value={question.title}
+          <TextField
+            id="question-title"
+            value={question?.title}
             onChange={handleChangeTitle}
-            placeholder={originalTitle || "Rick Astley - Never Gonna Give You Up"}
+            placeholder={"Rick Astley - Never Gonna Give You Up"}
+            size="small"
+            error={isTitleError}
+            helperText={isTitleError ? titleErrorMsg : (originalTitle || " ")}
+            inputProps={{ style: { fontSize: "20px" } }}
           />
         </div>
         <div className="flex flex-col">
@@ -95,12 +135,15 @@ function QuizQuestion({ question, readOnlyUrl, originalTitle, originalDescriptio
             </InfoIcon>
           </label>
           <TextField
+            id="question-description"
             value={question.description}
-            inputProps={{ style: { fontSize: "22px" } }}
+            inputProps={{ style: { fontSize: "20px" } }}
             onChange={handleChangeDescription}
             multiline
-            rows={4}
-            placeholder={originalDescription}
+            rows={2}
+            size="small"
+            error={isDescrError}
+            helperText={isDescrError ? descrErrorMsg : originalDescription}
           />
         </div>
       </div>

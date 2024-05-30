@@ -14,9 +14,7 @@ function UserProfilePage() {
 
   let userContent = <LinearProgress />;
   if (error) userContent = `Виникла помилка! Код: ${error.status}`;
-  if (isSuccess) {
-    userContent = <ShowPublicUserProfile user={user} />;
-  }
+  if (isSuccess) userContent = <ShowPublicUserProfile user={user} />;
 
   let content = userContent;
   if (nickname.toLowerCase() === authPersonNickname?.toLowerCase() && isSuccess) {

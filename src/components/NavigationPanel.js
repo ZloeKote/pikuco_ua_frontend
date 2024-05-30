@@ -2,7 +2,6 @@ import Link from "./simpleComponents/Link";
 import Logo from "./simpleComponents/Logo";
 import DropdownLink from "./simpleComponents/DropdownLink";
 import classNames from "classnames";
-import Button from "./simpleComponents/Button";
 import { FiLogIn } from "react-icons/fi";
 import { ROUTES } from "../ROUTES";
 import { useSelector, useDispatch } from "react-redux";
@@ -12,6 +11,7 @@ import { useContext } from "react";
 import ParamsContext from "../context/searchParams";
 import { quizTypes } from "../predefined/QuizTypes";
 import GeneratedUserAvatar from "./simpleComponents/GeneratedUserAvatar";
+import { IconButton } from "@mui/material";
 
 function NavigationPanel() {
   const { changeQuizzesSearchParams, changeQuizzesTypeSelection } = useContext(ParamsContext);
@@ -75,7 +75,6 @@ function NavigationPanel() {
             saturation="60"
             className="h-9 mr-2 bg-lime-300 rounded-full"
           />
-          {/* <img src={userAvatar === "some path" ? avatar : userAvatar} alt="creator" className="h-9 mr-2" /> */}
           <span
             className="self-center truncate text-[--dark-text] leading-none text-[16px] italic"
             title={nickname}
@@ -92,12 +91,12 @@ function NavigationPanel() {
           Реєстрація
         </Link>
         <Link to={ROUTES.Login}>
-          <Button
+          <IconButton
             className="w-[35px] h-[35px] border-[--dark-quizcard-border] hover:bg-[--dark-link-background-hover]"
-            rounded
+            title="Авторизуватися"
           >
             <FiLogIn className="text-[26px]" />
-          </Button>
+          </IconButton>
         </Link>
       </>
     );

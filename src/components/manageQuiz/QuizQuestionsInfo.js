@@ -32,11 +32,11 @@ function QuizQuestionsInfo({ questions, originalQuestions = [], questionType, re
   };
 
   const activeArrowClassname = classNames(
-    "text-[60px] self-center",
+    "text-[50px] self-center",
     "hover:cursor-pointer hover:text-[--dark-quizcard-border]"
   );
   const disabledArrowClassname = classNames(
-    "text-[60px] self-center text-[--dark-quizcard-border] hover:cursor-no-drop"
+    "text-[50px] self-center text-[--dark-quizcard-border] hover:cursor-no-drop"
   );
   const questionListHeaderClassname = classNames(
     "flex justify-between w-[96%] text-[26px]",
@@ -71,7 +71,7 @@ function QuizQuestionsInfo({ questions, originalQuestions = [], questionType, re
           <div className="self-center">{isOpenedQuestionList ? <FaChevronDown /> : <FaChevronUp />}</div>
         </div>
         {isOpenedQuestionList && (
-          <div className="max-h-[300px] overflow-y-auto w-full flex justify-center">
+          <div className="max-h-[287px] overflow-y-auto w-full flex justify-center">
             <QuestionList
               className="w-[95%] gap-[5px]"
               currNumQuestion={numQuestion}

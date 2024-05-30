@@ -25,6 +25,7 @@ function QuizzesList({
   hiddenPagination,
   showActions = false,
   onDelete,
+  isLoadingDeleting,
   ...rest
 }) {
   const [searchParams] = useSearchParams();
@@ -39,7 +40,15 @@ function QuizzesList({
     handlePageParam(searchParams.toString() !== "" ? "?" + searchParams.toString() : "");
   };
   const renderedQuizzes = quizzes?.map((quiz) => {
-    return <QuizCard key={quiz.pseudoId} quiz={quiz} showActions={showActions} onDelete={onDelete} />;
+    return (
+      <QuizCard
+        isLoadingDeleting={isLoadingDeleting}
+        key={quiz.pseudoId}
+        quiz={quiz}
+        showActions={showActions}
+        onDelete={onDelete}
+      />
+    );
   });
 
   return (

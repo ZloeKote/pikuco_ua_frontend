@@ -10,8 +10,8 @@ function QuizzesPage() {
   const { quizzesSearchParams, changeQuizzesSearchParams } = useContext(ParamsContext);
   const location = useLocation();
   const navigate = useNavigate();
-  const { data, error, isLoading } = useFetchQuizzesQuery(quizzesSearchParams);
-
+  const { data, error, isFetching } = useFetchQuizzesQuery(quizzesSearchParams);
+  
   const handleChangeParams = (newParam) => {
     navigate({
       pathname: location.pathname,
@@ -21,9 +21,9 @@ function QuizzesPage() {
   };
   return (
     <div className="flex flex-col mx-[50px] mt-[40px]">
-      <QuizFilterSort params={quizzesSearchParams} handleParams={handleChangeParams} />
+      <QuizFilterSort isLoading={isFetching} params={quizzesSearchParams} handleParams={handleChangeParams} />
       {error && <span className="text-white">Errors could happens...</span>}
-      {isLoading && !error ? (
+      {isFetching && !error ? (
         <LinearProgress />
       ) : (
         <QuizzesList

@@ -1,3 +1,5 @@
+import { YtLinkToValid } from "./yt-hooks";
+
 export function validateEmail(email, setIsError, setErrorMsg) {
   const regex = /[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+/;
   if (!regex.test(email)) {
@@ -23,7 +25,7 @@ export function validateNickname(nickname, setIsError, setErrorMsg) {
     return false;
   } else if (!regex.test(nickname)) {
     setIsError(true);
-    setErrorMsg("Нікнейм не повинен містити спеціальних символів");
+    setErrorMsg("Нікнейм не повинен містити спец. символів");
     return false;
   } else {
     setIsError(false);
@@ -110,6 +112,119 @@ export function validateBirthdate(birthdate, setIsError, setErrorMsg) {
   } else {
     setIsError(false);
     setErrorMsg("");
+    return true;
+  }
+}
+
+export function validateUserDescription(description, setIsDescriptionError, setDescriptionErrorMsg) {
+  if (!!!description) {
+    setIsDescriptionError(false);
+    setDescriptionErrorMsg("");
+    return true;
+  } else if (description.length > 255) {
+    setIsDescriptionError(true);
+    setDescriptionErrorMsg("Опис не може містити більше ніж 255 символів");
+    return false;
+  } else {
+    setIsDescriptionError(false);
+    setDescriptionErrorMsg("");
+    return true;
+  }
+}
+
+export function validateQuizTitle(title, setIsTitleError, setTitleErrorMsg) {
+  if (title.length < 3) {
+    setIsTitleError(true);
+    setTitleErrorMsg("Назва повинна мати не менше 3 символів");
+    return false;
+  } else if (title.length > 30) {
+    setIsTitleError(true);
+    setTitleErrorMsg("Назва повинна мати не більше 30 символів");
+    return false;
+  } else {
+    setIsTitleError(false);
+    setTitleErrorMsg("");
+    return true;
+  }
+}
+
+export function validateQuizDescription(
+  description,
+  setIsDescriptionError,
+  setDescriptionErrorMsg,
+  required = true
+) {
+  if (!required && !!!description) {
+    setIsDescriptionError(false);
+    setDescriptionErrorMsg("");
+    return true;
+  } else if (description.length < 5) {
+    setIsDescriptionError(true);
+    setDescriptionErrorMsg("Опис повинен мати не менше 5 символів");
+    return false;
+  } else if (description.length > 80) {
+    setIsDescriptionError(true);
+    setDescriptionErrorMsg("Опис повинен мати не більше 80 символів");
+    return false;
+  } else {
+    setIsDescriptionError(false);
+    setDescriptionErrorMsg("");
+    return true;
+  }
+}
+
+export function validateQuizQuestionUrl(url, setIsUrlError, setUrlErrorMsg, hideIfEmpty = true) {
+  if (hideIfEmpty && !!!url) {
+    setIsUrlError(false);
+    setUrlErrorMsg("");
+    return true;
+  } else if (YtLinkToValid(url) === "error" || YtLinkToValid(url) === "//www.youtube.com/embed/undefined") {
+    setIsUrlError(true);
+    setUrlErrorMsg("Посилання на Youtube-відео не дійсне");
+    return false;
+  } else {
+    setIsUrlError(false);
+    setUrlErrorMsg("");
+    return true;
+  }
+}
+
+export function validateQuizQuestionTitle(title, setIsTitleError, setTitleErrorMsg) {
+  if (!!!title) {
+    setIsTitleError(false);
+    setTitleErrorMsg("");
+    return true;
+  } else if (title.length < 3) {
+    setIsTitleError(true);
+    setTitleErrorMsg("Назва повинна мати не менше 3 символів");
+    return false;
+  } else if (title.length > 30) {
+    setIsTitleError(true);
+    setTitleErrorMsg("Назва повинна мати не більше 30 символів");
+    return false;
+  } else {
+    setIsTitleError(false);
+    setTitleErrorMsg("");
+    return true;
+  }
+}
+
+export function validateQuizQuestionDescription(description, setIsDescriptionError, setDescriptionErrorMsg) {
+  if (!!!description) {
+    setIsDescriptionError(false);
+    setDescriptionErrorMsg("");
+    return true;
+  } else if (description.length < 5) {
+    setIsDescriptionError(true);
+    setDescriptionErrorMsg("Опис повинен мати не менше 5 символів (якщо присутній)");
+    return false;
+  } else if (description.length > 80) {
+    setIsDescriptionError(true);
+    setDescriptionErrorMsg("Опис повинен мати не більше 80 символів (якщо присутній)");
+    return false;
+  } else {
+    setIsDescriptionError(false);
+    setDescriptionErrorMsg("");
     return true;
   }
 }
