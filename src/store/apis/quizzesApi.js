@@ -116,10 +116,11 @@ const quizzesApi = createApi({
         },
       }),
       fetchQuiz: builder.query({
-        query: (pseudoId) => {
+        query: ({pseudoId, token}) => {
           return {
             url: `/${pseudoId}`,
             method: "GET",
+            headers: { Authorization: !!token ? `Bearer ${token}` : "" },
           };
         },
       }),
@@ -132,10 +133,11 @@ const quizzesApi = createApi({
         },
       }),
       fetchQuizMain: builder.query({
-        query: (pseudoId) => {
+        query: ({pseudoId, token}) => {
           return {
             url: `/${pseudoId}/main`,
             method: "GET",
+            headers: { Authorization: !!token ? `Bearer ${token}` : "" },
           };
         },
       }),

@@ -3,7 +3,7 @@ import { ROUTES } from "../ROUTES";
 import SignupCover from "../img/Screenshot_2.png";
 import classNames from "classnames";
 import { setCredentials, useSignupMutation } from "../store";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { TextField, IconButton, InputAdornment, OutlinedInput, FormHelperText } from "@mui/material";
@@ -16,9 +16,11 @@ import {
 } from "../hooks/validate-hooks";
 import { LoadingButton } from "@mui/lab";
 import { IoMdCheckmarkCircle } from "react-icons/io";
+import SnackbarsContext from "../context/snackbars";
 
 function Signup() {
   const [signup, result] = useSignupMutation();
+  const { handleEnqueueSnackbar, closeAllSnackbars } = useContext(SnackbarsContext);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isEmailError, setIsEmailError] = useState(false);
   const [emailErrorMsg, setEmailErrorMsg] = useState("");
@@ -44,17 +46,24 @@ function Signup() {
     </span>
   );
 
+  useEffect(() => {
+    if (result.isSuccess) handleEnqueueSnackbar("Реєстрація пройшла успішно!", "default");
+  }, [handleEnqueueSnackbar, result.isSuccess])
+
   const handleChangeEmail = (e) => {
     setUser({ ...user, email: e.target.value });
     validateEmail(e.target.value, setIsEmailError, setEmailErrorMsg);
+    closeAllSnackbars();
   };
   const handleChangeUsername = (e) => {
     setUser({ ...user, username: e.target.value });
     validateNickname(e.target.value, setIsNicknameError, setNicknameErrorMsg);
+    closeAllSnackbars();
   };
   const handleChangePassword = (e) => {
     setUser({ ...user, password: e.target.value });
     validatePassword(e.target.value, setIsPasswordError, setPasswordErrorMsg);
+    closeAllSnackbars();
   };
   const handleChangeBirthdate = (e) => {
     setUser({ ...user, birthdate: e.target.value });
@@ -63,6 +72,7 @@ function Signup() {
       setIsBirthdateError(false);
       setBirthdateErrorMsg("");
     }
+    closeAllSnackbars();
   };
   const handleClickShowPassword = () => setIsPasswordVisible(!isPasswordVisible);
   const handleMouseDownPassword = (e) => e.preventDefault();
@@ -76,6 +86,7 @@ function Signup() {
       ? validateBirthdate(user.birthdate, setIsBirthdateError, setBirthdateErrorMsg)
       : true;
 
+    closeAllSnackbars();
     if (emailValid && nicknameValid && passwordValid && birthdateValid) {
       try {
         const userData = await signup(user).unwrap();
@@ -88,14 +99,14 @@ function Signup() {
         });
         navigate("/");
       } catch (err) {
-        if (!err?.originalStatus) {
-          // setErrMsg("No server response");
-        } else if (err.originalStatus?.status === 400) {
-          // setErrMsg("Missing email or password");
-        } else if (err.originalStatus?.status === 403) {
-          // setErrMsg("Unathorized");
+        if (err.status === 500) {
+          handleEnqueueSnackbar(err.data.error, "error");
+        } else if (err.status === 400) {
+          for (let i = 0; i < err.data.length; i++) {
+            handleEnqueueSnackbar(err.data[i], "error");
+          }
         } else {
-          // setErrMsg("Login Failed");
+          handleEnqueueSnackbar("Не вдалося виконати реєстрацію. Спробуйте пізніше", "error");
         }
       }
     }

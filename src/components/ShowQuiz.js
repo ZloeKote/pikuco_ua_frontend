@@ -38,29 +38,29 @@ function ShowQuiz({ quiz, language }) {
   );
 
   useEffect(() => {
-    fetchEvaluation({ pseudoId: quiz.pseudoId, token: token });
+    fetchEvaluation({ pseudoId: quiz.pseudoId, token: token })
+      .unwrap()
+      .catch((error) => {
+        if (error.status === 500) {
+          handleEnqueueSnackbar("Сталася помилка зі сторони серверу при завантаженні оцінки", "error");
+        } else {
+          handleEnqueueSnackbar(
+            `Не вдалося отримати оцінку. Код помилки ${error.status} ${error.data}`,
+            "error",
+            false
+          );
+        }
+      });
     if (token) checkWishlist({ pseudoId: quiz.pseudoId, token });
-  }, [fetchEvaluation, checkWishlist, quiz.pseudoId, token]);
+  }, [fetchEvaluation, checkWishlist, quiz.pseudoId, token, handleEnqueueSnackbar]);
 
   useEffect(() => {
     if (addingEvalResult.isSuccess) {
       fetchEvaluation({ pseudoId: quiz.pseudoId, token: token });
       addingEvalResult.reset();
-    } else if (addingEvalResult.isError) {
-      handleEnqueueSnackbar(
-        `Сталася помилка при оцінці вікторини! Код помилки ${addingEvalResult.error.originalStatus}: ${addingEvalResult.error.data}`,
-        "error",
-        false
-      );
     } else if (deletingEvalResult.isSuccess) {
       fetchEvaluation({ pseudoId: quiz.pseudoId, token: token });
       deletingEvalResult.reset();
-    } else if (deletingEvalResult.isError) {
-      handleEnqueueSnackbar(
-        `Сталася помилка при оцінці вікторини! Код помилки ${deletingEvalResult.error.originalStatus}: ${deletingEvalResult.error.data}`,
-        "error",
-        false
-      );
     }
   }, [addingEvalResult, deletingEvalResult, fetchEvaluation, handleEnqueueSnackbar, quiz.pseudoId, token]);
 
@@ -69,19 +69,9 @@ function ShowQuiz({ quiz, language }) {
       checkWishlist({ pseudoId: quiz.pseudoId, token });
       handleEnqueueSnackbar("Вікторина успішно додана до списку бажаного", "default");
       addingWishlistResult.reset();
-    } else if (addingWishlistResult.isError) {
-      handleEnqueueSnackbar(
-        `Сталася помилка при додаванні вікторини до списку бажаного. ${addingWishlistResult.error.data}`,
-        "error"
-      );
     } else if (deletingWishlistResult.isSuccess) {
       checkWishlist({ pseudoId: quiz.pseudoId, token });
       deletingWishlistResult.reset();
-    } else if (deletingWishlistResult.isError) {
-      handleEnqueueSnackbar(
-        `Сталася помилка при видаленні вікторини зі списку бажаного. ${deletingWishlistResult.error.data}`,
-        "error"
-      );
     }
   }, [
     addingWishlistResult,
@@ -115,45 +105,131 @@ function ShowQuiz({ quiz, language }) {
 
   const handleClickLike = () => {
     if (addingEvalResult.isLoading || deletingEvalResult.isLoading) return;
-
-    if (fetchingEvalResult.data?.liked) deleteEvaluation({ pseudoId: quiz.pseudoId, token: token });
-    else addEvaluation({ isLiked: true, pseudoId: quiz.pseudoId, token: token });
+    if (token === null) {
+      handleEnqueueSnackbar("Тільки авторизовані користувачі можуть оцінювати вікторину", "error");
+    } else if (fetchingEvalResult.data?.liked) {
+      deleteEvaluation({ pseudoId: quiz.pseudoId, token: token })
+        .unwrap()
+        .catch((error) => {
+          if (error.status === 401) {
+            handleEnqueueSnackbar("Тільки авторизовані користувачі можуть оцінювати вікторину", "error");
+          } else if (error.status === 500) {
+            handleEnqueueSnackbar("Сталася помилка зі сторони серверу при оцінці вікторини", "error");
+          } else {
+            handleEnqueueSnackbar(error.data, "error");
+          }
+        });
+    } else
+      addEvaluation({ isLiked: true, pseudoId: quiz.pseudoId, token: token })
+        .unwrap()
+        .catch((error) => {
+          if (error.status === 401) {
+            handleEnqueueSnackbar("Тільки авторизовані користувачі можуть оцінювати вікторину", "error");
+          } else if (error.status === 500) {
+            handleEnqueueSnackbar("Сталася помилка зі сторони серверу при оцінці вікторини", "error");
+          } else {
+            handleEnqueueSnackbar(error.data, "error");
+          }
+        });
   };
   const handleClickDislike = () => {
     if (addingEvalResult.isLoading || deletingEvalResult.isLoading) return;
-
-    if (fetchingEvalResult.data?.disliked) deleteEvaluation({ pseudoId: quiz.pseudoId, token: token });
-    else addEvaluation({ isLiked: false, pseudoId: quiz.pseudoId, token: token });
+    if (token === null) {
+      handleEnqueueSnackbar("Тільки авторизовані користувачі можуть оцінювати вікторину", "error");
+    } else if (fetchingEvalResult.data?.disliked)
+      deleteEvaluation({ pseudoId: quiz.pseudoId, token: token })
+        .unwrap()
+        .catch((error) => {
+          if (error.status === 401) {
+            handleEnqueueSnackbar("Тільки авторизовані користувачі можуть оцінювати вікторину", "error");
+          } else if (error.status === 500) {
+            handleEnqueueSnackbar("Сталася помилка зі сторони серверу при оцінці вікторини", "error");
+          } else {
+            handleEnqueueSnackbar(error.data, "error");
+          }
+        });
+    else
+      addEvaluation({ isLiked: false, pseudoId: quiz.pseudoId, token: token })
+        .unwrap()
+        .catch((error) => {
+          if (error.status === 401) {
+            handleEnqueueSnackbar("Тільки авторизовані користувачі можуть оцінювати вікторину", "error");
+          } else if (error.status === 500) {
+            handleEnqueueSnackbar("Сталася помилка зі сторони серверу при оцінці вікторини", "error");
+          } else {
+            handleEnqueueSnackbar(error.data, "error");
+          }
+        });
   };
   const handleClickWishlist = () => {
-    if (
-      token &&
+    if (token === null) {
+      handleEnqueueSnackbar(
+        "Тільки авторизовані користувачі можуть додавати вікторину до списку бажаного",
+        "error"
+      );
+    } else if (
       checkingWishlistResult.isSuccess &&
       !checkingWishlistResult.isLoading &&
       !addingWishlistResult.isLoading &&
       !deletingWishlistResult.isLoading
     ) {
-      if (checkingWishlistResult.data.isWishlisted)
-        deleteFromWishlist({ pseudoId: quiz.pseudoId, token: token });
-      else addToWishlist({ pseudoId: quiz.pseudoId, token: token });
-    } else if (token === null) {
-      handleEnqueueSnackbar(
-        "Тільки авторизовані користувачі можуть додавати вікторину до списку бажаного",
-        "error"
-      );
+      if (checkingWishlistResult.data.isWishlisted) {
+        deleteFromWishlist({ pseudoId: quiz.pseudoId, token: token })
+          .unwrap()
+          .catch((error) => {
+            if (error.status === 401) {
+              handleEnqueueSnackbar(
+                "Тільки авторизовані користувачі можуть додавати вікторину до бажаного",
+                "error"
+              );
+            } else if (error.status === 500) {
+              handleEnqueueSnackbar(
+                "Сталася помилка зі сторони серверу при додаванні вікторини до бажаного",
+                "error"
+              );
+            } else {
+              handleEnqueueSnackbar(error.data, "error");
+            }
+          });
+      } else {
+        addToWishlist({ pseudoId: quiz.pseudoId, token: token })
+          .unwrap()
+          .catch((error) => {
+            if (error.status === 401 || error.status === 403) {
+              handleEnqueueSnackbar(
+                "Тільки авторизовані користувачі можуть додавати вікторину до бажаного",
+                "error"
+              );
+            } else if (error.status === 500) {
+              handleEnqueueSnackbar(
+                "Сталася помилка зі сторони серверу при додаванні вікторини до бажаного",
+                "error"
+              );
+            } else {
+              handleEnqueueSnackbar(error.data, "error");
+            }
+          });
+      }
+    } else if (checkingWishlistResult.isError) {
+      if (checkingWishlistResult.error.status === 401) {
+        handleEnqueueSnackbar(
+          "Тільки авторизовані користувачі можуть додавати вікторину до бажаного",
+          "error"
+        );
+      } else if (checkingWishlistResult.error.status === 500) {
+        handleEnqueueSnackbar(
+          "Сталася помилка зі сторони серверу при додаванні чи видаленні вікторини з бажаного",
+          "error"
+        );
+      } else {
+        handleEnqueueSnackbar(checkingWishlistResult.error.data.error, "error");
+      }
     }
   };
 
-  let evaluationContent = "";
+  let evaluationContent = "0";
   if (fetchingEvalResult.isLoading) evaluationContent = <CircularProgress />;
-  else if (fetchingEvalResult.isError) {
-    evaluationContent = 0;
-    handleEnqueueSnackbar(
-      `Не вдалося отримати оцінку. Код помилки ${fetchingEvalResult.error.status} ${fetchingEvalResult.error.data}`,
-      "error",
-      false
-    );
-  } else if (fetchingEvalResult.isSuccess) evaluationContent = fetchingEvalResult.data.evaluation;
+  if (fetchingEvalResult.isSuccess) evaluationContent = fetchingEvalResult.data.evaluation;
 
   return (
     <div className="mt-[10px]">

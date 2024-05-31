@@ -1,4 +1,3 @@
-import Button from "../components/simpleComponents/Button";
 import Link from "../components/simpleComponents/Link";
 import { ROUTES } from "../ROUTES";
 import SignupCover from "../img/Screenshot_2.png";
@@ -42,6 +41,8 @@ function LoginPage() {
     e.preventDefault();
     const emailValid = validateEmail(email, setIsEmailError, setEmailErrorMsg);
     const passwordValid = validatePassword(password, setIsPasswordError, setPasswordErrorMsg);
+
+    closeAllSnackbars();
     if (emailValid && passwordValid) {
       try {
         const userData = await login({ email, password }).unwrap();
@@ -50,14 +51,14 @@ function LoginPage() {
         setPassword("");
         navigate("/");
       } catch (err) {
-        if (!err?.originalStatus) {
-          handleEnqueueSnackbar("Сервер не відповідає!", "error");
-        } else if (err.originalStatus?.status === 400) {
-          handleEnqueueSnackbar("Ви не ввели пошту чи пароль!", "error");
-        } else if (err.originalStatus?.status === 403) {
-          handleEnqueueSnackbar("В авторизації відмовлено!", "error");
+        if (err.status === 500) {
+          handleEnqueueSnackbar(err.data.error, "error");
+        } else if (err.status === 400) {
+          for (let i = 0; i < err.data.length; i++) {
+            handleEnqueueSnackbar(err.data[i], "error");
+          }
         } else {
-          handleEnqueueSnackbar("Ой! Сталася помилка ;(", "error");
+          handleEnqueueSnackbar("Не вдалося виконати авторизацію. Спробуйте пізніше", "error");
         }
       }
     }
@@ -66,10 +67,12 @@ function LoginPage() {
   const handleChangeEmail = (e) => {
     setEmail(e.target.value);
     validateEmail(e.target.value, setIsEmailError, setEmailErrorMsg);
+    closeAllSnackbars();
   };
   const handleChangePassword = (e) => {
     setPassword(e.target.value);
     validatePassword(e.target.value, setIsPasswordError, setPasswordErrorMsg);
+    closeAllSnackbars();
   };
   const handleClickShowPassword = () => setIsPasswordVisible(!isPasswordVisible);
   const handleMouseDownPassword = (e) => e.preventDefault();

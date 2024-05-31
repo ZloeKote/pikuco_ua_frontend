@@ -14,7 +14,7 @@ const root = ReactDOM.createRoot(el);
 
 root.render(
   <Provider store={store}>
-    <SnackbarProvider maxSnack={3}>
+    <SnackbarProvider maxSnack={5}>
       <BrowserRouter>
         <EnqueueSnackbarProvider>
           <SearchParamsProvider>

@@ -6,14 +6,22 @@ import { useSelector } from "react-redux";
 import { LinearProgress } from "@mui/material";
 import ShowEditedUserProfile from "../components/userProfile/ShowEditedUserProfile";
 import ShowPublicUserProfile from "../components/userProfile/ShowPublicUserProfile";
+import UserNotFound from "../components/errors/UserNotFound";
+import InternalServerError from "../components/errors/InternalServerError";
 
 function UserProfilePage() {
   const { nickname } = useParams();
   const { nickname: authPersonNickname } = useSelector(selectCurrentUser);
-  const { data: user, error, isSuccess } = useFetchUserByNicknameQuery(nickname);
+  const { data: user, isError, error, isSuccess } = useFetchUserByNicknameQuery(nickname);
 
   let userContent = <LinearProgress />;
-  if (error) userContent = `Виникла помилка! Код: ${error.status}`;
+  if (isError) {
+    if (error.status === 404) {
+      userContent = <UserNotFound />;
+    } else if(error.status === 500) {
+      userContent = <InternalServerError />
+    }
+  }
   if (isSuccess) userContent = <ShowPublicUserProfile user={user} />;
 
   let content = userContent;

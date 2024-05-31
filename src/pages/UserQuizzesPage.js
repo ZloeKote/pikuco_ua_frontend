@@ -56,7 +56,9 @@ function UserQuizzesPage() {
     <div className="flex justify-between">
       <h2>МОЇ ВІКТОРИНИ</h2>
       <div className={createButtonClassname}>
-        <Link className="w-full text-center" to={ROUTES.CreateQuiz}>Створити</Link>
+        <Link className="w-full text-center" to={ROUTES.CreateQuiz}>
+          Створити
+        </Link>
       </div>
     </div>
   );
@@ -85,7 +87,23 @@ function UserQuizzesPage() {
   }, [fetchQuizzes, handleEnqueueSnackbar, nickname, params, result, searchParams, quizzes]);
 
   function handleClickDeleteQuiz(pseudoId) {
-    deleteQuiz({ pseudoId: pseudoId, token });
+    deleteQuiz({ pseudoId: pseudoId, token })
+      .unwrap()
+      .catch((error) => {
+        if (error.status === 400) {
+          for (let i = 0; i < error.data.length; i++) {
+            handleEnqueueSnackbar(error.data[i], "error");
+          }
+        } else if (error.status === 403) {
+          handleEnqueueSnackbar("В доступі відмовлено", "error");
+        } else if (error.status === 500) {
+          handleEnqueueSnackbar(error.data, "error");
+        } else if (error.originalStatus) {
+          handleEnqueueSnackbar(error.data.error, "error");
+        } else {
+          handleEnqueueSnackbar(`Сталася непередбачувана помилка :( ${error.data}`, "error");
+        }
+      });
   }
 
   return (

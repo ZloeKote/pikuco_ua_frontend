@@ -9,6 +9,7 @@ import { LinearProgress } from "@mui/material";
 import ShowQuizStats from "../components/ShowQuizStats";
 import LanguagePicker from "../components/simpleComponents/LanguagePicker";
 import { useState } from "react";
+import QuizNotFound from "../components/errors/QuizNotFound";
 
 function QuizStatsPage() {
   const token = useSelector(selectCurrentToken);
@@ -21,7 +22,13 @@ function QuizStatsPage() {
   const [individualParams, setIndividualParams] = useState(
     searchParams.has("lang") ? "lang=" + searchParams.get("lang") : ""
   );
-  const { data: quiz, isLoading: quizIsLoading, isSuccess } = useFetchQuizQuery(pseudoId);
+  const {
+    data: quiz,
+    isLoading: quizIsLoading,
+    isSuccess,
+    isError: quizIsError,
+    error: quizError,
+  } = useFetchQuizQuery({ pseudoId, token });
   const { data: indResults } = useFetchIndividualResultsQuery(
     { pseudoId: pseudoId, token: token, param: individualParams },
     {
@@ -97,6 +104,12 @@ function QuizStatsPage() {
       });
     }
   };
+
+  if (quizIsError) {
+    if (quizError.status === 404) {
+      return <QuizNotFound />;
+    }
+  }
 
   return (
     <div className="flex flex-col items-center mt-10 text-white w-full">

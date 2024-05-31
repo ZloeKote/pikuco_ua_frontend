@@ -1,11 +1,21 @@
 import { useParams, useSearchParams } from "react-router-dom";
-import { useFetchQuizQuery } from "../store";
+import { selectCurrentToken, useFetchQuizQuery } from "../store";
 import PlayQuizLayout from "../components/PlayQuizLayout";
+import { useSelector } from "react-redux";
+import { LinearProgress } from "@mui/material";
+import QuizNotFound from "../components/errors/QuizNotFound";
 
 function PlayQuizPage() {
   const [searchParams] = useSearchParams();
   const { pseudoId } = useParams();
-  const { data: fetchedQuizData, error, isLoading, isSuccess } = useFetchQuizQuery(pseudoId);
+  const token = useSelector(selectCurrentToken);
+  const {
+    data: fetchedQuizData,
+    error,
+    isError,
+    isLoading,
+    isSuccess,
+  } = useFetchQuizQuery({ pseudoId, token });
   const language = searchParams.get("lang");
 
   let quiz = null;
@@ -25,8 +35,12 @@ function PlayQuizPage() {
       } else quiz = fetchedQuizData;
     } else quiz = fetchedQuizData;
   }
-
-  return <>{isLoading ? <div>Loading...</div> : <PlayQuizLayout quiz={quiz} />}</>;
+  if (isError) {
+    if (error.status === 403) {
+      return <QuizNotFound />;
+    }
+  }
+  return <>{isLoading ? <LinearProgress /> : <PlayQuizLayout quiz={quiz} />}</>;
 }
 
 export default PlayQuizPage;

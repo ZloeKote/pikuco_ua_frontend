@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   TextField,
   Tooltip,
@@ -8,6 +8,7 @@ import {
   IconButton,
   FormHelperText,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { IoCheckbox } from "react-icons/io5";
 import { BiEditAlt } from "react-icons/bi";
@@ -20,11 +21,15 @@ import { useParams } from "react-router-dom";
 import { validateEmail, validatePassword } from "../../hooks/validate-hooks";
 import { LoadingButton } from "@mui/lab";
 import { RiSave3Fill } from "react-icons/ri";
+import SnackbarsContext from "../../context/snackbars";
+import { ROUTES } from "../../ROUTES";
 
 function ShowUserPrivacy({ user }) {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const token = useSelector(selectCurrentToken);
   const { nickname } = useParams();
+  const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
 
   const [editedEmail, setEditedEmail] = useState(user.email);
   const [actualEmail, setActualEmail] = useState(editedEmail);
@@ -51,10 +56,12 @@ function ShowUserPrivacy({ user }) {
 
   useEffect(() => {
     if (result.isSuccess) {
-      logout(token);
+      logout(token).then(() => {
+        navigate(ROUTES.Login);
+      });
       dispatch(logOut());
     }
-  }, [dispatch, logout, token, result.isSuccess]);
+  }, [dispatch, logout, token, result.isSuccess, navigate]);
 
   const handleChangeEmail = (e) => {
     setEditedEmail(e.target.value);
@@ -136,7 +143,24 @@ function ShowUserPrivacy({ user }) {
       currentPassword: actualCurrentPassword,
       nickname: nickname,
       token: token,
-    });
+    })
+      .unwrap()
+      .catch((error) => {
+        console.log(error);
+        if (error.status === 400) {
+          for (let i = 0; i < error.data.length; i++) {
+            handleEnqueueSnackbar(error.data[i], "error");
+          }
+        } else if (error.status === 403) {
+          handleEnqueueSnackbar("В доступі відмовлено", "error");
+        } else if (error.status === 500) {
+          handleEnqueueSnackbar(error.data, "error");
+        } else if (error.originalStatus) {
+          handleEnqueueSnackbar(error.data.error, "error");
+        } else {
+          handleEnqueueSnackbar(`Сталася непередбачувана помилка :( ${error.data}`, "error");
+        }
+      });
   };
 
   let passwordTitle = <h3 className="text-[28px]">Пароль</h3>;

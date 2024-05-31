@@ -1,7 +1,7 @@
 import classNames from "classnames";
-import { Alert, TextField, Tooltip, Typography, Button } from "@mui/material";
+import { TextField, Tooltip, Typography, Button } from "@mui/material";
 import { BsInfoCircleFill } from "react-icons/bs";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { BiEditAlt } from "react-icons/bi";
 import { IoCheckbox } from "react-icons/io5";
 import { selectCurrentToken, useUpdateUserPublicMutation } from "../../store";
@@ -11,8 +11,10 @@ import GeneratedUserAvatar from "../simpleComponents/GeneratedUserAvatar";
 import { validateNickname, validateUserDescription } from "../../hooks/validate-hooks";
 import { LoadingButton } from "@mui/lab";
 import { RiSave3Fill } from "react-icons/ri";
+import SnackbarsContext from "../../context/snackbars";
 
 function ShowEditedUserProfile({ user }) {
+  const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
   const token = useSelector(selectCurrentToken);
   const [editedNickname, setEditedNickname] = useState(user.nickname);
   const [editedDescription, setEditedDescription] = useState(user.description);
@@ -45,8 +47,8 @@ function ShowEditedUserProfile({ user }) {
   const handleCompleteEditingNickname = (e) => {
     e.preventDefault();
     if (validateNickname(editedNickname, setIsNicknameError, setNicknameErrorMsg)) {
-      setIsEditingNickname(false);
-      setActualNickname(editedNickname);
+    setIsEditingNickname(false);
+    setActualNickname(editedNickname);
     }
   };
   const handleCloseEditingNicknameOnEscape = (e) => {
@@ -96,14 +98,30 @@ function ShowEditedUserProfile({ user }) {
   };
 
   const handleClickSave = () => {
-    const validNickname = validateNickname(actualNickname, setIsNicknameError, nicknameErrorMsg);
+    const validNickname = validateNickname(actualNickname, setIsNicknameError, setNicknameErrorMsg);
     const validDescription = validateUserDescription(actualDescription, setIsDescrError, setDescrErrorMsg);
     if (validNickname && validDescription) {
-      updateUser({
-        newNickname: editedNickname,
-        newDescription: editedDescription,
-        nickname: user.nickname,
-        token: token,
+    updateUser({
+      newNickname: editedNickname,
+      newDescription: editedDescription,
+      nickname: user.nickname,
+      token: token,
+    })
+      .unwrap()
+      .catch((error) => {
+        if (error.status === 400) {
+          for (let i = 0; i < error.data.length; i++) {
+            handleEnqueueSnackbar(error.data[i], "error");
+          }
+        } else if (error.status === 403) {
+          handleEnqueueSnackbar("В доступі відмовлено", "error");
+        } else if (error.status === 500) {
+          handleEnqueueSnackbar(error.data, "error");
+        } else if (error.originalStatus) {
+          handleEnqueueSnackbar(error.data.error, "error");
+        } else {
+          handleEnqueueSnackbar(`Сталася непередбачувана помилка :( ${error.data}`, "error");
+        }
       });
     } else if (!validNickname) setIsEditingNickname(true);
     else if (!validDescription) setIsEditingDescription(true);
@@ -111,15 +129,6 @@ function ShowEditedUserProfile({ user }) {
   useEffect(() => {
     if (result.isSuccess) window.location.replace(ROUTES.Profile(editedNickname.toLowerCase()));
   }, [editedNickname, result.isSuccess]);
-
-  let error = "";
-  if (result.isError) {
-    error += (
-      <Alert className="absolute left-2 bottom-11 z-40" variant="filled" severity="error">
-        Сталася помилка при застосуванні змін!
-      </Alert>
-    );
-  }
 
   let userBirthdate = "Не вказано";
   if (user.birthdate) userBirthdate = formatDate(new Date(user.birthdate));
@@ -245,7 +254,6 @@ function ShowEditedUserProfile({ user }) {
           Скинути
         </Button>
       </div>
-      {error}
     </div>
   );
 }

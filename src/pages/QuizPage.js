@@ -7,12 +7,16 @@ import { useFetchQuizMainQuery } from "../store/apis/quizzesApi";
 import ShowQuiz from "../components/ShowQuiz";
 import { LinearProgress } from "@mui/material";
 import LanguagePicker from "../components/simpleComponents/LanguagePicker";
+import { useSelector } from "react-redux";
+import { selectCurrentToken } from "../store";
+import QuizNotFound from "../components/errors/QuizNotFound";
 
 function QuizPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { pseudoId } = useParams();
-  const { data: quiz, isLoading, isSuccess } = useFetchQuizMainQuery(pseudoId);
+  const token = useSelector(selectCurrentToken);
+  const { data: quiz, isLoading, isSuccess, isError, error } = useFetchQuizMainQuery({pseudoId, token});
 
   const mainStatClassname = classNames(
     "hover:cursor-pointer hover:bg-[--dark-link-background-hover]",
@@ -34,6 +38,10 @@ function QuizPage() {
       (quiz.languages.includes(searchParams.get("lang")) && searchParams.get("lang")) ||
       (quiz.languages.includes("uk") && "uk") ||
       quiz.language;
+  }
+  if (isError) {
+    if(error.status === 404) 
+      return <QuizNotFound />
   }
 
   const handleChangeLanguage = (newLang) => {

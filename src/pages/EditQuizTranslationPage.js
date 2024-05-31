@@ -1,19 +1,28 @@
 import { useLocation } from "react-router-dom";
-import { useFetchQuizQuery } from "../store";
+import { selectCurrentToken, useFetchQuizQuery } from "../store";
 import { LinearProgress } from "@mui/material";
 import Button from "../components/simpleComponents/Button";
 import EditQuizTranslation from "../components/manageQuiz/EditQuizTranslation";
+import { useSelector } from "react-redux";
+import QuizNotFound from "../components/errors/QuizNotFound";
 
 function EditQuizTranslationPage() {
   const location = useLocation();
+  const token = useSelector(selectCurrentToken);
 
-  const { data, isSuccess, isError, error } = useFetchQuizQuery(location.state?.pseudoId);
+  const { data, isSuccess, isError, error } = useFetchQuizQuery({
+    pseudoId: location.state?.pseudoId,
+    token,
+  });
 
   let content = <LinearProgress />;
 
   if (isSuccess) {
     content = <EditQuizTranslation quiz={data} translationLanguage={location.state?.language} />;
   } else if (isError) {
+    if (error.status === 403) {
+      return <QuizNotFound />;
+    }
     content = (
       <div className="flex flex-col gap-2">
         <p>Ой! Сталася помилка при завантаженні вікторини для редагування</p>

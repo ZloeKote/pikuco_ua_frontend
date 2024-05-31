@@ -92,7 +92,21 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
         },
         pseudoId: quiz.pseudoId,
         token: token,
-      });
+      }).unwrap()
+      .catch((error) => {
+        console.log(error);
+        if (error.status === 400) {
+          for (let i = 0; i < error.data.length; i++) {
+            handleEnqueueSnackbar(error.data[i], "error");
+          }
+        } else if (error.status === 401 || error.status === 500) {
+          handleEnqueueSnackbar(error.data.error, "error");
+        } else if (error.originalStatus) {
+          handleEnqueueSnackbar(error.data, "error");
+        } else {
+          handleEnqueueSnackbar(`Сталася непередбачувана помилка :( ${error.data?.error}`, "error");
+        }
+      });;
     }
   };
 
@@ -186,8 +200,8 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
     lastContent = (
       <>
         <span>На жаль, сталася помилка при редагуванні перекладу!</span>
-        <span>Деталі помилки {result.error.status}:</span>
-        <p>{result.error.data}</p>
+        <span>Деталі помилки {result.error.originalStatus || result.error.error.status}:</span>
+        <p>{result.originalStatus ? result.error.data : result.error.data[0]}</p>
         <Button className={buttonClassname} color="warning" variant="contained" onClick={handleBack}>
           Повернутися
         </Button>

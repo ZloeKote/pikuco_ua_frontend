@@ -109,7 +109,22 @@ function CreateQuizTranslation({ quiz }) {
         },
         pseudoId: quiz.pseudoId,
         token: token,
-      });
+      })
+        .unwrap()
+        .catch((error) => {
+          console.log(error);
+          if (error.status === 400) {
+            for (let i = 0; i < error.data.length; i++) {
+              handleEnqueueSnackbar(error.data[i], "error");
+            }
+          } else if (error.status === 401 || error.status === 500) {
+            handleEnqueueSnackbar(error.data.error, "error");
+          } else if (error.originalStatus) {
+            handleEnqueueSnackbar(error.data, "error");
+          } else {
+            handleEnqueueSnackbar(`Сталася непередбачувана помилка :( ${error.data?.error}`, "error");
+          }
+        });
     } else {
       handleEnqueueSnackbar("Для створення вікторини потрібно заповнити всі питання", "error");
     }
@@ -193,7 +208,7 @@ function CreateQuizTranslation({ quiz }) {
       <>
         <span>Переклад успішно доданий!</span>
         <div className="flex gap-4">
-        <Button className={buttonClassname} color="primary" variant="contained">
+          <Button className={buttonClassname} color="primary" variant="contained">
             <Link to={ROUTES.Main}>Головна сторінка</Link>
           </Button>
           <Button className={buttonClassname} color="primary" variant="contained">
@@ -206,8 +221,8 @@ function CreateQuizTranslation({ quiz }) {
     lastContent = (
       <>
         <span>На жаль, сталася помилка при додаванні перекладу!</span>
-        <span>Деталі помилки {result.error.status}:</span>
-        <p>{result.error.data}</p>
+        <span>Деталі помилки {result.error.originalStatus || result.error.error.status}:</span>
+        <p>{result.originalStatus ? result.error.data : result.error.data[0]}</p>
         <Button className={buttonClassname} color="warning" variant="contained" onClick={handleBack}>
           Повернутися
         </Button>

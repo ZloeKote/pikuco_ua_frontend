@@ -142,7 +142,21 @@ function EditQuiz({ quiz }) {
           },
           questions: questions,
           token: token,
-        });
+        })
+          .unwrap()
+          .catch((error) => {
+            if (error.status === 400) {
+              for (let i = 0; i < error.data.length; i++) {
+                handleEnqueueSnackbar(error.data[i], "error");
+              }
+            } else if (error.status === 401 || error.status === 500) {
+              handleEnqueueSnackbar(error.data.error, "error");
+            } else if (error.originalStatus) {
+              handleEnqueueSnackbar(error.data, "error");
+            } else {
+              handleEnqueueSnackbar(`Сталася непередбачувана помилка :( ${error.data.error}`, "error");
+            }
+          });
       });
     } else {
       createQuizAsRoughDraft({
@@ -156,7 +170,21 @@ function EditQuiz({ quiz }) {
         },
         questions: questions,
         token: token,
-      });
+      })
+        .unwrap()
+        .catch((error) => {
+          if (error.status === 400) {
+            for (let i = 0; i < error.data.length; i++) {
+              handleEnqueueSnackbar(error.data[i], "error");
+            }
+          } else if (error.status === 401 || error.status === 500) {
+            handleEnqueueSnackbar(error.data.error, "error");
+          } else if (error.originalStatus) {
+            handleEnqueueSnackbar(error.data, "error");
+          } else {
+            handleEnqueueSnackbar(`Сталася непередбачувана помилка :( ${error.data.error}`, "error");
+          }
+        });
     }
   };
 
@@ -205,7 +233,21 @@ function EditQuiz({ quiz }) {
           },
           questions: questions,
           token: token,
-        });
+        })
+          .unwrap()
+          .catch((error) => {
+            if (error.status === 400) {
+              for (let i = 0; i < error.data.length; i++) {
+                handleEnqueueSnackbar(error.data[i], "error");
+              }
+            } else if (error.status === 401 || error.status === 500) {
+              handleEnqueueSnackbar(error.data.error, "error");
+            } else if (error.originalStatus) {
+              handleEnqueueSnackbar(error.data, "error");
+            } else {
+              handleEnqueueSnackbar(`Сталася непередбачувана помилка :( ${error.data.error}`, "error");
+            }
+          });
         setActiveStep(activeStep + 1);
       });
     } else {
@@ -298,8 +340,8 @@ function EditQuiz({ quiz }) {
     lastContent = (
       <>
         <span>На жаль, сталася помилка при редагуванні вікторини!</span>
-        <span>Деталі помилки {result.error.status}:</span>
-        <p>{result.error.message}</p>
+        <span>Деталі помилки {result.originalStatus || result.error.status}:</span>
+        <p>{result.originalStatus ? result.error.data : result.error.data[0]}</p>
         <Button className={buttonClassname} color="warning" variant="contained" onClick={handleBack}>
           Повернутися
         </Button>
