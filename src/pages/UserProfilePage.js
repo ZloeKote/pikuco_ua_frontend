@@ -8,21 +8,27 @@ import ShowEditedUserProfile from "../components/userProfile/ShowEditedUserProfi
 import ShowPublicUserProfile from "../components/userProfile/ShowPublicUserProfile";
 import UserNotFound from "../components/errors/UserNotFound";
 import InternalServerError from "../components/errors/InternalServerError";
+import { useContext } from "react";
+import SnackbarsContext from "../context/snackbars";
 
 function UserProfilePage() {
+  const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
   const { nickname } = useParams();
   const { nickname: authPersonNickname } = useSelector(selectCurrentUser);
   const { data: user, isError, error, isSuccess } = useFetchUserByNicknameQuery(nickname);
 
   let userContent = <LinearProgress />;
+
+  if (isSuccess) userContent = <ShowPublicUserProfile user={user} />;
   if (isError) {
     if (error.status === 404) {
-      userContent = <UserNotFound />;
-    } else if(error.status === 500) {
-      userContent = <InternalServerError />
+      return <UserNotFound />;
+    } else if (error.status === 500) {
+      return <InternalServerError />;
+    } else if (error.originalStatus) {
+      handleEnqueueSnackbar("Сталася непередбачувана помилка! Спробуйте пізніше", "error", false);
     }
   }
-  if (isSuccess) userContent = <ShowPublicUserProfile user={user} />;
 
   let content = userContent;
   if (nickname.toLowerCase() === authPersonNickname?.toLowerCase() && isSuccess) {

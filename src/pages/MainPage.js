@@ -1,5 +1,5 @@
 import { LinearProgress } from "@mui/material";
-import QuizHeader from "../components/QuizHeader";
+import QuizzesSectionHeader from "../components/QuizzesSectionHeader";
 import QuizzesList from "../components/QuizzesList";
 import { useFetchPopularQuizzesQuery, useFetchQuizzesQuery } from "../store/index";
 import InternalServerError from "../components/errors/InternalServerError"
@@ -27,7 +27,7 @@ function MainPage() {
   return (
     <div className="main-page-layout mx-[3rem] mt-[15px]">
       <div>
-        <QuizHeader>Популярні вікторини</QuizHeader>
+        <QuizzesSectionHeader>Популярні вікторини</QuizzesSectionHeader>
         {isSuccessFetchingPopularQuizzes ? (
           <QuizzesList quizzes={popularQuizzes.quizzes} hiddenPagination={true} />
         ) : (
@@ -36,7 +36,7 @@ function MainPage() {
       </div>
 
       <div className="mt-[15px]">
-        <QuizHeader>Нові вікторини</QuizHeader>
+        <QuizzesSectionHeader>Нові вікторини</QuizzesSectionHeader>
         {isSuccessFetchingNewestQuizzes ? (
           <QuizzesList quizzes={newestQuizzes.quizzes} hiddenPagination={true} />
         ) : (
