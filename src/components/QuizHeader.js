@@ -20,7 +20,7 @@ import LanguagePicker from "./simpleComponents/LanguagePicker";
 import GeneratedUserAvatar from "./simpleComponents/GeneratedUserAvatar";
 import { ROUTES } from "../ROUTES";
 
-function QuizHeader({ children, quiz, language, section }) {
+function QuizHeader({ children, quiz, language, onChangeLanguage, section }) {
   const { pseudoId } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -58,6 +58,7 @@ function QuizHeader({ children, quiz, language, section }) {
   );
 
   const handleChangeLanguage = (newLang) => {
+    onChangeLanguage(newLang);
     searchParams.set("lang", newLang);
     navigate({
       pathname: location.pathname,
@@ -100,8 +101,7 @@ function QuizHeader({ children, quiz, language, section }) {
     if (token) checkWishlistFunction();
   }, [fetchEvaluationFunction, checkWishlistFunction, token]);
 
-  let quizTitle =
-    language === quiz.language ? quiz.title : quiz.translations.find((tr) => tr.language === language).title;
+  let quizTitle = quiz.title;
 
   if (quiz.isRoughDraft) {
     quizTitle = (

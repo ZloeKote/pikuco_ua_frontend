@@ -12,11 +12,6 @@ function ShowQuiz({ quiz, language }) {
     "border-green-400 bg-green-600 text-white hover:bg-green-500 rounded-full"
   );
 
-  const quizDescription =
-    language === quiz.language
-      ? quiz.description
-      : quiz.translations.find((tr) => tr.language === language).description;
-
   return (
     <>
       <div className="flex flex-col items-center text-center text-[24px]">
@@ -25,7 +20,7 @@ function ShowQuiz({ quiz, language }) {
         </div>
         <div className="w-[60rem]">
           <p className="my-[5px]">{quizType}</p>
-          <p className="mb-[5px]">{quizDescription}</p>
+          <p className="mb-[5px]">{quiz.description}</p>
           <p className="mb-[15px]">{quiz.amountQuestions} варіанти</p>
         </div>
       </div>
@@ -34,7 +29,7 @@ function ShowQuiz({ quiz, language }) {
           <div className={playButtonClassname}>
             <Link
               className="w-full h-full flex justify-center items-center"
-              to={ROUTES.PlayQuiz(quiz.pseudoId) + `?lang=${language}`}
+              to={ROUTES.PlayQuiz(quiz.pseudoId) + `${!!language ? "?lang=" + language : ""}`}
             >
               Грати
             </Link>

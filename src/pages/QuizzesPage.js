@@ -7,7 +7,7 @@ import ParamsContext from "../context/searchParams";
 import { LinearProgress } from "@mui/material";
 import SnackbarsContext from "../context/snackbars";
 import QuizNotFound from "../components/errors/QuizNotFound";
-import InternalServerError from "../components/errors/InternalServerError"
+import InternalServerError from "../components/errors/InternalServerError";
 
 function QuizzesPage() {
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
@@ -30,7 +30,7 @@ function QuizzesPage() {
         handleEnqueueSnackbar(error.data[i], "error");
       }
     } else if (error.status === 500) {
-      return <InternalServerError />
+      return <InternalServerError />;
     } else if (error.originalStatus) {
       handleEnqueueSnackbar(error.data.error, "error");
     } else {

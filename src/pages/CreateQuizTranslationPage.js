@@ -5,6 +5,7 @@ import Button from "../components/simpleComponents/Button";
 import CreateQuizTranslation from "../components/manageQuiz/CreateQuizTranslation";
 import { useSelector } from "react-redux";
 import QuizNotFound from "../components/errors/QuizNotFound";
+import NotAuthorized from "../components/errors/NotAuthorized";
 
 function CreateQuizTranslationPage() {
   const location = useLocation();
@@ -20,9 +21,9 @@ function CreateQuizTranslationPage() {
   if (isSuccess) {
     content = <CreateQuizTranslation quiz={data} />;
   } else if (isError) {
-    if (error.status === 403) {
-      return <QuizNotFound />;
-    }
+    if (error.status === 401) return <NotAuthorized />;
+    else if (error.status === 404) return <QuizNotFound />;
+
     content = (
       <div className="flex flex-col gap-2">
         <p>Ой! Сталася помилка при завантаженні вікторини для редагування</p>

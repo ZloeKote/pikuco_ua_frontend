@@ -1,42 +1,57 @@
-import { useLocation, useParams, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import QuestionList from "./QuestionList";
 import ActiveButton from "./simpleComponents/ActiveButton";
 import { LinearProgress } from "@mui/material";
 import classNames from "classnames";
 import { useFetchQuizResultsQuery } from "../store";
 import { types } from "../predefined/QuestionTypes";
+import { ROUTES } from "../ROUTES";
 
 function ShowQuizStats({
   quiz,
   indResults,
-  individualParams,
+  isResultsAfterPassing,
   generalParams,
   onChangeParam,
   isIndividual,
   onChangeIndividual,
-  language,
 }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { pseudoId } = useParams();
   const [searchParams] = useSearchParams();
-  const { data: results, isLoading: resultsIsLoading } = useFetchQuizResultsQuery({
+  const { data: results, isFetching: resultsIsLoading } = useFetchQuizResultsQuery({
     pseudoId: pseudoId,
     param: generalParams,
   });
 
   let questions;
   if (isIndividual) {
-    questions = location.state?.resultsAfterPassing || indResults?.quizResults.questions;
+    if (isResultsAfterPassing) {
+      const page = searchParams.get("page");
+      const sort = searchParams.get("sort");
+      let questionsTemp = location.state?.resultsAfterPassing;
+      if (questionsTemp.length <= 4) questions = questionsTemp;
+      else {
+        if (sort === "TITLE_ASC")
+          questionsTemp.sort((q1, q2) => (q1.title > q2.title ? 1 : q2.title > q1.title ? -1 : 0));
+        else questionsTemp.sort((q1, q2) => q1.place - q2.place);
+
+        if (page === null || page <= 1) {
+          questionsTemp = questionsTemp.slice(0, 4);
+        } else {
+          questionsTemp = questionsTemp.slice((Number(page) - 1) * 4, Number(page) * 4);
+        }
+        questions = questionsTemp;
+      }
+    } else questions = indResults?.quizResults.questions;
   } else {
     if (!resultsIsLoading && results === undefined) {
-      if (language !== quiz.language && quiz.translations.some((tr) => tr.language === language))
-        questions = quiz.translations.find((tr) => tr.language === language).questions;
-      else questions = quiz.questions;
+      questions = quiz.questions;
     } else {
       questions = results?.quizResults.questions;
     }
   }
-
   let isIndExists = location.state?.resultsAfterPassing ? true : false || indResults ? true : false;
   const indClassname = classNames("mr-[25px] text-[32px]", {
     "text-gray-500 cursor-no-drop": !isIndExists,
@@ -56,7 +71,24 @@ function ShowQuizStats({
       else if (sortBy === "title") searchParams.set("sort", "TITLE_ASC");
     }
     searchParams.delete("page");
-    onChangeParam(searchParams.toString());
+
+    if (isResultsAfterPassing)
+      navigate(
+        ROUTES.QuizStats(pseudoId) + (!!searchParams.toString() ? "?" + searchParams.toString() : ""),
+        {
+          state: { isIndividual: true, resultsAfterPassing: location.state?.resultsAfterPassing },
+        }
+      );
+    else onChangeParam(searchParams.toString());
+  };
+
+  const handlePageParam = (param) => {
+    if (isResultsAfterPassing) {
+      console.log(param);
+      navigate(ROUTES.QuizStats(pseudoId) + (!!param ? "?" + param : ""), {
+        state: { isIndividual: true, resultsAfterPassing: location.state?.resultsAfterPassing },
+      });
+    } else onChangeParam(param);
   };
 
   const handleClickIndividual = () => onChangeIndividual(true);
@@ -99,9 +131,8 @@ function ShowQuizStats({
           questions={questions}
           questionType={quiz.type}
           variant={isIndividual ? types.individual : types.general}
-          lang={language}
           numPages={results.numPages}
-          handlePageParam={onChangeParam}
+          handlePageParam={handlePageParam}
           hiddenPagination={results.numPages < 2}
         />
       )}

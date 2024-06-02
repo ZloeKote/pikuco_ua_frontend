@@ -20,13 +20,13 @@ function ShowQuestion({
   let questionDescription = question.description !== "null" ? question.description : "";
   const isQuestionEmpty = question.url === "" && question.title === "" && question.description === "";
 
-  if (
-    (variant === types.individual || variant === types.general) &&
-    question.translations?.some((tr) => tr.language === lang)
-  ) {
-    questionTitle = question.translations.find((tr) => tr.language === lang).title;
-    questionDescription = question.translations.find((tr) => tr.language === lang).description;
-  }
+  // if (
+  //   (variant === types.individual || variant === types.general) &&
+  //   question.translations?.some((tr) => tr.language === lang)
+  // ) {
+  //   questionTitle = question.translations.find((tr) => tr.language === lang).title;
+  //   questionDescription = question.translations.find((tr) => tr.language === lang).description;
+  // }
 
   let questionInfoClassname = classNames("w-[70%] pl-3");
 

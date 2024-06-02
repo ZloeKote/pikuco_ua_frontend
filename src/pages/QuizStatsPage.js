@@ -6,40 +6,39 @@ import { LinearProgress } from "@mui/material";
 import ShowQuizStats from "../components/ShowQuizStats";
 import { useState } from "react";
 import QuizNotFound from "../components/errors/QuizNotFound";
+import PageNotFound from "../components/errors/PageNotFound";
 import QuizHeader from "../components/QuizHeader";
+import InternalServerError from "../components/errors/InternalServerError";
 
 function QuizStatsPage() {
   const token = useSelector(selectCurrentToken);
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [language, setLanguage] = useState(searchParams.get("lang") || "");
   const { pseudoId } = useParams();
   const [isIndividual, setIsIndividual] = useState(location.state?.isIndividual ? true : false);
   const [generalParams, setGeneralParams] = useState(searchParams.toString());
-  const [individualParams, setIndividualParams] = useState(
-    searchParams.has("lang") ? "lang=" + searchParams.get("lang") : ""
-  );
+  const [individualParams, setIndividualParams] = useState(!!language ? "lang=" + language : "");
   const {
     data: quiz,
-    isLoading: quizIsLoading,
     isSuccess,
+    isLoading: quizIsLoading,
     isError: quizIsError,
     error: quizError,
   } = useFetchQuizQuery({ pseudoId, token });
+  const isResultsAfterPassing = !!location.state?.resultsAfterPassing;
   const { data: indResults } = useFetchIndividualResultsQuery(
     { pseudoId: pseudoId, token: token, param: individualParams },
     {
-      skip: location.state?.resultsAfterPassing ? true : false || token ? false : true,
+      skip: isResultsAfterPassing ? true : false || token ? false : true,
     }
   );
 
-  let currLanguage = "";
   if (isSuccess) {
-    currLanguage =
-      (quiz.languages.includes(searchParams.get("lang")) && searchParams.get("lang")) ||
-      (quiz.languages.includes("uk") && "uk") ||
-      quiz.language;
+    if (quiz.isRoughDraft) return <PageNotFound />;
   }
+
   const handleChangeIndividual = (isIndividual) => {
     setIsIndividual(isIndividual);
     if (isIndividual) {
@@ -69,23 +68,27 @@ function QuizStatsPage() {
       });
     }
   };
+  const handleChangeLanguage = (lang) => {
+    setLanguage(lang);
+    setGeneralParams(updateQueryParam(generalParams, "lang", lang));
+    setIndividualParams(updateQueryParam(individualParams, "lang", lang));
+  };
 
   if (quizIsError) {
-    if (quizError.status === 404) {
-      return <QuizNotFound />;
-    }
+    if (quizError.status === 404) return <QuizNotFound />;
+    else if (quizError.status === 500) return <InternalServerError />;
   }
 
   return quizIsLoading ? (
     <LinearProgress />
   ) : (
-    <QuizHeader quiz={quiz} language={currLanguage} section="stats">
+    <QuizHeader quiz={quiz} language={language} onChangeLanguage={handleChangeLanguage} section="stats">
       <ShowQuizStats
         quiz={quiz}
         indResults={indResults}
         isIndividual={isIndividual}
         onChangeIndividual={handleChangeIndividual}
-        language={currLanguage}
+        isResultsAfterPassing={isResultsAfterPassing}
         generalParams={generalParams}
         individualParams={individualParams}
         onChangeParam={handleClickChangeParam}
@@ -95,3 +98,33 @@ function QuizStatsPage() {
 }
 
 export default QuizStatsPage;
+
+function updateQueryParam(query, paramToUpdate, paramValue) {
+  console.log(query);
+  // Розділяємо параметри на масив
+  let paramsArray = query.split("&");
+  let langFound = false;
+
+  if (query === "") return `${paramToUpdate}=${paramValue}`;
+
+  // Проходимося по кожному параметру
+  for (let i = 0; i < paramsArray.length; i++) {
+    let param = paramsArray[i].split("=");
+
+    // Якщо параметр знайдено, замінюємо його значення
+    if (param[0] === paramToUpdate) {
+      param[1] = paramValue;
+      paramsArray[i] = param.join("=");
+      langFound = true;
+      break;
+    }
+  }
+
+  // Якщо параметр не знайдено, додаємо його
+  if (!langFound) {
+    paramsArray.push(`${paramToUpdate}=` + paramValue);
+  }
+
+  // Збираємо параметри назад у рядок
+  return paramsArray.join("&");
+}

@@ -118,7 +118,7 @@ function ShowEditedUserProfile({ user }) {
         } else if (error.status === 500) {
           handleEnqueueSnackbar(error.data, "error");
         } else if (error.originalStatus) {
-          handleEnqueueSnackbar(error.data.error, "error");
+          handleEnqueueSnackbar(error.data, "error");
         } else {
           handleEnqueueSnackbar(`Сталася непередбачувана помилка :( ${error.data}`, "error");
         }

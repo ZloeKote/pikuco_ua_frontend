@@ -21,7 +21,7 @@ function QuestionList({
   const [page, setPage] = useState(searchParams.get("page") !== null ? searchParams.get("page") : 1);
   useEffect(() => {
     if (!searchParams.has("page")) setPage(1);
-    else setPage(searchParams.get("page"))
+    else setPage(searchParams.get("page"));
   }, [searchParams]);
   const handleChangePage = (_, value) => {
     if (value !== 1) searchParams.set("page", value);
@@ -39,7 +39,6 @@ function QuestionList({
         question={question}
         questionType={questionType}
         variant={variant}
-        lang={lang}
         numQuestion={i}
         onClickReset={onClickReset}
         onClickQuiz={onClickQuiz}
