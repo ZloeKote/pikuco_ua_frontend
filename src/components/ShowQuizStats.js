@@ -31,19 +31,16 @@ function ShowQuizStats({
       const page = searchParams.get("page");
       const sort = searchParams.get("sort");
       let questionsTemp = location.state?.resultsAfterPassing;
-      if (questionsTemp.length <= 4) questions = questionsTemp;
-      else {
-        if (sort === "TITLE_ASC")
-          questionsTemp.sort((q1, q2) => (q1.title > q2.title ? 1 : q2.title > q1.title ? -1 : 0));
-        else questionsTemp.sort((q1, q2) => q1.place - q2.place);
+      if (sort === "TITLE_ASC")
+        questionsTemp.sort((q1, q2) => (q1.title > q2.title ? 1 : q2.title > q1.title ? -1 : 0));
+      else questionsTemp.sort((q1, q2) => q1.place - q2.place);
 
-        if (page === null || page <= 1) {
-          questionsTemp = questionsTemp.slice(0, 4);
-        } else {
-          questionsTemp = questionsTemp.slice((Number(page) - 1) * 4, Number(page) * 4);
-        }
-        questions = questionsTemp;
+      if (page === null || page <= 1) {
+        questionsTemp = questionsTemp.slice(0, 4);
+      } else {
+        questionsTemp = questionsTemp.slice((Number(page) - 1) * 4, Number(page) * 4);
       }
+      questions = questionsTemp;
     } else questions = indResults?.quizResults.questions;
   } else {
     if (!resultsIsLoading && results === undefined) {

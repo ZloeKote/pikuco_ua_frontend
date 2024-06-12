@@ -23,10 +23,10 @@ function QuizStatsPage() {
   const {
     data: quiz,
     isSuccess,
-    isLoading: quizIsLoading,
+    isFetching: quizIsFetching,
     isError: quizIsError,
     error: quizError,
-  } = useFetchQuizQuery({ pseudoId, token });
+  } = useFetchQuizQuery({ pseudoId, token, param: searchParams.toString() });
   const isResultsAfterPassing = !!location.state?.resultsAfterPassing;
   const { data: indResults } = useFetchIndividualResultsQuery(
     { pseudoId: pseudoId, token: token, param: individualParams },
@@ -79,7 +79,7 @@ function QuizStatsPage() {
     else if (quizError.status === 500) return <InternalServerError />;
   }
 
-  return quizIsLoading ? (
+  return quizIsFetching ? (
     <LinearProgress />
   ) : (
     <QuizHeader quiz={quiz} language={language} onChangeLanguage={handleChangeLanguage} section="stats">

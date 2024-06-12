@@ -118,7 +118,7 @@ const quizzesApi = createApi({
       fetchQuiz: builder.query({
         query: ({pseudoId, token, param}) => {
           return {
-            url: `/${pseudoId}${!!param ? param : ""}`,
+            url: `/${pseudoId}${!!param ? '?' + param : ""}`,
             method: "GET",
             headers: { Authorization: !!token ? `Bearer ${token}` : "" },
           };

@@ -7,8 +7,8 @@ export const quizTypes = [
     label: "Турнір - Відео",
     value: "TOURNAMENT_VIDEO",
   },
-  {
-    label: "Турнір - Картинки",
-    value: "TOURNAMENT_PICTURE",
-  },
+  // {
+  //   label: "Турнір - Картинки",
+  //   value: "TOURNAMENT_PICTURE",
+  // },
 ];

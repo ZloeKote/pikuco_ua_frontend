@@ -196,7 +196,7 @@ function CreateQuizPage() {
     const actualNumQuestions = questions.filter(
       (question) => question.url !== "" || question.title !== ""
     ).length;
-    if (actualNumQuestions === numQuestions) {
+    if (actualNumQuestions === Number(numQuestions)) {
       const firstRandomIndex = Math.floor(Math.random() * actualNumQuestions);
       let secondRandomIndex;
       while (true) {

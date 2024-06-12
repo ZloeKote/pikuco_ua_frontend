@@ -125,6 +125,7 @@ function CreateQuizTranslation({ quiz }) {
             handleEnqueueSnackbar(`Сталася непередбачувана помилка :( ${error.data?.error}`, "error");
           }
         });
+        setActiveStep(activeStep + 1);
     } else {
       handleEnqueueSnackbar("Для створення вікторини потрібно заповнити всі питання", "error");
     }

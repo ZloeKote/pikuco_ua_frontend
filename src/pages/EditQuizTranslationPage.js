@@ -13,6 +13,7 @@ function EditQuizTranslationPage() {
   const { data, isSuccess, isError, error } = useFetchQuizQuery({
     pseudoId: location.state?.pseudoId,
     token,
+    param: `?lang=${location.state?.language}`
   });
 
   let content = <LinearProgress />;

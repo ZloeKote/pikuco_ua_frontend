@@ -5,6 +5,7 @@ import InfoIcon from "../simpleComponents/InfoIcon";
 import LanguageAutocompleter from "../simpleComponents/LanguageAutocompleter";
 import predefinedNumQuestions from "../../predefined/NumQuestions";
 import { RedAsterisk } from "../../custom-materials";
+import { quizTypes } from "../../predefined/QuizTypes";
 
 function GeneralInfoQuiz({
   title,
@@ -32,7 +33,7 @@ function GeneralInfoQuiz({
   descrErrorMsg,
 }) {
   const [numDescriptionSymbolsLeft, setNumDescriptionSymbolsLeft] = useState(80);
-  const renderedQuizTypes = QuizTypes.filter((type) => type.value !== "").map((type) => {
+  const renderedQuizTypes = quizTypes.filter((type) => type.value !== "").map((type) => {
     return (
       <MenuItem key={type.value} value={type.value}>
         <Typography sx={{ fontSize: "22px" }}>{type.label}</Typography>
@@ -152,18 +153,3 @@ function GeneralInfoQuiz({
 }
 
 export default GeneralInfoQuiz;
-
-const QuizTypes = [
-  {
-    label: "Обери тип",
-    value: "",
-  },
-  {
-    label: "Турнір - Відео",
-    value: "TOURNAMENT_VIDEO",
-  },
-  {
-    label: "Турнір - Картинки",
-    value: "TOURNAMENT_PICTURE",
-  },
-];

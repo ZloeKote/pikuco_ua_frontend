@@ -10,7 +10,7 @@ function PlayQuizLayout({ quiz }) {
   const navigate = useNavigate();
   const token = useSelector(selectCurrentToken);
   const [questionList, setQuestionList] = useState({
-    curr: quiz.questions,
+    curr: shuffle(quiz.questions),
     next: [],
     excluded: [],
     round: 1,
@@ -177,6 +177,23 @@ function PlayQuizLayout({ quiz }) {
 }
 
 export default PlayQuizLayout;
+
+function shuffle(array) {
+  let currentIndex = array.length;
+  let tempArray = [...array];
+  // While there remain elements to shuffle...
+  while (currentIndex !== 0) {
+
+    // Pick a remaining element...
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [tempArray[currentIndex], tempArray[randomIndex]] = [
+      tempArray[randomIndex], tempArray[currentIndex]];
+  }
+  return tempArray;
+}
 
 //another variant
 // const updatedList = questionList.curr.filter((q, index) => {

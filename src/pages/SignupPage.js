@@ -164,7 +164,6 @@ function Signup() {
                   value={user.password}
                   onChange={handleChangePassword}
                   type={isPasswordVisible ? "text" : "password"}
-                  placeholder="arroweatsbugs123"
                   margin="none"
                   size="small"
                   inputProps={{ style: { fontSize: "26px" } }}

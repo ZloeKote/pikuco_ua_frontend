@@ -23,24 +23,16 @@ import { LoadingButton } from "@mui/lab";
 function EditQuizTranslation({ quiz, translationLanguage }) {
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
   const token = useSelector(selectCurrentToken);
-  const [title, setTitle] = useState(
-    quiz.translations?.find((tr) => tr.language === translationLanguage).title
-  );
-  const [description, setDescription] = useState(
-    quiz.translations?.find((tr) => tr.language === translationLanguage).description
-  );
-  const [questions, setQuestions] = useState(
-    quiz.translations?.find((tr) => tr.language === translationLanguage).questions
-  );
+  const [title, setTitle] = useState(quiz.title);
+  const [description, setDescription] = useState(quiz.description);
+  const [questions, setQuestions] = useState(quiz.questions);
   const [activeStep, setActiveStep] = useState(0);
   const [isTitleError, setIsTitleError] = useState(false);
   const [titleErrorMsg, setTitleErrorMsg] = useState("");
   const [isDescrError, setIsDescrError] = useState(false);
   const [descrErrorMsg, setDescrErrorMsg] = useState("");
 
-  const language = iso6393.find(
-    (lang) => lang.iso6391 === quiz.translations?.find((tr) => tr.language === translationLanguage).language
-  );
+  const language = iso6393.find((lang) => lang.iso6391 === quiz.language);
 
   const [editTranslation, result] = useEditQuizTranslationMutation();
 
@@ -92,21 +84,23 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
         },
         pseudoId: quiz.pseudoId,
         token: token,
-      }).unwrap()
-      .catch((error) => {
-        console.log(error);
-        if (error.status === 400) {
-          for (let i = 0; i < error.data.length; i++) {
-            handleEnqueueSnackbar(error.data[i], "error");
+      })
+        .unwrap()
+        .catch((error) => {
+          console.log(error);
+          if (error.status === 400) {
+            for (let i = 0; i < error.data.length; i++) {
+              handleEnqueueSnackbar(error.data[i], "error");
+            }
+          } else if (error.status === 401 || error.status === 500) {
+            handleEnqueueSnackbar(error.data.error, "error");
+          } else if (error.originalStatus) {
+            handleEnqueueSnackbar(error.data, "error");
+          } else {
+            handleEnqueueSnackbar(`Сталася непередбачувана помилка :( ${error.data?.error}`, "error");
           }
-        } else if (error.status === 401 || error.status === 500) {
-          handleEnqueueSnackbar(error.data.error, "error");
-        } else if (error.originalStatus) {
-          handleEnqueueSnackbar(error.data, "error");
-        } else {
-          handleEnqueueSnackbar(`Сталася непередбачувана помилка :( ${error.data?.error}`, "error");
-        }
-      });;
+        });
+      setActiveStep(activeStep + 1);
     }
   };
 
