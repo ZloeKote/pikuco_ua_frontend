@@ -123,23 +123,17 @@ function QuizCard({ quiz, showActions = false, onDelete, isLoadingDeleting }) {
             onClose={handleClose}
             variant="menu"
           >
-            <IconMenuItem
-              leftIcon={<BiEditAlt />}
-              label={
-                <Link to={ROUTES.EditQuiz} state={{ pseudoId: quiz.pseudoId }}>
-                  Редагувати
-                </Link>
-              }
-            />
-            <IconMenuItem
-              leftIcon={<BsTranslate />}
-              label={
-                <Link to={ROUTES.CreateQuizTranslation} state={{ pseudoId: quiz.pseudoId }}>
-                  Додати переклад
-                </Link>
-              }
+            <Link to={ROUTES.EditQuiz} state={{ pseudoId: quiz.pseudoId }}>
+              <IconMenuItem leftIcon={<BiEditAlt />} label="Редагувати" />
+            </Link>
+            <Link
+              to={ROUTES.CreateQuizTranslation}
+              state={{ pseudoId: quiz.pseudoId }}
               disabled={quiz.isRoughDraft}
-            />
+              className="!text-white"
+            >
+              <IconMenuItem leftIcon={<BsTranslate />} label="Додати переклад" disabled={quiz.isRoughDraft} />
+            </Link>
             <NestedMenuItem
               leftIcon={<BsTranslate />}
               rightIcon={<FaChevronRight />}
@@ -149,16 +143,15 @@ function QuizCard({ quiz, showActions = false, onDelete, isLoadingDeleting }) {
             >
               {quiz.languages.slice(1).map((lang) => {
                 return (
-                  <MenuItem onClick={handleClose} key={lang}>
-                    <ListItemText>
-                      <Link
-                        to={ROUTES.EditQuizTranslation}
-                        state={{ pseudoId: quiz.pseudoId, language: lang }}
-                      >
-                        {iso6393.find((isoLang) => isoLang.iso6391 === lang)?.name}
-                      </Link>
-                    </ListItemText>
-                  </MenuItem>
+                  <Link
+                    to={ROUTES.EditQuizTranslation}
+                    state={{ pseudoId: quiz.pseudoId, language: lang }}
+                    key={lang}
+                  >
+                    <MenuItem>
+                      <ListItemText>{iso6393.find((isoLang) => isoLang.iso6391 === lang)?.name}</ListItemText>
+                    </MenuItem>
+                  </Link>
                 );
               })}
             </NestedMenuItem>
