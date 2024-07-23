@@ -1,4 +1,4 @@
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useParams, useLocation, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { selectCurrentUser, selectCurrentToken, useFetchUserCompletedQuizzesQuery } from "../store";
@@ -12,8 +12,9 @@ function UserCQuizzesPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { nickname } = useParams();
+  const [searchParams] = useSearchParams();
   const { nickname: authPersonNickname } = useSelector(selectCurrentUser);
-  const [params, setParams] = useState("");
+  const [params, setParams] = useState(searchParams.size !== 0 ? "?" + searchParams.toString() : "");
   const token = useSelector(selectCurrentToken);
 
   const { data: quizzes, isLoading } = useFetchUserCompletedQuizzesQuery({ token: token, param: params });
@@ -37,12 +38,14 @@ function UserCQuizzesPage() {
         section={ProfileSections.completed_quizzes}
         userNickname={nickname}
         className="h-[776px]"
+        handleParam={handleChangeParam}
       >
         {!isLoading ? (
           <QuizzesList
             className="my-2 mx-8 justify-between h-full"
             quizzes={quizzes?.quizzes}
             numPages={quizzes?.numPages}
+            page={searchParams.get("page")}
             gapY="middle"
             gapX="middle"
             handlePageParam={handleChangeParam}

@@ -1,6 +1,6 @@
 import QuizCard from "./QuizCard";
 import { Pagination } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import classNames from "classnames";
 import { twMerge } from "tailwind-merge";
@@ -20,6 +20,7 @@ function QuizzesList({
   quizzes,
   handlePageParam,
   numPages = 1,
+  page,
   gapX = "small",
   gapY = "distant",
   hiddenPagination,
@@ -29,14 +30,30 @@ function QuizzesList({
   ...rest
 }) {
   const [searchParams] = useSearchParams();
-  const [page, setPage] = useState(searchParams.get("page") !== null ? searchParams.get("page") : 1);
+  const [currentPage, setCurrentPage] = useState(
+    page !== undefined && page !== null
+      ? page
+      : searchParams.get("page") !== null
+      ? searchParams.get("page")
+      : 1
+  );
   const quizzesClassName = classNames(`flex flex-wrap ${gapXVariants[gapX]} ${gapYVariants[gapY]}`);
   const layoutClassname = twMerge(classNames(rest.className, "flex flex-col "));
+
+  useEffect(() => {
+    setCurrentPage(
+      page !== undefined && page !== null
+        ? page
+        : searchParams.get("page") !== null
+        ? searchParams.get("page")
+        : 1
+    );
+  }, [page, searchParams]);
 
   const handleChangePage = (_, value) => {
     if (value !== 1) searchParams.set("page", value);
     else searchParams.delete("page");
-    setPage(value);
+    setCurrentPage(value);
     handlePageParam(searchParams.toString() !== "" ? "?" + searchParams.toString() : "");
   };
   const renderedQuizzes = quizzes?.map((quiz) => {
@@ -58,7 +75,7 @@ function QuizzesList({
       <div className="flex justify-center mt-[20px]">
         <Pagination
           count={numPages}
-          page={Number(page)}
+          page={Number(currentPage)}
           onChange={handleChangePage}
           size="large"
           showFirstButton

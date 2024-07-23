@@ -18,7 +18,7 @@ function UserQuizzesPage() {
   const [searchParams] = useSearchParams();
   const { nickname } = useParams();
   const { nickname: authPersonNickname } = useSelector(selectCurrentUser);
-  const [params, setParams] = useState("");
+  const [params, setParams] = useState(searchParams.size !== 0 ? "?" + searchParams.toString() : "");
   const token = useSelector(selectCurrentToken);
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
 
@@ -113,12 +113,14 @@ function UserQuizzesPage() {
         section={ProfileSections.my_quizzes}
         userNickname={nickname}
         className="h-[776px]"
+        handleParam={handleChangeParam}
       >
         {!isLoading ? (
           <QuizzesList
             className="my-2 mx-8 justify-between h-full"
             quizzes={quizzes?.quizzes}
             numPages={quizzes?.numPages}
+            page={searchParams.get("page")}
             gapY="middle"
             gapX="middle"
             handlePageParam={handleChangeParam}
