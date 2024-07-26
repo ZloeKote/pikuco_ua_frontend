@@ -18,6 +18,11 @@ function UserCQuizzesPage() {
   const token = useSelector(selectCurrentToken);
 
   const { data: quizzes, isLoading } = useFetchUserCompletedQuizzesQuery({ token: token, param: params });
+
+  useEffect(() => {
+    setParams(searchParams.size !== 0 ? "?" + searchParams.toString() : "");
+  }, [searchParams]);
+  
   useEffect(() => {
     if (nickname.toLowerCase() !== authPersonNickname?.toLowerCase())
       navigate(ROUTES.Profile(nickname), { replace: true });

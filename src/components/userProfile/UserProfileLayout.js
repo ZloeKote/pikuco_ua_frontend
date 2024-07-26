@@ -11,10 +11,6 @@ function UserProfileLayout({ title, section, userNickname, children, className, 
     "border border-[--dark-quizcard-border] rounded-2xl",
     "w-[75rem] text-[20px]"
   );
-  const resetParams = (e) => {
-    e.preventDefault();
-    handleParam("");
-  };
 
   return (
     <div>
@@ -49,7 +45,6 @@ function UserProfileLayout({ title, section, userNickname, children, className, 
                   <Link
                     className={classNames({ "font-bold": ProfileSections.completed_quizzes === section })}
                     to={ROUTES.UserCompletedQuizzes(userNickname)}
-                    onClick={ProfileSections.completed_quizzes === section ? resetParams : undefined}
                   >
                     Пройдені
                   </Link>
@@ -58,7 +53,6 @@ function UserProfileLayout({ title, section, userNickname, children, className, 
                   <Link
                     className={classNames({ "font-bold": ProfileSections.my_quizzes === section })}
                     to={ROUTES.UserQuizzes(userNickname)}
-                    onClick={ProfileSections.my_quizzes === section ? resetParams : undefined}
                   >
                     Мої
                   </Link>
@@ -67,7 +61,6 @@ function UserProfileLayout({ title, section, userNickname, children, className, 
                   <Link
                     className={classNames({ "font-bold": ProfileSections.wishlisted_quizzes === section })}
                     to={ROUTES.UserWishlistedQuizzes(userNickname)}
-                    onClick={ProfileSections.wishlisted_quizzes === section ? resetParams : undefined}
                   >
                     Список бажаного
                   </Link>

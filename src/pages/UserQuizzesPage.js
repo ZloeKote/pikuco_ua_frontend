@@ -32,6 +32,9 @@ function UserQuizzesPage() {
   );
 
   useEffect(() => {
+    setParams(searchParams.size !== 0 ? "?" + searchParams.toString() : "");
+  }, [searchParams]);
+  useEffect(() => {
     fetchQuizzes(
       params === ""
         ? `?creatorNickname=${nickname}&showRoughDraft=true&pageSize=4`
@@ -73,8 +76,10 @@ function UserQuizzesPage() {
     }
     if (result.isSuccess) {
       if (quizzes.quizzes.length === 1 && searchParams.get("page") > 1) {
-        setParams(`?page=${searchParams.get("page") - 1}`);
-        searchParams.set("page", searchParams.get("page") - 1);
+        navigate({
+          pathname: location.pathname,
+          search: `?page=${searchParams.get("page") - 1}`,
+        });
       } else {
         fetchQuizzes(
           params === ""
@@ -84,7 +89,17 @@ function UserQuizzesPage() {
       }
       result.reset();
     }
-  }, [fetchQuizzes, handleEnqueueSnackbar, nickname, params, result, searchParams, quizzes]);
+  }, [
+    fetchQuizzes,
+    handleEnqueueSnackbar,
+    nickname,
+    params,
+    result,
+    searchParams,
+    quizzes,
+    location.pathname,
+    navigate,
+  ]);
 
   function handleClickDeleteQuiz(pseudoId) {
     deleteQuiz({ pseudoId: pseudoId, token })
