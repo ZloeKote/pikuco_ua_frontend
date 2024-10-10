@@ -47,6 +47,16 @@ const usersApi = createApi({
           };
         },
       }),
+      deleteUser: builder.mutation({
+        query: ({nickname, deleteQuizzes, token}) => {
+          return {
+            url: `/${nickname}`,
+            params: {"delete_quizzes": deleteQuizzes},
+            method: "DELETE",
+            headers: {Authorization: `Bearer ${token}`}
+          };
+        },
+      }),
     };
   },
 });
@@ -56,5 +66,6 @@ export const {
   useFetchUserPrivacyByNicknameQuery,
   useUpdateUserPublicMutation,
   useUpdateUserPrivacyMutation,
+  useDeleteUserMutation,
 } = usersApi;
 export { usersApi };

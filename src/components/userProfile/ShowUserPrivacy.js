@@ -7,6 +7,8 @@ import {
   InputAdornment,
   IconButton,
   FormHelperText,
+  Modal,
+  Box,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -14,7 +16,7 @@ import { IoCheckbox } from "react-icons/io5";
 import { BiEditAlt } from "react-icons/bi";
 import classNames from "classnames";
 import Button from "../simpleComponents/Button";
-import { useUpdateUserPrivacyMutation, useLogoutMutation } from "../../store";
+import { useUpdateUserPrivacyMutation, useLogoutMutation, useDeleteUserMutation } from "../../store";
 import { useSelector, useDispatch } from "react-redux";
 import { selectCurrentToken, logOut } from "../../store";
 import { useParams } from "react-router-dom";
@@ -23,6 +25,19 @@ import { LoadingButton } from "@mui/lab";
 import { RiSave3Fill } from "react-icons/ri";
 import SnackbarsContext from "../../context/snackbars";
 import { ROUTES } from "../../ROUTES";
+
+const modalStyle = {
+  position: "absolute",
+  top: "15%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 600,
+  bgcolor: "var(--dark-quizcard-background)",
+  border: "1px solid var(--dark-quizcard-border)",
+  borderRadius: 4,
+  boxShadow: 12,
+  p: 2,
+};
 
 function ShowUserPrivacy({ user }) {
   const dispatch = useDispatch();
@@ -49,19 +64,23 @@ function ShowUserPrivacy({ user }) {
   const [isCurrentPasswordVisible, setIsCurrentPasswordVisible] = useState(false);
   const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false);
 
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [deleteQuizzes, setDeleteQuizzes] = useState(false);
+
   const [logout] = useLogoutMutation();
-  const [updateUser, result] = useUpdateUserPrivacyMutation();
+  const [updateUser, resultUpdate] = useUpdateUserPrivacyMutation();
+  const [deleteUser, resultDelete] = useDeleteUserMutation();
 
   const editedInfoClassname = classNames("italic", "hover:cursor-pointer hover:underline", "text-[26px]");
 
   useEffect(() => {
-    if (result.isSuccess) {
+    if (resultUpdate.isSuccess) {
       logout(token).then(() => {
         navigate(ROUTES.Login);
       });
       dispatch(logOut());
     }
-  }, [dispatch, logout, token, result.isSuccess, navigate]);
+  }, [dispatch, logout, token, resultUpdate.isSuccess, navigate]);
 
   const handleChangeEmail = (e) => {
     setEditedEmail(e.target.value);
@@ -163,6 +182,27 @@ function ShowUserPrivacy({ user }) {
       });
   };
 
+  const handleOpenDeleteModal = () => setOpenDeleteModal(true);
+  const handleCloseDeleteModal = () => setOpenDeleteModal(false);
+  const handleClickCheckboxDeleteQuizzes = () => setDeleteQuizzes(!deleteQuizzes);
+
+  const handleSubmitDeleteUser = (e) => {
+    e.preventDefault();
+    deleteUser({
+      nickname: nickname,
+      deleteQuizzes: deleteQuizzes,
+      token: token,
+    })
+      .unwrap()
+      .then(() => {
+        logout(token).then(() => {
+          navigate(ROUTES.Main);
+        });
+        dispatch(logOut());
+      });
+    handleCloseDeleteModal();
+  };
+
   let passwordTitle = <h3 className="text-[28px]">Пароль</h3>;
   if (actualCurrentPassword !== "" && actualNewPassword !== "") {
     passwordTitle = (
@@ -174,7 +214,7 @@ function ShowUserPrivacy({ user }) {
 
   return (
     <div className="flex flex-col h-[606px] justify-between">
-      <div className="ml-2 mt-2">
+      <div className="ml-2 mt-2 flex flex-col basis-full">
         <div className="grid grid-rows-[111px_1fr] leading-tight">
           <div>
             <h3 className="text-[28px]">Електронна пошта</h3>
@@ -307,11 +347,55 @@ function ShowUserPrivacy({ user }) {
             )}
           </div>
         </div>
+
+        <div className="grow flex items-end">
+          <Button className="w-max h-[40px]" color="error" onClick={handleOpenDeleteModal}>
+            <span className="text-[length:var(--desktop-title-text-size)]">Видалити акаунт</span>
+          </Button>
+          <Modal open={openDeleteModal} onClose={handleCloseDeleteModal}>
+            <Box sx={modalStyle}>
+              <Typography variant="h5" component="h2" sx={{ textAlign: "center" }}>
+                Ви дійсно хочете видалити акаунт?
+              </Typography>
+              <Typography sx={{ mt: 2 }}>
+                <form onSubmit={handleSubmitDeleteUser}>
+                  <input
+                    type="checkbox"
+                    id="deleteQuizzes"
+                    value={deleteQuizzes}
+                    onClick={handleClickCheckboxDeleteQuizzes}
+                    className="mr-[0.4rem] mb-8"
+                  />
+                  <label for="deleteQuizzes">Також видалити створені вікторини</label>
+
+                  <br />
+                  <span className="text-[length:var(--desktop-smallest-text-size)]">
+                    *Відновлення акаунту після видалення неможливе
+                  </span>
+
+                  <div className="flex justify-between">
+                    <Button className="h-[40px] w-fit px-8" variant="contained" color="error" type="submit">
+                      <span className="text-[length:var(--desktop-body-text-size)]">Видалити</span>
+                    </Button>
+                    <Button
+                      className="h-[40px] w-fit px-8"
+                      variant="contained"
+                      type="button"
+                      onClick={handleCloseDeleteModal}
+                    >
+                      <span className="text-[length:var(--desktop-body-text-size)]">Скасувати</span>
+                    </Button>
+                  </div>
+                </form>
+              </Typography>
+            </Box>
+          </Modal>
+        </div>
       </div>
 
       <div className="pl-5 mt-5 mb-4 row-start-6 row-end-7 col-span-full flex gap-5 items-end">
         <LoadingButton
-          loading={result.isLoading}
+          loading={resultUpdate.isLoading}
           loadingPosition="start"
           startIcon={<RiSave3Fill />}
           className="w-[150px] h-[50px]"
@@ -320,7 +404,7 @@ function ShowUserPrivacy({ user }) {
           variant="contained"
           onClick={handleClickSave}
           disabled={
-            result.isLoading ||
+            resultUpdate.isLoading ||
             (user.email === actualEmail && actualCurrentPassword === "" && actualNewPassword === "")
           }
         >

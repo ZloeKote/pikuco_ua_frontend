@@ -85,4 +85,5 @@ export {
   useFetchUserPrivacyByNicknameQuery,
   useUpdateUserPublicMutation,
   useUpdateUserPrivacyMutation,
+  useDeleteUserMutation,
 } from "./apis/UsersApi";
