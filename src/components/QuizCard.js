@@ -1,17 +1,17 @@
 import "../css/QuizCard.css";
 import { useState, memo } from "react";
 import classNames from "classnames";
-import { BsFillPlayFill } from "react-icons/bs";
+import { BsFillPlayFill, BsTranslate } from "react-icons/bs";
+import { ImCross } from "react-icons/im";
+import { IoMenu, IoClose } from "react-icons/io5";
+import { BiEditAlt } from "react-icons/bi";
+import { MdDelete } from "react-icons/md";
+import { FaChevronRight } from "react-icons/fa6";
 import placeholderCover from "../img/placeholderCover.png";
 import Link from "./simpleComponents/Link";
 import { ROUTES } from "../ROUTES";
 import { IconButton, Menu, Typography, MenuItem, ListItemText, CircularProgress } from "@mui/material";
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
-import { IoMenu, IoClose } from "react-icons/io5";
-import { BiEditAlt } from "react-icons/bi";
-import { BsTranslate } from "react-icons/bs";
-import { MdDelete } from "react-icons/md";
-import { FaChevronRight } from "react-icons/fa6";
 import { IconMenuItem, NestedMenuItem } from "mui-nested-menu";
 import { iso6393 } from "iso-639-3";
 import GeneratedUserAvatar from "./simpleComponents/GeneratedUserAvatar";
@@ -19,6 +19,7 @@ import GeneratedUserAvatar from "./simpleComponents/GeneratedUserAvatar";
 function QuizCard({ quiz, showActions = false, onDelete, isLoadingDeleting }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const isCreatorDeleted = quiz.creator.nickname.startsWith("[deleted-");
 
   const playbuttonClassname = classNames(
     "quizcard-playbutton flex items-center justify-center",
@@ -55,23 +56,38 @@ function QuizCard({ quiz, showActions = false, onDelete, isLoadingDeleting }) {
         </Link>
       </div>
 
-      <Link
-        to={`/user/${quiz.creator.nickname.toLowerCase()}`}
-        className="quizcard-creator z-10 mr-3 w-[120px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]"
-      >
-        <div className="flex items-center">
-          <GeneratedUserAvatar
-            username={quiz.creator.nickname}
-            saturation="60"
-            className="h-7 mr-1 bg-lime-300 rounded-full"
-          />
-          <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
-            <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[16px] italic">
-              {quiz.creator.nickname}
-            </span>
-          </Tooltip>
+      {isCreatorDeleted ? (
+        <div className="quizcard-creator-deleted z-10 mr-3 w-[150px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]">
+          <div className="flex items-center">
+            <ImCross
+              className="h-7 w-12 mr-1 bg-lime-300 rounded-full text-red-600"
+            />
+            <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
+              <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[16px] italic">
+                {quiz.creator.nickname}
+              </span>
+            </Tooltip>
+          </div>
         </div>
-      </Link>
+      ) : (
+        <Link
+          to={`/user/${quiz.creator.nickname.toLowerCase()}`}
+          className="quizcard-creator z-10 mr-3 w-[150px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]"
+        >
+          <div className="flex items-center">
+            <GeneratedUserAvatar
+              username={quiz.creator.nickname}
+              saturation="60"
+              className="h-7 mr-1 bg-lime-300 rounded-full"
+            />
+            <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
+              <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[16px] italic">
+                {quiz.creator.nickname}
+              </span>
+            </Tooltip>
+          </div>
+        </Link>
+      )}
 
       <Link className="quizcard-content-layout rounded-b-2xl" to={ROUTES.Quiz(quiz.pseudoId)}>
         <div className="quizcard-content px-2 mt-11">

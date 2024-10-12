@@ -17,7 +17,8 @@
   z-index: 1;
 }
 
-.quizcard-creator {
+.quizcard-creator,
+.quizcard-creator-deleted {
   grid-row: 3 / 5;
   grid-column: 4 / 5;
 }
@@ -52,6 +53,7 @@
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 5;
+  line-clamp: 5;
   white-space: pre-wrap;
 }
 
@@ -73,4 +75,8 @@
   cursor: pointer;
   text-decoration: underline;
   text-decoration-color: var(--dark-quizcard-description);
+}
+
+.quizcard-creator-deleted:hover {
+  cursor: default;
 }

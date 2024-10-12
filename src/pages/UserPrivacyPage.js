@@ -17,6 +17,7 @@ function UserPrivacyPage() {
   const { nickname: authPersonNickname } = useSelector(selectCurrentUser);
   const token = useSelector(selectCurrentToken);
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
+  let isLoggedOut = false;
 
   const {
     data: user,
@@ -30,7 +31,7 @@ function UserPrivacyPage() {
       navigate(ROUTES.Profile(nickname), { replace: true });
   }, [authPersonNickname, navigate, nickname]);
 
-  if (isError) {
+  if (isError && !isLoggedOut) {
     if (error.status === 400) {
       for (let i = 0; i < error.data.length; i++) {
         handleEnqueueSnackbar(error.data[i], "error");
@@ -44,14 +45,16 @@ function UserPrivacyPage() {
     } else {
       handleEnqueueSnackbar(`Сталася непередбачувана помилка :( ${error.data.error}`, "error");
     }
-    if (nickname.toLowerCase() !== authPersonNickname?.toLowerCase())
+    if (nickname.toLowerCase() !== authPersonNickname?.toLowerCase() && !isLoggedOut)
       navigate(ROUTES.Profile(nickname), { replace: true });
   }
+
+  const localLogout = () => isLoggedOut = true;
 
   return (
     <div className="flex justify-center mt-12">
       <UserProfileLayout title="КОНФІДЕНЦІЙНІСТЬ" section={ProfileSections.privacy} userNickname={nickname}>
-        {!isLoading ? <ShowUserPrivacy user={user} /> : <LinearProgress />}
+        {!isLoading ? <ShowUserPrivacy user={user} localLogout={localLogout} /> : <LinearProgress />}
       </UserProfileLayout>
     </div>
   );

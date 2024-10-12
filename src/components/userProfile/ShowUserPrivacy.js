@@ -39,7 +39,7 @@ const modalStyle = {
   p: 2,
 };
 
-function ShowUserPrivacy({ user }) {
+function ShowUserPrivacy({ user, localLogout }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const token = useSelector(selectCurrentToken);
@@ -165,7 +165,6 @@ function ShowUserPrivacy({ user }) {
     })
       .unwrap()
       .catch((error) => {
-        console.log(error);
         if (error.status === 400) {
           for (let i = 0; i < error.data.length; i++) {
             handleEnqueueSnackbar(error.data[i], "error");
@@ -195,12 +194,15 @@ function ShowUserPrivacy({ user }) {
     })
       .unwrap()
       .then(() => {
+        handleCloseDeleteModal();
+
+        localLogout();
         logout(token).then(() => {
+          handleEnqueueSnackbar("Акаунт успішно видалений!", "success")
           navigate(ROUTES.Main);
         });
         dispatch(logOut());
       });
-    handleCloseDeleteModal();
   };
 
   let passwordTitle = <h3 className="text-[28px]">Пароль</h3>;
@@ -357,7 +359,7 @@ function ShowUserPrivacy({ user }) {
               <Typography variant="h5" component="h2" sx={{ textAlign: "center" }}>
                 Ви дійсно хочете видалити акаунт?
               </Typography>
-              <Typography sx={{ mt: 2 }}>
+              <Box sx={{ mt: 2 }}>
                 <form onSubmit={handleSubmitDeleteUser}>
                   <input
                     type="checkbox"
@@ -366,7 +368,7 @@ function ShowUserPrivacy({ user }) {
                     onClick={handleClickCheckboxDeleteQuizzes}
                     className="mr-[0.4rem] mb-8"
                   />
-                  <label for="deleteQuizzes">Також видалити створені вікторини</label>
+                  <label htmlFor="deleteQuizzes">Також видалити створені вікторини</label>
 
                   <br />
                   <span className="text-[length:var(--desktop-smallest-text-size)]">
@@ -374,9 +376,15 @@ function ShowUserPrivacy({ user }) {
                   </span>
 
                   <div className="flex justify-between">
-                    <Button className="h-[40px] w-fit px-8" variant="contained" color="error" type="submit">
+                    <LoadingButton
+                      className="h-[40px] w-fit px-8"
+                      loading={resultDelete.isLoading}
+                      variant="contained"
+                      color="error"
+                      type="submit"
+                    >
                       <span className="text-[length:var(--desktop-body-text-size)]">Видалити</span>
-                    </Button>
+                    </LoadingButton>
                     <Button
                       className="h-[40px] w-fit px-8"
                       variant="contained"
@@ -387,7 +395,7 @@ function ShowUserPrivacy({ user }) {
                     </Button>
                   </div>
                 </form>
-              </Typography>
+              </Box>
             </Box>
           </Modal>
         </div>
