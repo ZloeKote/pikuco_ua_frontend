@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams, useSearchParams } from "react-rout
 import classNames from "classnames";
 import Link from "../components/simpleComponents/Link";
 import { GoChevronUp, GoChevronDown, GoArrowLeft } from "react-icons/go";
+import { ImCross } from "react-icons/im";
 import { CircularProgress, Tooltip, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
 import SnackbarsContext from "../context/snackbars";
@@ -34,6 +35,7 @@ function QuizHeader({ children, quiz, language, onChangeLanguage, section }) {
   const [addToWishlist, addingWishlistResult] = useAddQuizToWishlistMutation();
   const [deleteFromWishlist, deletingWishlistResult] = useDeleteQuizFromWishlistMutation();
 
+  const isCreatorDeleted = quiz.creator.nickname.startsWith("[deleted-");
   const currLanguage =
     (quiz.languages.includes(searchParams.get("lang")) && searchParams.get("lang")) ||
     (quiz.languages.includes("uk") && "uk") ||
@@ -323,7 +325,37 @@ function QuizHeader({ children, quiz, language, onChangeLanguage, section }) {
                     </div>
                   </>
                 )}
-                <Link
+                {isCreatorDeleted ? (
+                  <div className="quizcard-creator-deleted z-10 mr-3 w-[170px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]">
+                    <div className="flex items-center">
+                      <ImCross className="h-[40px] w-20 mr-2 bg-lime-300 rounded-full text-red-600" />
+                      <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
+                        <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[20px] italic">
+                          {quiz.creator.nickname}
+                        </span>
+                      </Tooltip>
+                    </div>
+                  </div>
+                ) : (
+                  <Link
+                    to={`/user/${quiz.creator.nickname.toLowerCase()}`}
+                    className="quizcard-creator z-10 mr-3 w-[170px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]"
+                  >
+                    <div className="flex items-center">
+                      <GeneratedUserAvatar
+                        username={quiz.creator.nickname}
+                        saturation="60"
+                        className="h-[40px] mr-2 bg-lime-300 rounded-full"
+                      />
+                      <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
+                        <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[20px] italic">
+                          {quiz.creator.nickname}
+                        </span>
+                      </Tooltip>
+                    </div>
+                  </Link>
+                )}
+                {/* <Link
                   to={`/user/${quiz.creator.nickname.toLowerCase()}`}
                   className="quizcard-creator z-10 mr-3 w-[170px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]"
                 >
@@ -339,7 +371,7 @@ function QuizHeader({ children, quiz, language, onChangeLanguage, section }) {
                       </span>
                     </Tooltip>
                   </div>
-                </Link>
+                </Link> */}
               </div>
             </div>
             {children}
