@@ -198,10 +198,25 @@ function ShowUserPrivacy({ user, localLogout }) {
 
         localLogout();
         logout(token).then(() => {
-          handleEnqueueSnackbar("Акаунт успішно видалений!", "success")
+          handleEnqueueSnackbar("Акаунт успішно видалений!", "success");
           navigate(ROUTES.Main);
         });
         dispatch(logOut());
+      })
+      .catch((error) => {
+        if (error.status === 400) {
+          for (let i = 0; i < error.data.length; i++) {
+            handleEnqueueSnackbar(error.data[i], "error");
+          }
+        } else if (error.status === 403) {
+          handleEnqueueSnackbar("В доступі відмовлено", "error");
+        } else if (error.status === 500) {
+          handleEnqueueSnackbar(error.data, "error");
+        } else if (error.originalStatus) {
+          handleEnqueueSnackbar(error.data.error, "error");
+        } else {
+          handleEnqueueSnackbar(`Сталася непередбачувана помилка :( ${error.data}`, "error");
+        }
       });
   };
 
