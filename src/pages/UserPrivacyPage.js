@@ -52,7 +52,7 @@ function UserPrivacyPage() {
   const localLogout = () => isLoggedOut = true;
 
   return (
-    <div className="flex justify-center mt-12">
+    <div className="flex justify-center mt-9">
       <UserProfileLayout title="КОНФІДЕНЦІЙНІСТЬ" section={ProfileSections.privacy} userNickname={nickname}>
         {!isLoading ? <ShowUserPrivacy user={user} localLogout={localLogout} /> : <LinearProgress />}
       </UserProfileLayout>

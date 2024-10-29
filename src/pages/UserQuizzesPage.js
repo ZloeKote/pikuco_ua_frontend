@@ -22,7 +22,7 @@ function UserQuizzesPage() {
   const token = useSelector(selectCurrentToken);
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
 
-  const [fetchQuizzes, { data: quizzes, isLoading }] = quizzesApi.endpoints.fetchQuizzes.useLazyQuery();
+  const [fetchQuizzes, { data: quizzes, isFetching }] = quizzesApi.endpoints.fetchQuizzes.useLazyQuery();
   const [deleteQuiz, result] = useDeleteQuizMutation();
 
   const createButtonClassname = classNames(
@@ -75,6 +75,7 @@ function UserQuizzesPage() {
       );
     }
     if (result.isSuccess) {
+      handleEnqueueSnackbar("Вікторина успішно видалена!", "success");
       if (quizzes.quizzes.length === 1 && searchParams.get("page") > 1) {
         navigate({
           pathname: location.pathname,
@@ -122,7 +123,7 @@ function UserQuizzesPage() {
   }
 
   return (
-    <div className="flex justify-center mt-12">
+    <div className="flex justify-center mt-9">
       <UserProfileLayout
         title={title}
         section={ProfileSections.my_quizzes}
@@ -130,7 +131,7 @@ function UserQuizzesPage() {
         className="h-[776px]"
         handleParam={handleChangeParam}
       >
-        {!isLoading ? (
+        {!isFetching ? (
           <QuizzesList
             className="my-2 mx-8 justify-between h-full"
             quizzes={quizzes?.quizzes}

@@ -46,7 +46,7 @@ function QuizzesPage() {
       quizzes = (
         <QuizzesList
           gapY="small"
-          className="mt-[20px]"
+          className="mt-[10px]"
           quizzes={data?.quizzes}
           numPages={data?.numPages}
           handlePageParam={handleChangeParams}

@@ -43,7 +43,7 @@ function UserProfilePage() {
     );
   }
 
-  return <div className="flex justify-center mt-12">{content}</div>;
+  return <div className="flex justify-center mt-9">{content}</div>;
 }
 
 export default UserProfilePage;

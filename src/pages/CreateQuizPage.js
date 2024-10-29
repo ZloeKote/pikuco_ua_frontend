@@ -40,7 +40,7 @@ function CreateQuizPage() {
 
   const [createQuiz, result] = useCreateQuizMutation();
   const [createQuizAsRoughDraft, resultRoughDraft] = useCreateQuizAsRoughDraftMutation();
-
+  
   useEffect(() => {
     if (resultRoughDraft.isSuccess) {
       handleEnqueueSnackbar("Чернетка успішно збережена!", "success", false);

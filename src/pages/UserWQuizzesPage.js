@@ -3,10 +3,11 @@ import ProfileSections from "../predefined/ProfileSections";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
-import { useFetchUserWishlistedQuizzesQuery, selectCurrentToken, selectCurrentUser } from "../store";
+import { selectCurrentToken, selectCurrentUser } from "../store";
 import { ROUTES } from "../ROUTES";
 import QuizzesList from "../components/QuizzesList";
 import { LinearProgress } from "@mui/material";
+import { quizzesApi } from "../store/apis/quizzesApi";
 
 function UserWQuizzesPage() {
   const navigate = useNavigate();
@@ -17,12 +18,16 @@ function UserWQuizzesPage() {
   const [params, setParams] = useState(searchParams.size !== 0 ? "?" + searchParams.toString() : "");
   const token = useSelector(selectCurrentToken);
 
-  const { data: quizzes, isLoading } = useFetchUserWishlistedQuizzesQuery({ token: token, param: params });
+  const [fetchQuizzes, { data: quizzes, isFetching }] =
+    quizzesApi.endpoints.fetchUserWishlistedQuizzes.useLazyQuery();
 
   useEffect(() => {
     setParams(searchParams.size !== 0 ? "?" + searchParams.toString() : "");
   }, [searchParams]);
-  
+  useEffect(() => {
+    fetchQuizzes({ token: token, param: params });
+  }, [fetchQuizzes, params, token]);
+
   useEffect(() => {
     if (nickname.toLowerCase() !== authPersonNickname?.toLowerCase())
       navigate(ROUTES.Profile(nickname), { replace: true });
@@ -37,7 +42,7 @@ function UserWQuizzesPage() {
   };
 
   return (
-    <div className="flex justify-center mt-12">
+    <div className="flex justify-center mt-9">
       <UserProfileLayout
         title="СПИСОК БАЖАНОГО"
         section={ProfileSections.wishlisted_quizzes}
@@ -45,7 +50,7 @@ function UserWQuizzesPage() {
         className="h-[776px]"
         handleParam={handleChangeParam}
       >
-        {!isLoading ? (
+        {!isFetching ? (
           <QuizzesList
             className="my-2 mx-8 justify-between h-full"
             quizzes={quizzes?.quizzes}

@@ -1,12 +1,13 @@
 import { useNavigate, useParams, useLocation, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { selectCurrentUser, selectCurrentToken, useFetchUserCompletedQuizzesQuery } from "../store";
+import { selectCurrentUser, selectCurrentToken } from "../store";
 import { ROUTES } from "../ROUTES";
 import UserProfileLayout from "../components/userProfile/UserProfileLayout";
 import ProfileSections from "../predefined/ProfileSections";
 import QuizzesList from "../components/QuizzesList";
 import { LinearProgress } from "@mui/material";
+import { quizzesApi } from "../store/apis/quizzesApi";
 
 function UserCQuizzesPage() {
   const navigate = useNavigate();
@@ -17,12 +18,16 @@ function UserCQuizzesPage() {
   const [params, setParams] = useState(searchParams.size !== 0 ? "?" + searchParams.toString() : "");
   const token = useSelector(selectCurrentToken);
 
-  const { data: quizzes, isLoading } = useFetchUserCompletedQuizzesQuery({ token: token, param: params });
+  const [fetchQuizzes, { data: quizzes, isFetching }] =
+    quizzesApi.endpoints.fetchUserCompletedQuizzes.useLazyQuery();
 
   useEffect(() => {
     setParams(searchParams.size !== 0 ? "?" + searchParams.toString() : "");
   }, [searchParams]);
-  
+  useEffect(() => {
+    fetchQuizzes({ token: token, param: params });
+  }, [fetchQuizzes, token, params]);
+
   useEffect(() => {
     if (nickname.toLowerCase() !== authPersonNickname?.toLowerCase())
       navigate(ROUTES.Profile(nickname), { replace: true });
@@ -37,7 +42,7 @@ function UserCQuizzesPage() {
   };
 
   return (
-    <div className="flex justify-center mt-12">
+    <div className="flex justify-center mt-9">
       <UserProfileLayout
         title="ПРОЙДЕНІ ВІКТОРИНИ"
         section={ProfileSections.completed_quizzes}
@@ -45,7 +50,7 @@ function UserCQuizzesPage() {
         className="h-[776px]"
         handleParam={handleChangeParam}
       >
-        {!isLoading ? (
+        {!isFetching ? (
           <QuizzesList
             className="my-2 mx-8 justify-between h-full"
             quizzes={quizzes?.quizzes}

@@ -7,6 +7,7 @@ import { useSearchParams } from "react-router-dom";
 import ParamsContext from "../context/searchParams";
 import { quizTypes } from "../predefined/QuizTypes";
 import { LoadingButton } from "@mui/lab";
+import numQuestions from "../predefined/NumQuestions";
 
 function QuizFilterSort({ isLoading, handleParams }) {
   const { quizzesTypeSelection, changeQuizzesTypeSelection } = useContext(ParamsContext);
@@ -19,49 +20,10 @@ function QuizFilterSort({ isLoading, handleParams }) {
     "hover:bg-[--dark-quizcard-background-hover] focus:bg-[--dark-quizcard-background-hover]"
   );
 
-  const optionsQuestions = [
-    {
-      label: "Всі",
-      value: "",
-    },
-    {
-      label: "4",
-      value: "4",
-    },
-    {
-      label: "8",
-      value: "8",
-    },
-    {
-      label: "16",
-      value: "16",
-    },
-    {
-      label: "32",
-      value: "32",
-    },
-    {
-      label: "64",
-      value: "64",
-    },
-    {
-      label: "128",
-      value: "128",
-    },
-    {
-      label: "256",
-      value: "256",
-    },
-    {
-      label: "512",
-      value: "512",
-    },
-  ];
-
   const [questionsSelection, setQuestionsSelection] = useState(
     searchParams.get("numberQuestions") !== null
-      ? optionsQuestions.find((opt) => opt.value === searchParams.get("numberQuestions"))
-      : optionsQuestions[0]
+      ? numQuestions.find((opt) => opt.value === searchParams.get("numberQuestions"))
+      : numQuestions[0]
   );
   const [titleSearch, setTitleSearch] = useState(searchParams.get("title") ? searchParams.get("title") : "");
   const [isActiveBest, setIsActiveBest] = useState(
@@ -133,7 +95,7 @@ function QuizFilterSort({ isLoading, handleParams }) {
             className="h-[40px] w-[300px] z-20 text-white border border-[--dark-quizcard-border] rounded-2xl bg-[--dark-quizcard-background] hover:bg-[--dark-quizcard-background-hover]"
           />
           <Dropdown
-            options={optionsQuestions}
+            options={numQuestions}
             value={questionsSelection}
             param="numberQuestions"
             onChange={handleChangeQuestions}

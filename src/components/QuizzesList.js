@@ -37,8 +37,9 @@ function QuizzesList({
       ? searchParams.get("page")
       : 1
   );
-  const quizzesClassName = classNames(`flex flex-wrap ${gapXVariants[gapX]} ${gapYVariants[gapY]}`);
-  const layoutClassname = twMerge(classNames(rest.className, "flex flex-col "));
+  const quizzesClassName = classNames(`flex flex-wrap ${gapXVariants[gapX]} ${gapYVariants[gapY]} h-full`);
+  const layoutClassname = twMerge(classNames(rest.className, "flex flex-col h-full"));
+  const paginationClassname = classNames(`flex justify-center mt-[20px] ${hiddenPagination && 'hidden'}`)
 
   useEffect(() => {
     setCurrentPage(
@@ -72,7 +73,7 @@ function QuizzesList({
     // якщо щось зламалося, то замінити перший div на <>
     <div className={layoutClassname}>
       <div className={quizzesClassName}>{renderedQuizzes}</div>
-      <div className="flex justify-center mt-[20px]">
+      <div className={paginationClassname}>
         <Pagination
           count={numPages}
           page={Number(currentPage)}
@@ -80,7 +81,6 @@ function QuizzesList({
           size="large"
           showFirstButton
           showLastButton
-          hidden={!quizzes?.length || hiddenPagination}
         />
       </div>
     </div>
