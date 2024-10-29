@@ -15,11 +15,33 @@ import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 import { IconMenuItem, NestedMenuItem } from "mui-nested-menu";
 import { iso6393 } from "iso-639-3";
 import GeneratedUserAvatar from "./simpleComponents/GeneratedUserAvatar";
+import Button from "./simpleComponents/Button";
 
 function QuizCard({ quiz, showActions = false, onDelete, isLoadingDeleting }) {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [confirmOpened, setConfirmOpened] = useState(false);
   const open = Boolean(anchorEl);
   const isCreatorDeleted = quiz.creator.nickname.startsWith("[deleted-");
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+    setConfirmOpened(false);
+  };
+
+  const handleClickOpenConfirmDeleting = () => setConfirmOpened(true);
+  const deleteQuiz = () => {
+    setConfirmOpened(false);
+    onDelete(quiz.pseudoId);
+  };
+
+  const classnames = classNames(
+    "border-2 border-[--dark-quizcard-border] rounded-2xl",
+    "w-[432px] h-[314px] bg-[--dark-quizcard-background]",
+    "layout-quizcard relative"
+  );
 
   const playbuttonClassname = classNames(
     "quizcard-playbutton flex items-center justify-center",
@@ -27,17 +49,12 @@ function QuizCard({ quiz, showActions = false, onDelete, isLoadingDeleting }) {
     "border-green-400 bg-green-600 text-white hover:bg-green-500"
   );
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const classnames = classNames(
-    "border-2 border-[--dark-quizcard-border] rounded-2xl",
-    "w-[432px] h-[314px] bg-[--dark-quizcard-background]",
-    "layout-quizcard relative"
+  const deletingConfirmationClassname = classNames(
+    "flex flex-col gap-2 p-2",
+    "absolute h-fit w-[300px] z-30 right-[0%]",
+    "border border-[--dark-quizcard-border] rounded-2xl",
+    "bg-[--dark-dropdown-background] text-[length:var(--desktop-body-text-size)]",
+    `${confirmOpened ? "" : "hidden"}`
   );
 
   return (
@@ -59,9 +76,7 @@ function QuizCard({ quiz, showActions = false, onDelete, isLoadingDeleting }) {
       {isCreatorDeleted ? (
         <div className="quizcard-creator-deleted z-10 mr-3 w-[150px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]">
           <div className="flex items-center">
-            <ImCross
-              className="h-7 w-12 mr-1 bg-lime-300 rounded-full text-red-600"
-            />
+            <ImCross className="h-7 w-12 mr-1 bg-lime-300 rounded-full text-red-600" />
             <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
               <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[16px] italic">
                 {quiz.creator.nickname}
@@ -132,52 +147,75 @@ function QuizCard({ quiz, showActions = false, onDelete, isLoadingDeleting }) {
           >
             {anchorEl === null ? <IoMenu /> : <IoClose />}
           </IconButton>
-          <Menu
-            MenuListProps={{ "aria-labelledby": "long-button" }}
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            variant="menu"
-          >
-            <Link to={ROUTES.EditQuiz} state={{ pseudoId: quiz.pseudoId }}>
-              <IconMenuItem leftIcon={<BiEditAlt />} label="Редагувати" />
-            </Link>
-            <Link
-              to={ROUTES.CreateQuizTranslation}
-              state={{ pseudoId: quiz.pseudoId }}
-              disabled={quiz.isRoughDraft}
-              className="!text-white"
+          <div>
+            <Menu
+              MenuListProps={{ "aria-labelledby": "long-button" }}
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              variant="menu"
+              sx={{ zIndex: 10 }}
             >
-              <IconMenuItem leftIcon={<BsTranslate />} label="Додати переклад" disabled={quiz.isRoughDraft} />
-            </Link>
-            <NestedMenuItem
-              leftIcon={<BsTranslate />}
-              rightIcon={<FaChevronRight />}
-              label="Редагувати переклад"
-              parentMenuOpen={open}
-              disabled={quiz.languages.length < 2}
-            >
-              {quiz.languages.slice(1).map((lang) => {
-                return (
-                  <Link
-                    to={ROUTES.EditQuizTranslation}
-                    state={{ pseudoId: quiz.pseudoId, language: lang }}
-                    key={lang}
-                  >
-                    <MenuItem>
-                      <ListItemText>{iso6393.find((isoLang) => isoLang.iso6391 === lang)?.name}</ListItemText>
-                    </MenuItem>
-                  </Link>
-                );
-              })}
-            </NestedMenuItem>
-            <IconMenuItem
-              onClick={() => (isLoadingDeleting ? undefined : onDelete(quiz.pseudoId))}
-              className="hover:!bg-red-600"
-              leftIcon={isLoadingDeleting ? <CircularProgress size={20} /> : <MdDelete />}
-              label="Видалити"
-            />
-          </Menu>
+              <Link to={ROUTES.EditQuiz} state={{ pseudoId: quiz.pseudoId }}>
+                <IconMenuItem leftIcon={<BiEditAlt />} label="Редагувати" />
+              </Link>
+              <Link
+                to={ROUTES.CreateQuizTranslation}
+                state={{ pseudoId: quiz.pseudoId }}
+                disabled={quiz.isRoughDraft}
+                className="!text-white"
+              >
+                <IconMenuItem
+                  leftIcon={<BsTranslate />}
+                  label="Додати переклад"
+                  disabled={quiz.isRoughDraft}
+                />
+              </Link>
+              <NestedMenuItem
+                leftIcon={<BsTranslate />}
+                rightIcon={<FaChevronRight />}
+                label="Редагувати переклад"
+                parentMenuOpen={open}
+                disabled={quiz.languages.length < 2}
+              >
+                {quiz.languages.slice(1).map((lang) => {
+                  return (
+                    <Link
+                      to={ROUTES.EditQuizTranslation}
+                      state={{ pseudoId: quiz.pseudoId, language: lang }}
+                      key={lang}
+                    >
+                      <MenuItem>
+                        <ListItemText>
+                          {iso6393.find((isoLang) => isoLang.iso6391 === lang)?.name}
+                        </ListItemText>
+                      </MenuItem>
+                    </Link>
+                  );
+                })}
+              </NestedMenuItem>
+              <IconMenuItem
+                onClick={() => (isLoadingDeleting ? undefined : handleClickOpenConfirmDeleting())}
+                className="hover:!bg-red-600"
+                leftIcon={isLoadingDeleting ? <CircularProgress size={20} /> : <MdDelete />}
+                label="Видалити"
+              />
+            </Menu>
+            {/* Deleting quiz confirmation */}
+            <div className={deletingConfirmationClassname}>
+              <span>Ви дійсно хочете видалити вікторину?</span>
+              <Button
+                className="self-end"
+                sx={{"fontWeight": 600}}
+                size="small"
+                color="error"
+                variant="contained"
+                onClick={deleteQuiz}
+              >
+                Видалити
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 
