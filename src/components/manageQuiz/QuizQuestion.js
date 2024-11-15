@@ -140,7 +140,7 @@ function QuizQuestion({ question, readOnlyUrl, originalTitle, originalDescriptio
             inputProps={{ style: { fontSize: "20px" } }}
             onChange={handleChangeDescription}
             multiline
-            rows={2}
+            rows={3}
             size="small"
             error={isDescrError}
             helperText={isDescrError ? descrErrorMsg : originalDescription}

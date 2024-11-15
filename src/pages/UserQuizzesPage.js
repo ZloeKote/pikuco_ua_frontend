@@ -3,7 +3,6 @@ import { useNavigate, useLocation, useParams, useSearchParams } from "react-rout
 import { useSelector } from "react-redux";
 import { selectCurrentUser, selectCurrentToken, useDeleteQuizMutation } from "../store";
 import { ROUTES } from "../ROUTES";
-import { LinearProgress } from "@mui/material";
 import UserProfileLayout from "../components/userProfile/UserProfileLayout";
 import ProfileSections from "../predefined/ProfileSections";
 import QuizzesList from "../components/QuizzesList";
@@ -131,22 +130,22 @@ function UserQuizzesPage() {
         className="h-[776px]"
         handleParam={handleChangeParam}
       >
-        {!isFetching ? (
-          <QuizzesList
-            className="my-2 mx-8 justify-between h-full"
-            quizzes={quizzes?.quizzes}
-            numPages={quizzes?.numPages}
-            page={searchParams.get("page")}
-            gapY="middle"
-            gapX="middle"
-            handlePageParam={handleChangeParam}
-            showActions={true}
-            onDelete={handleClickDeleteQuiz}
-            isLoadingDeleting={result.isLoading}
-          />
-        ) : (
-          <LinearProgress />
-        )}
+        <QuizzesList
+          layoutClassname="justify-between h-full"
+          quizzesClassName="mt-2 mx-8"
+          paginationClassname="mb-2"
+          quizzes={quizzes?.quizzes}
+          numPages={quizzes?.numPages}
+          page={searchParams.get("page")}
+          gapY="middle"
+          gapX="middle"
+          handlePageParam={handleChangeParam}
+          showActions={true}
+          onDelete={handleClickDeleteQuiz}
+          isLoadingDeleting={result.isLoading}
+          isFetchingQuizzes={isFetching}
+          skeletonItems={4}
+        />
       </UserProfileLayout>
     </div>
   );

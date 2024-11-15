@@ -1,14 +1,16 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useContext } from "react";
 import { useDispatch } from "react-redux";
 import Cookie from "universal-cookie";
 import { Outlet } from "react-router-dom";
 import { useRecreateTokenMutation, setCredentials } from "../../store";
+import { Backdrop, CircularProgress } from "@mui/material";
+import SnackbarsContext from "../../context/snackbars";
 
 function LoginLayout() {
-  const [recreateToken, { isSuccess }] = useRecreateTokenMutation();
+  const [recreateToken, { isSuccess, isError }] = useRecreateTokenMutation();
+  const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
   const dispatch = useDispatch();
 
-  let outlet = <div>Loading...</div>;
   const cookie = useMemo(() => new Cookie(), []);
 
   useEffect(() => {
@@ -19,16 +21,22 @@ function LoginLayout() {
           dispatch(setCredentials({ ...userData }));
         }
       } catch (err) {
-        return;
+        handleEnqueueSnackbar("Сталася помилка при авторизації!", "error");
       }
     };
-    refreshLogin();
-  }, [recreateToken, dispatch, cookie]);
 
-  if (cookie.get("LoggedIn") ? isSuccess : true) outlet = <Outlet />;
+    refreshLogin();
+  }, [recreateToken, dispatch, cookie, handleEnqueueSnackbar]);
+
   return (
     <div className="font-serif h-full">
-      {outlet}
+      {(cookie.get("LoggedIn") ? isSuccess || isError : true) ? (
+        <Outlet />
+      ) : (
+        <Backdrop open={true}>
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      )}
     </div>
   );
 }

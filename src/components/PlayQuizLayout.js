@@ -1,27 +1,43 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { FiRewind, FiRotateCcw } from "react-icons/fi";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { useAddQuizResultMutation, selectCurrentToken } from "../store";
 import { ROUTES } from "../ROUTES";
 import QuizDuoBattle from "../components/QuizDuoBattle";
+import { Skeleton } from "@mui/material";
 
-function PlayQuizLayout({ quiz }) {
+function PlayQuizLayout({ quiz, isFetchingQuiz }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const token = useSelector(selectCurrentToken);
   const [questionList, setQuestionList] = useState({
-    curr: shuffle(quiz.questions),
+    curr: Array.from(new Array(4)),
     next: [],
     excluded: [],
     round: 1,
     stage: 1,
-    place: quiz.questions.length,
+    place: 0,
   });
-  let amountRounds = Math.floor(quiz.questions.length / Math.pow(2, questionList.stage));
-  const amountStages = Math.round(Math.pow(quiz.questions.length, 0.5));
+  let amountRounds = Math.floor(quiz?.questions.length / Math.pow(2, questionList.stage));
+  const amountStages = Math.round(Math.pow(quiz?.questions.length, 0.5));
+  const isDataLoaded = !isFetchingQuiz && quiz !== undefined;
 
   const [isCompleted, setIsCompleted] = useState(false);
   const [addResult] = useAddQuizResultMutation();
+
+  useEffect(() => {
+    if (isDataLoaded) {
+      setQuestionList({
+        curr: shuffle(quiz?.questions),
+        next: [],
+        excluded: [],
+        round: 1,
+        stage: 1,
+        place: quiz?.questions.length,
+      });
+    }
+  }, [isDataLoaded, quiz?.questions]);
   useEffect(() => {
     const addQuizResult = async () => {
       if (token) {
@@ -32,50 +48,70 @@ function PlayQuizLayout({ quiz }) {
       setIsCompleted(true);
     };
 
-    if (!questionList.curr.length) {
+    if (!questionList.curr.length && isDataLoaded) {
       addQuizResult();
     }
-  }, [questionList, navigate, quiz.pseudoId, addResult, token]);
+  }, [questionList, navigate, quiz?.pseudoId, addResult, token, isDataLoaded]);
+
   if (isCompleted) {
-    navigate(ROUTES.QuizStats(quiz.pseudoId), {
-      state: {
-        isIndividual: true,
-        resultsAfterPassing: questionList.excluded,
+    navigate(
+      {
+        pathname: ROUTES.QuizStats(quiz.pseudoId),
+        search: searchParams.size > 0 ? "?" + searchParams.toString() : "",
       },
-    });
+      {
+        state: {
+          isIndividual: true,
+          resultsAfterPassing: questionList.excluded,
+        },
+      }
+    );
   }
 
   let question1Content;
   let question2Content;
-  if (questionList.curr[0]?.description == null) {
-    question1Content = (
-      <div className="w-[48%] flex justify-center items-center">
-        <div className="text-[36px]">{questionList.curr[0]?.title}</div>
-      </div>
-    );
-  } else {
-    question1Content = (
-      <div className="w-[48%] text-center">
-        <h2 className="h-[40%] text-[30px]">{questionList.curr[0]?.title}</h2>
-        <div className="h-[60%] text-[22px] text-[--dark-quizcard-description] leading-tight">
-          {questionList.curr[0]?.description}
+  if (isDataLoaded) {
+    if (questionList.curr[0]?.description == null) {
+      question1Content = (
+        <div className="w-[48%] flex justify-center items-center">
+          <div className="text-[36px]">{questionList.curr[0]?.title}</div>
         </div>
-      </div>
-    );
-  }
+      );
+    } else {
+      question1Content = (
+        <div className="w-[48%] text-center">
+          <h2 className="h-[40%] text-[30px]">{questionList.curr[0]?.title}</h2>
+          <div className="h-[60%] text-[22px] text-[--dark-quizcard-description] leading-tight">
+            {questionList.curr[0]?.description}
+          </div>
+        </div>
+      );
+    }
 
-  if (questionList.curr[1]?.description == null) {
-    question2Content = (
-      <div className="w-[48%] flex justify-center items-center">
-        <div className="text-[36px]">{questionList.curr[1]?.title}</div>
-      </div>
-    );
+    if (questionList.curr[1]?.description == null) {
+      question2Content = (
+        <div className="w-[48%] flex justify-center items-center">
+          <div className="text-[36px]">{questionList.curr[1]?.title}</div>
+        </div>
+      );
+    } else {
+      question2Content = (
+        <div className="w-[48%] text-center">
+          <h2 className="h-[40%] text-[30px]">{questionList.curr[1]?.title}</h2>
+          <div className="h-[60%] text-[22px] text-[--dark-quizcard-description] leading-tight">
+            {questionList.curr[1]?.description}
+          </div>
+        </div>
+      );
+    }
   } else {
-    question2Content = (
-      <div className="w-[48%] text-center">
-        <h2 className="h-[40%] text-[30px]">{questionList.curr[1]?.title}</h2>
-        <div className="h-[60%] text-[22px] text-[--dark-quizcard-description] leading-tight">
-          {questionList.curr[1]?.description}
+    question1Content = question2Content = (
+      <div className="w-[48%] flex flex-col items-center">
+        <h2 className="h-[40%] w-[70%] text-[30px]">
+          <Skeleton animation="wave" />
+        </h2>
+        <div className="h-[60%] w-[85%] text-[22px] text-[--dark-quizcard-description] leading-tight">
+          <Skeleton animation="wave" />
         </div>
       </div>
     );
@@ -143,23 +179,19 @@ function PlayQuizLayout({ quiz }) {
   return (
     <div className="grid grid-rows-[50px_100px_1fr_100px] h-[100vh]">
       <div className="flex gap-[50px] text-[--dark-text] text-[32px] justify-center">
-        <div>
-          Етап: {questionList.stage}/{amountStages}
-        </div>
-        <div>
-          Раунд: {questionList.round}/{amountRounds}
-        </div>
+        <div>Етап: {isDataLoaded ? `${questionList.stage}/${amountStages}` : "1/?"}</div>
+        <div>Раунд: {isDataLoaded ? `${questionList.round}/${amountRounds}` : "1/??"}</div>
       </div>
 
       <div className="flex text-[--dark-text] border border-[--dark-quizcard-border] bg-[--dark-nav]">
         {question1Content}
         <div className="flex flex-col justify-around items-center border-x border-[--dark-quizcard-border] w-[4%] bg-[--dark-background-secondary] text-[36px]">
           <div className="pl-1 pr-2 rounded-xl hover:bg-[--dark-link-background-hover] hover:cursor-pointer">
-            <FiRewind />
+            <FiRewind title="Повернутися на попередній раунд" />
           </div>
           <div className="p-1 pl-2 rounded-xl hover:bg-[--dark-link-background-hover] hover:cursor-pointer">
-            <NavLink to={ROUTES.Quiz(quiz.pseudoId)}>
-              <FiRotateCcw />
+            <NavLink to={ROUTES.Quiz(quiz?.pseudoId)}>
+              <FiRotateCcw title="Повернутися на сторінку вікторини" />
             </NavLink>
           </div>
         </div>
@@ -169,8 +201,9 @@ function PlayQuizLayout({ quiz }) {
       <QuizDuoBattle
         question1={questionList.curr[0]}
         question2={questionList.curr[1]}
-        type={quiz.type}
+        type={quiz?.type}
         handleWinner={handleWinner}
+        isDataLoaded={isDataLoaded}
       />
     </div>
   );
@@ -183,14 +216,12 @@ function shuffle(array) {
   let tempArray = [...array];
   // While there remain elements to shuffle...
   while (currentIndex !== 0) {
-
     // Pick a remaining element...
     let randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex--;
 
     // And swap it with the current element.
-    [tempArray[currentIndex], tempArray[randomIndex]] = [
-      tempArray[randomIndex], tempArray[currentIndex]];
+    [tempArray[currentIndex], tempArray[randomIndex]] = [tempArray[randomIndex], tempArray[currentIndex]];
   }
   return tempArray;
 }

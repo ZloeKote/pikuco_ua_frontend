@@ -2,7 +2,6 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { selectCurrentToken, useFetchQuizQuery } from "../store";
 import PlayQuizLayout from "../components/PlayQuizLayout";
 import { useSelector } from "react-redux";
-import { LinearProgress } from "@mui/material";
 import QuizNotFound from "../components/errors/QuizNotFound";
 import InternalServerError from "../components/errors/InternalServerError";
 
@@ -18,7 +17,7 @@ function PlayQuizPage() {
   } = useFetchQuizQuery({
     pseudoId,
     token,
-    param: !!searchParams.toString() && "?" + searchParams.toString(),
+    param: searchParams.toString(),
   });
 
   if (isError) {
@@ -26,7 +25,7 @@ function PlayQuizPage() {
       return <QuizNotFound />;
     } else if (error.status === 500) return <InternalServerError />;
   }
-  return <>{isLoading ? <LinearProgress /> : <PlayQuizLayout quiz={fetchedQuizData} />}</>;
+  return <PlayQuizLayout quiz={fetchedQuizData} isFetchingQuiz={isLoading} />;
 }
 
 export default PlayQuizPage;

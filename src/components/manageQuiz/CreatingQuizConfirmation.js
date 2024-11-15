@@ -63,6 +63,7 @@ function CreatingQuizConfirmation({ title, description, quizType, language, numQ
               questionType={quizType}
               variant={types.confirmingQuiz}
               hiddenPagination
+              isLoaded={true}
             />
           </div>
         )}

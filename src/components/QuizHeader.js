@@ -1,10 +1,10 @@
 import { useCallback, useContext, useEffect } from "react";
-import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import classNames from "classnames";
 import Link from "../components/simpleComponents/Link";
 import { GoChevronUp, GoChevronDown, GoArrowLeft } from "react-icons/go";
 import { ImCross } from "react-icons/im";
-import { CircularProgress, Tooltip, Typography } from "@mui/material";
+import { CircularProgress, Skeleton, Tooltip, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
 import SnackbarsContext from "../context/snackbars";
 import {
@@ -21,11 +21,9 @@ import LanguagePicker from "./simpleComponents/LanguagePicker";
 import GeneratedUserAvatar from "./simpleComponents/GeneratedUserAvatar";
 import { ROUTES } from "../ROUTES";
 
-function QuizHeader({ children, quiz, language, onChangeLanguage, section }) {
+function QuizHeader({ children, quiz, language, onChangeLanguage, section, isFetchingQuiz }) {
   const { pseudoId } = useParams();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const location = useLocation();
   const token = useSelector(selectCurrentToken);
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
   const [fetchEvaluation, fetchingEvalResult] = useLazyFetchEvaluationQuizQuery();
@@ -35,11 +33,13 @@ function QuizHeader({ children, quiz, language, onChangeLanguage, section }) {
   const [addToWishlist, addingWishlistResult] = useAddQuizToWishlistMutation();
   const [deleteFromWishlist, deletingWishlistResult] = useDeleteQuizFromWishlistMutation();
 
-  const isCreatorDeleted = quiz.creator.nickname.startsWith("[deleted-");
-  const currLanguage =
-    (quiz.languages.includes(searchParams.get("lang")) && searchParams.get("lang")) ||
-    (quiz.languages.includes("uk") && "uk") ||
-    quiz.language;
+  const isDataLoaded = !isFetchingQuiz && quiz !== undefined;
+
+  const isCreatorDeleted = quiz?.creator.nickname.startsWith("[deleted-");
+  const currLanguage = language || quiz?.language;
+  // (quiz?.languages.includes(searchParams.get("lang")) && searchParams.get("lang")) ||
+  // (quiz?.languages.includes("uk") && "uk") ||
+  // quiz?.language;
   const langParam = searchParams.get("lang") !== null ? "?lang=" + searchParams.get("lang") : "";
 
   const sectionTitleClassname = classNames(
@@ -59,16 +59,10 @@ function QuizHeader({ children, quiz, language, onChangeLanguage, section }) {
     "hover:bg-[--dark-link-background-hover] hover:cursor-pointer"
   );
 
-  const handleChangeLanguage = (newLang) => {
-    onChangeLanguage(newLang);
-    searchParams.set("lang", newLang);
-    navigate({
-      pathname: location.pathname,
-      search: searchParams.toString().length !== 0 ? "?" + searchParams.toString() : "",
-    });
-  };
+  const handleChangeLanguage = (newLang) => onChangeLanguage(newLang);
+
   const fetchEvaluationFunction = useCallback(() => {
-    fetchEvaluation({ pseudoId: quiz.pseudoId, token: token })
+    fetchEvaluation({ pseudoId: quiz?.pseudoId, token: token })
       .unwrap()
       .catch((error) => {
         if (error.status === 500) {
@@ -81,9 +75,9 @@ function QuizHeader({ children, quiz, language, onChangeLanguage, section }) {
           );
         }
       });
-  }, [fetchEvaluation, handleEnqueueSnackbar, quiz.pseudoId, token]);
+  }, [fetchEvaluation, handleEnqueueSnackbar, quiz?.pseudoId, token]);
   const checkWishlistFunction = useCallback(() => {
-    checkWishlist({ pseudoId: quiz.pseudoId, token })
+    checkWishlist({ pseudoId: quiz?.pseudoId, token })
       .unwrap()
       .catch((error) => {
         if (error.status === 500) {
@@ -96,28 +90,36 @@ function QuizHeader({ children, quiz, language, onChangeLanguage, section }) {
           );
         }
       });
-  }, [checkWishlist, token, quiz.pseudoId, handleEnqueueSnackbar]);
+  }, [checkWishlist, token, quiz?.pseudoId, handleEnqueueSnackbar]);
 
   useEffect(() => {
-    fetchEvaluationFunction();
-    if (token) checkWishlistFunction();
-  }, [fetchEvaluationFunction, checkWishlistFunction, token]);
+    if (isDataLoaded) {
+      fetchEvaluationFunction();
+      if (token) checkWishlistFunction();
+    }
+  }, [fetchEvaluationFunction, checkWishlistFunction, token, isDataLoaded]);
 
-  let quizTitle = quiz.title;
+  let quizTitle = <Skeleton animation="wave" width="60%" sx={{ fontSize: "36px", marginLeft: "15px" }} />;
 
-  if (quiz.isRoughDraft) {
-    quizTitle = (
-      <Tooltip title="Вікторина є чернеткою">
-        <span className="text-[36px] ml-[15px] italic">{quizTitle} *</span>
-      </Tooltip>
-    );
-  } else {
-    quizTitle = <span className="text-[36px] ml-[15px]">{quizTitle}</span>;
+  if (isDataLoaded) {
+    quizTitle = quiz?.title;
+
+    if (quiz?.isRoughDraft) {
+      quizTitle = (
+        <Tooltip title="Вікторина є чернеткою">
+          <span className="text-[36px] ml-[15px] italic">{quizTitle} *</span>
+        </Tooltip>
+      );
+    } else {
+      quizTitle = <span className="text-[36px] ml-[15px]">{quizTitle}</span>;
+    }
   }
 
   const evalClassName = "hover:bg-[--dark-link-background-hover] hover:cursor-pointer rounded-full";
   const likeClassname = classNames(evalClassName, { "text-[green]": fetchingEvalResult.data?.liked });
   const dislikeClassname = classNames(evalClassName, { "text-[red]": fetchingEvalResult.data?.disliked });
+  const creatorClassname =
+    "quizcard-creator z-10 mr-3 w-[170px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]";
 
   const handleClickLike = () => {
     if (addingEvalResult.isLoading || deletingEvalResult.isLoading) return;
@@ -277,14 +279,24 @@ function QuizHeader({ children, quiz, language, onChangeLanguage, section }) {
             </Link>
           </div>
           <div>
-            <LanguagePicker
-              currLanguageCode={currLanguage}
-              languageCodes={quiz.languages}
-              handleChangeLanguage={handleChangeLanguage}
-              label="Мова вікторини"
-              disabled={quiz.languages.length === 1}
-              title={quiz.languages.length === 1 ? "Вікторина має лише 1 мову" : "Оберіть мову вікторини"}
-            />
+            {isDataLoaded ? (
+              <LanguagePicker
+                currLanguageCode={currLanguage}
+                languageCodes={quiz?.languages}
+                handleChangeLanguage={handleChangeLanguage}
+                label="Мова вікторини"
+                disabled={quiz?.languages.length === 1}
+                title={quiz?.languages.length === 1 ? "Вікторина має лише 1 мову" : "Оберіть мову вікторини"}
+              />
+            ) : (
+              <Skeleton
+                animation="wave"
+                variant="rectangular"
+                width={150}
+                height={40}
+                sx={{ borderRadius: 1 }}
+              />
+            )}
           </div>
         </div>
 
@@ -293,7 +305,7 @@ function QuizHeader({ children, quiz, language, onChangeLanguage, section }) {
             <div className="flex items-center justify-between py-[10px] border-b border-[--dark-quizcard-border]">
               {quizTitle}
               <div className="flex gap-[4rem]">
-                {!quiz.isRoughDraft && (
+                {!quiz?.isRoughDraft && (
                   <>
                     <div className="self-center">
                       <WishlistIcon
@@ -325,35 +337,47 @@ function QuizHeader({ children, quiz, language, onChangeLanguage, section }) {
                     </div>
                   </>
                 )}
-                {isCreatorDeleted ? (
-                  <div className="quizcard-creator-deleted z-10 mr-3 w-[170px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]">
+                {isDataLoaded ? (
+                  isCreatorDeleted ? (
+                    <div className={creatorClassname}>
+                      <div className="flex items-center">
+                        <ImCross className="h-[40px] w-20 mr-2 bg-lime-300 rounded-full text-red-600" />
+                        <Tooltip title={<Typography>{quiz?.creator.nickname}</Typography>} placement="bottom">
+                          <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[20px] italic">
+                            {quiz?.creator.nickname}
+                          </span>
+                        </Tooltip>
+                      </div>
+                    </div>
+                  ) : (
+                    <Link to={`/user/${quiz?.creator.nickname.toLowerCase()}`} className={creatorClassname}>
+                      <div className="flex items-center">
+                        <GeneratedUserAvatar
+                          username={quiz?.creator.nickname}
+                          saturation="60"
+                          className="h-[40px] mr-2 bg-lime-300 rounded-full"
+                        />
+                        <Tooltip title={<Typography>{quiz?.creator.nickname}</Typography>} placement="bottom">
+                          <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[20px] italic">
+                            {quiz?.creator.nickname}
+                          </span>
+                        </Tooltip>
+                      </div>
+                    </Link>
+                  )
+                ) : (
+                  <div className="z-10 mr-3 w-[170px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]">
                     <div className="flex items-center">
-                      <ImCross className="h-[40px] w-20 mr-2 bg-lime-300 rounded-full text-red-600" />
-                      <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
-                        <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[20px] italic">
-                          {quiz.creator.nickname}
-                        </span>
-                      </Tooltip>
+                      <Skeleton
+                        animation="wave"
+                        variant="circular"
+                        width={40}
+                        height={40}
+                        sx={{ marginRight: "8px" }}
+                      />
+                      <Skeleton animation="wave" width="65%" sx={{ fontSize: "20px" }} />
                     </div>
                   </div>
-                ) : (
-                  <Link
-                    to={`/user/${quiz.creator.nickname.toLowerCase()}`}
-                    className="quizcard-creator z-10 mr-3 w-[170px] h-fit border border-[--dark-quizcard-border] rounded-full self-center bg-[--dark-quizcard-background]"
-                  >
-                    <div className="flex items-center">
-                      <GeneratedUserAvatar
-                        username={quiz.creator.nickname}
-                        saturation="60"
-                        className="h-[40px] mr-2 bg-lime-300 rounded-full"
-                      />
-                      <Tooltip title={<Typography>{quiz.creator.nickname}</Typography>} placement="bottom">
-                        <span className="quizcard-creator-nickname text-[--dark-text] leading-none text-[20px] italic">
-                          {quiz.creator.nickname}
-                        </span>
-                      </Tooltip>
-                    </div>
-                  </Link>
                 )}
                 {/* <Link
                   to={`/user/${quiz.creator.nickname.toLowerCase()}`}

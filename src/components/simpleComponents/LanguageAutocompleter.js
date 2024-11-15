@@ -29,7 +29,8 @@ function LanguageAutocompleter({
       onInputChange={(_, newInputLang) => setInputLang(newInputLang)}
       isOptionEqualToValue={(option, lang) => option.iso6391 === lang.iso6391}
       disableClearable
-      renderInput={(params) => <TextField {...params} label="Мова" variant={variant} required={required} />}
+      // щоб показувати назву над полем, потрібно додати атрибут label до TexField в renderInput
+      renderInput={(params) => <TextField {...params} variant={variant} required={required} />}
       {...rest}
     />
   );

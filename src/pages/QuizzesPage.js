@@ -1,20 +1,24 @@
 import QuizzesList from "../components/QuizzesList";
 import QuizFilterSort from "../components/QuizFilterSort";
-import { useFetchQuizzesQuery } from "../store";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ParamsContext from "../context/searchParams";
-import { LinearProgress } from "@mui/material";
 import SnackbarsContext from "../context/snackbars";
 import QuizNotFound from "../components/errors/QuizNotFound";
 import InternalServerError from "../components/errors/InternalServerError";
+import { quizzesApi } from "../store/apis/quizzesApi";
 
 function QuizzesPage() {
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
   const { quizzesSearchParams, changeQuizzesSearchParams } = useContext(ParamsContext);
   const location = useLocation();
   const navigate = useNavigate();
-  const { data, isError, error, isFetching, isSuccess } = useFetchQuizzesQuery(quizzesSearchParams);
+  const [fetchQuizzes, { data: fetchedQuizzes, isError, error, isFetching, isSuccess }] =
+    quizzesApi.endpoints.fetchQuizzes.useLazyQuery();
+
+  useEffect(() => {
+    fetchQuizzes(quizzesSearchParams);
+  }, [fetchQuizzes, quizzesSearchParams]);
 
   const handleChangeParams = (newParam) => {
     navigate({
@@ -38,28 +42,23 @@ function QuizzesPage() {
     }
   }
 
-  let quizzes = <div></div>;
-  if (isSuccess) {
-    if (data?.quizzes.length === 0) {
-      quizzes = <QuizNotFound />;
-    } else {
-      quizzes = (
-        <QuizzesList
-          gapY="small"
-          className="mt-[10px]"
-          quizzes={data?.quizzes}
-          numPages={data?.numPages}
-          handlePageParam={handleChangeParams}
-        />
-      );
-    }
-  }
-
   return (
     <div className="flex flex-col mx-[50px] mt-[40px]">
       <QuizFilterSort isLoading={isFetching} params={quizzesSearchParams} handleParams={handleChangeParams} />
       {error && <span className="text-white">Errors could happens...</span>}
-      {isFetching ? <LinearProgress /> : quizzes}
+      {isSuccess && fetchedQuizzes?.quizzes.length === 0 ? (
+        <QuizNotFound />
+      ) : (
+        <QuizzesList
+          gapY="small"
+          quizzesClassName="mt-[10px]"
+          quizzes={fetchedQuizzes?.quizzes}
+          numPages={fetchedQuizzes?.numPages}
+          handlePageParam={handleChangeParams}
+          isFetchingQuizzes={isFetching}
+          skeletonItems={8}
+        />
+      )}
     </div>
   );
 }

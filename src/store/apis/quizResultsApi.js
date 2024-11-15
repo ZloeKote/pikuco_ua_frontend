@@ -21,10 +21,11 @@ const quizResultsApi = createApi({
         providesTags: (result, error, args) => {
           return [{ type: "quizResults" }];
         },
-        query: ({pseudoId, param}) => {
+        query: ({pseudoId, param, token}) => {
           return {
             url: `/${pseudoId}${!!param ? "?" + param : ""}`,
             method: "GET",
+            headers: { Authorization: `${!!token ? `Bearer ${token}` : ""}` },
           };
         },
       }),

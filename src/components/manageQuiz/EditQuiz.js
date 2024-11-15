@@ -1,9 +1,4 @@
 import { useState, Fragment, useEffect, useContext } from "react";
-import Box from "@mui/material/Box";
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import Typography from "@mui/material/Typography";
 import classNames from "classnames";
 import GeneralInfoQuiz from "../manageQuiz/GeneralInfoQuiz";
 import QuizQuestionsInfo from "../manageQuiz/QuizQuestionsInfo";
@@ -12,7 +7,7 @@ import { iso6393 } from "iso-639-3";
 import { selectCurrentToken, useCreateQuizAsRoughDraftMutation, useCreateQuizMutation } from "../../store";
 import { useSelector } from "react-redux";
 import SnackbarsContext from "../../context/snackbars";
-import { CircularProgress, Button } from "@mui/material";
+import { CircularProgress, Button, Box, Stepper, Step, StepLabel, Typography, Skeleton } from "@mui/material";
 import Link from "../simpleComponents/Link";
 import { ROUTES } from "../../ROUTES";
 import { createCover, getYtThumbnail } from "../../hooks/yt-hooks";
@@ -21,16 +16,18 @@ import { validateQuizDescription, validateQuizTitle } from "../../hooks/validate
 import { LoadingButton } from "@mui/lab";
 import { RiDraftFill, RiSave3Fill } from "react-icons/ri";
 
-function EditQuiz({ quiz }) {
+function EditQuiz({ quiz, isFetchingQuiz }) {
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
   const token = useSelector(selectCurrentToken);
-  const [title, setTitle] = useState(quiz.title);
-  const [description, setDescription] = useState(quiz.description);
-  const [quizType, setQuizType] = useState(quiz.type);
-  const [language, setLanguage] = useState(iso6393.find((lang) => lang.iso6391 === quiz.language));
-  const [numQuestions, setNumQuestions] = useState(quiz.numQuestions);
-  const [questions, setQuestions] = useState(quiz.questions);
-  const [pseudoId, setPseudoId] = useState(quiz.pseudoId);
+  const [title, setTitle] = useState(quiz?.title);
+  const [description, setDescription] = useState(quiz?.description);
+  const [quizType, setQuizType] = useState(quiz?.type);
+  const [language, setLanguage] = useState(
+    quiz?.language === undefined ? "" : iso6393.find((lang) => lang.iso6391 === quiz?.language)
+  );
+  const [numQuestions, setNumQuestions] = useState(quiz?.numQuestions);
+  const [questions, setQuestions] = useState(quiz?.questions);
+  const [pseudoId, setPseudoId] = useState(quiz?.pseudoId);
   const [activeStep, setActiveStep] = useState(0);
   const [isTitleError, setIsTitleError] = useState(false);
   const [titleErrorMsg, setTitleErrorMsg] = useState("");
@@ -42,9 +39,18 @@ function EditQuiz({ quiz }) {
   const [createQuizAsRoughDraft, resultRoughDraft] = useCreateQuizAsRoughDraftMutation();
 
   useEffect(() => {
-    if (questions.length !== numQuestions) {
+    setTitle(quiz?.title);
+    setDescription(quiz?.description);
+    setQuizType(quiz?.type);
+    setLanguage(iso6393.find((lang) => lang.iso6391 === quiz?.language));
+    setNumQuestions(quiz?.numQuestions);
+    setQuestions(quiz?.questions);
+    setPseudoId(quiz?.pseudoId);
+  }, [quiz]);
+  useEffect(() => {
+    if (questions?.length !== numQuestions) {
       let allQuestions = [...questions];
-      for (let i = 0; i < numQuestions - questions.length; i++) {
+      for (let i = 0; i < numQuestions - questions?.length; i++) {
         allQuestions.push({ url: "", title: "", description: "" });
       }
       setQuestions(allQuestions);
@@ -278,6 +284,7 @@ function EditQuiz({ quiz }) {
           setIsDescrError={setIsDescrError}
           descrErrorMsg={descrErrorMsg}
           setDescrErrorMsg={setDescrErrorMsg}
+          isFetchingQuiz={isFetchingQuiz}
         />
       ),
     },
@@ -294,7 +301,7 @@ function EditQuiz({ quiz }) {
           title={title}
           description={description}
           quizType={quizType}
-          language={language.name}
+          language={language?.name}
           numQuestions={numQuestions}
           questions={questions}
         />
@@ -375,7 +382,8 @@ function EditQuiz({ quiz }) {
                 {content}
                 <div className="w-full flex justify-between mb-2">
                   <div className="ml-2">
-                    <Button
+                    <LoadingButton
+                      loading={isFetchingQuiz}
                       className={buttonClassname}
                       disabled={activeStep === 0}
                       onClick={handleBack}
@@ -384,21 +392,31 @@ function EditQuiz({ quiz }) {
                       type="button"
                     >
                       Назад
-                    </Button>
+                    </LoadingButton>
                   </div>
                   <div className="flex gap-2 mr-2">
-                    {quiz.isRoughDraft && (
-                      <LoadingButton
-                        className={"w-[240px] " + buttonClassname}
-                        loading={resultRoughDraft.isLoading}
-                        loadingPosition="start"
-                        startIcon={<RiDraftFill />}
-                        color="secondary"
-                        variant="contained"
-                        onClick={handleClickSaveRoughDraft}
-                      >
-                        <span>Зберегти як чернетку</span>
-                      </LoadingButton>
+                    {isFetchingQuiz ? (
+                      <Skeleton
+                        animation="wave"
+                        variant="rectangular"
+                        height="100%"
+                        width={240}
+                        sx={{ borderRadius: 1 }}
+                      />
+                    ) : (
+                      quiz?.isRoughDraft && (
+                        <LoadingButton
+                          className={"w-[240px] " + buttonClassname}
+                          loading={resultRoughDraft.isLoading}
+                          loadingPosition="start"
+                          startIcon={<RiDraftFill />}
+                          color="secondary"
+                          variant="contained"
+                          onClick={handleClickSaveRoughDraft}
+                        >
+                          <span>Зберегти як чернетку</span>
+                        </LoadingButton>
+                      )
                     )}
                     {isLastStep ? (
                       <LoadingButton
@@ -413,9 +431,15 @@ function EditQuiz({ quiz }) {
                         <span>Відредагувати</span>
                       </LoadingButton>
                     ) : (
-                      <Button className={buttonClassname} type="submit" color="primary" variant="contained">
+                      <LoadingButton
+                        loading={isFetchingQuiz}
+                        className={buttonClassname}
+                        type="submit"
+                        color="primary"
+                        variant="contained"
+                      >
                         Далі
-                      </Button>
+                      </LoadingButton>
                     )}
                   </div>
                 </div>

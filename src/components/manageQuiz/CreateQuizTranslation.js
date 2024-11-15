@@ -21,7 +21,7 @@ import { validateQuizTitle, validateQuizDescription } from "../../hooks/validate
 import { RiSave3Fill } from "react-icons/ri";
 import { LoadingButton } from "@mui/lab";
 
-function CreateQuizTranslation({ quiz }) {
+function CreateQuizTranslation({ quiz, isFetchingQuiz }) {
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
   const token = useSelector(selectCurrentToken);
   const [title, setTitle] = useState("");
@@ -31,15 +31,12 @@ function CreateQuizTranslation({ quiz }) {
       (lang) =>
         lang ===
         predefinedLanguages
-          .filter((preLang) => !!!quiz.languages.find((disLang) => disLang === preLang.iso6391))
+          .filter((preLang) => !!!quiz?.languages.find((disLang) => disLang === preLang.iso6391))
           .at(0)
     )
   );
-  const [questions, setQuestions] = useState(
-    quiz.questions?.map((q) => {
-      return { ...q, title: "", description: "" };
-    })
-  );
+  const [questions, setQuestions] = useState();
+
   const [activeStep, setActiveStep] = useState(0);
   const [isTitleError, setIsTitleError] = useState(false);
   const [titleErrorMsg, setTitleErrorMsg] = useState("");
@@ -48,15 +45,24 @@ function CreateQuizTranslation({ quiz }) {
 
   const [addTranslation, result] = useAddQuizTranslationMutation();
 
+  const isQuizLoaded = !isFetchingQuiz && quiz !== undefined;
+
   useEffect(() => {
-    if (questions.length !== quiz.numQuestions) {
-      let allQuestions = [...questions];
-      for (let i = 0; i < quiz.numQuestions - questions.length; i++) {
+    if (questions?.length !== quiz?.numQuestions) {
+      let allQuestions = [...questions ?? []];
+      for (let i = 0; i < quiz?.numQuestions - questions?.length; i++) {
         allQuestions.push({ url: "", title: "", description: "" });
       }
       setQuestions(allQuestions);
     }
-  }, [quiz.numQuestions, questions]);
+  }, [quiz?.numQuestions, questions]);
+  useEffect(() => {
+    if (isQuizLoaded) {
+      setQuestions(quiz?.questions?.map((q) => {
+        return { ...q, title: "", description: "" };
+      }))
+    }
+  }, [isQuizLoaded, quiz])
 
   const handleNext = (e) => {
     e?.preventDefault();
@@ -96,10 +102,10 @@ function CreateQuizTranslation({ quiz }) {
       return;
     }
 
-    const actualNumQuestions = questions.filter(
+    const actualNumQuestions = questions?.filter(
       (question) => question.url !== "" || question.title !== ""
     ).length;
-    if (actualNumQuestions === quiz.numQuestions) {
+    if (actualNumQuestions === quiz?.numQuestions) {
       addTranslation({
         translation: {
           title: title,
@@ -107,7 +113,7 @@ function CreateQuizTranslation({ quiz }) {
           language: language.iso6391,
           questions: questions,
         },
-        pseudoId: quiz.pseudoId,
+        pseudoId: quiz?.pseudoId,
         token: token,
       })
         .unwrap()
@@ -125,7 +131,7 @@ function CreateQuizTranslation({ quiz }) {
             handleEnqueueSnackbar(`Сталася непередбачувана помилка :( ${error.data?.error}`, "error");
           }
         });
-        setActiveStep(activeStep + 1);
+      setActiveStep(activeStep + 1);
     } else {
       handleEnqueueSnackbar("Для створення вікторини потрібно заповнити всі питання", "error");
     }
@@ -137,23 +143,24 @@ function CreateQuizTranslation({ quiz }) {
       element: (
         <GeneralInfoQuiz
           title={title}
-          originalTitle={quiz.title}
+          originalTitle={quiz?.title}
           onChangeTitle={handleChangeTitle}
           description={description}
-          originalDescription={quiz.description}
+          originalDescription={quiz?.description}
           onChangeDescription={handleChangeDescription}
-          quizType={quiz.type}
+          quizType={quiz?.type}
           readOnlyQuizType
           language={language}
           onChangeLanguage={handleChangeLanguage}
-          disabledLanguages={quiz.languages}
-          numQuestions={quiz.numQuestions}
+          disabledLanguages={quiz?.languages}
+          numQuestions={quiz?.numQuestions}
           readOnlyNumQuestions
           isTitleError={isTitleError}
           titleErrorMsg={titleErrorMsg}
           isDescrError={isDescrError}
           descrErrorMsg={descrErrorMsg}
           descriptionRequired={true}
+          isFetchingQuiz={isFetchingQuiz}
         />
       ),
     },
@@ -162,8 +169,8 @@ function CreateQuizTranslation({ quiz }) {
       element: (
         <QuizQuestionsInfo
           questions={questions}
-          originalQuestions={quiz.questions}
-          questionType={quiz.type}
+          originalQuestions={quiz?.questions}
+          questionType={quiz?.type}
           readOnlyUrl
           onChange={handleChangeQuestion}
         />
@@ -175,9 +182,9 @@ function CreateQuizTranslation({ quiz }) {
         <CreatingQuizConfirmation
           title={title}
           description={description}
-          quizType={quiz.type}
+          quizType={quiz?.type}
           language={language.name}
-          numQuestions={quiz.numQuestions}
+          numQuestions={quiz?.numQuestions}
           questions={questions}
         />
       ),
@@ -213,7 +220,7 @@ function CreateQuizTranslation({ quiz }) {
             <Link to={ROUTES.Main}>Головна сторінка</Link>
           </Button>
           <Button className={buttonClassname} color="primary" variant="contained">
-            <Link to={ROUTES.Quiz(quiz.pseudoId)}>Сторінка вікторини</Link>
+            <Link to={ROUTES.Quiz(quiz?.pseudoId)}>Сторінка вікторини</Link>
           </Button>
         </div>
       </>

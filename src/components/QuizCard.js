@@ -205,7 +205,7 @@ function QuizCard({ quiz, showActions = false, onDelete, isLoadingDeleting }) {
             <div className={deletingConfirmationClassname}>
               <span>Ви дійсно хочете видалити вікторину?</span>
               <Button
-                className="self-end"
+                className="self-end shadow-xl"
                 sx={{"fontWeight": 600}}
                 size="small"
                 color="error"

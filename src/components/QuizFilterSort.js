@@ -65,6 +65,7 @@ function QuizFilterSort({ isLoading, handleParams }) {
     setIsActiveNewest(false);
     if (!isActiveBest) searchParams.set("sort", "HIGHEST_RATED");
     else searchParams.delete("sort");
+    searchParams.delete("page");
     handleParams(searchParams.toString() !== "" ? "?" + searchParams.toString() : "");
   };
 
@@ -73,6 +74,7 @@ function QuizFilterSort({ isLoading, handleParams }) {
     setIsActiveBest(false);
     if (!isActiveNewest) searchParams.set("sort", "NEWEST");
     else searchParams.delete("sort");
+    searchParams.delete("page");
     handleParams(searchParams.toString() !== "" ? "?" + searchParams.toString() : "");
   };
 

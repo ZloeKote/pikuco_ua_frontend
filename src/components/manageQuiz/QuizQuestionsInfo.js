@@ -81,6 +81,7 @@ function QuizQuestionsInfo({ questions, originalQuestions = [], questionType, re
               onClickQuiz={handleClickQuestion}
               onClickReset={handleClickResetQuestion}
               hiddenPagination
+              isLoaded={true}
             />
           </div>
         )}

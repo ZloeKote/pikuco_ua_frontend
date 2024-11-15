@@ -1,7 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { selectCurrentToken, useFetchQuizQuery } from "../store";
 import EditQuiz from "../components/manageQuiz/EditQuiz";
-import { LinearProgress } from "@mui/material";
 import Button from "../components/simpleComponents/Button";
 import { useSelector } from "react-redux";
 import QuizNotFound from "../components/errors/QuizNotFound";
@@ -10,18 +9,16 @@ function EditQuizPage() {
   const location = useLocation();
   const token = useSelector(selectCurrentToken);
 
-  const { data, isSuccess, isError, error } = useFetchQuizQuery({
+  const { data, isFetching, isError, error } = useFetchQuizQuery({
     pseudoId: location.state?.pseudoId,
     token,
   });
 
-  let content = <LinearProgress />;
+  let content = <EditQuiz quiz={data} isFetchingQuiz={isFetching} />;
 
-  if (isSuccess) {
-    content = <EditQuiz quiz={data} />;
-  } else if (isError) {
+  if (isError) {
     if (error.status === 403) {
-      return <QuizNotFound />;
+      content = <QuizNotFound />;
     }
     content = (
       <div className="flex flex-col gap-2">

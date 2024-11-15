@@ -9,6 +9,7 @@ import {
   FormHelperText,
   Modal,
   Box,
+  Skeleton,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -39,14 +40,14 @@ const modalStyle = {
   p: 2,
 };
 
-function ShowUserPrivacy({ user, localLogout }) {
+function ShowUserPrivacy({ user, localLogout, isFetchingUser }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const token = useSelector(selectCurrentToken);
   const { nickname } = useParams();
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
 
-  const [editedEmail, setEditedEmail] = useState(user.email);
+  const [editedEmail, setEditedEmail] = useState(user?.email);
   const [actualEmail, setActualEmail] = useState(editedEmail);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -72,6 +73,11 @@ function ShowUserPrivacy({ user, localLogout }) {
   const [deleteUser, resultDelete] = useDeleteUserMutation();
 
   const editedInfoClassname = classNames("italic", "hover:cursor-pointer hover:underline", "text-[26px]");
+
+  useEffect(() => {
+    setActualEmail(user?.email);
+    setEditedEmail(user?.email);
+  }, [user?.email]);
 
   useEffect(() => {
     if (resultUpdate.isSuccess) {
@@ -235,7 +241,9 @@ function ShowUserPrivacy({ user, localLogout }) {
         <div className="grid grid-rows-[111px_1fr] leading-tight">
           <div>
             <h3 className="text-[28px]">Електронна пошта</h3>
-            {isEditingEmail ? (
+            {isFetchingUser ? (
+              <Skeleton animation="wave" width="40%" sx={{ fontSize: "26px" }} />
+            ) : isEditingEmail ? (
               <form onSubmit={handleCompleteEditingEmail} className="flex gap-1 text-[24px]">
                 <TextField
                   id="email"
@@ -352,23 +360,31 @@ function ShowUserPrivacy({ user, localLogout }) {
               </div>
             ) : (
               <div className="flex mt-1">
-                <Button
+                <LoadingButton
+                  loading={isFetchingUser}
                   color="primary"
                   variant="contained"
                   className="w-[120px] h-[40px]"
                   onClick={handleClickChangePassword}
                 >
                   Змінити
-                </Button>
+                </LoadingButton>
               </div>
             )}
           </div>
         </div>
 
         <div className="grow flex items-end">
-          <Button className="w-max h-[40px]" color="error" onClick={handleOpenDeleteModal}>
+          <LoadingButton
+            loading={isFetchingUser}
+            variant="outlined"
+            className="w-max h-[40px]"
+            sx={{ marginLeft: "12px" }}
+            color="error"
+            onClick={handleOpenDeleteModal}
+          >
             <span className="text-[length:var(--desktop-title-text-size)]">Видалити акаунт</span>
-          </Button>
+          </LoadingButton>
           <Modal open={openDeleteModal} onClose={handleCloseDeleteModal}>
             <Box sx={modalStyle}>
               <Typography variant="h5" component="h2" sx={{ textAlign: "center" }}>
@@ -400,14 +416,15 @@ function ShowUserPrivacy({ user, localLogout }) {
                     >
                       <span className="text-[length:var(--desktop-body-text-size)]">Видалити</span>
                     </LoadingButton>
-                    <Button
+                    <LoadingButton
+                      loading={isFetchingUser}
                       className="h-[40px] w-fit px-8"
                       variant="contained"
                       type="button"
                       onClick={handleCloseDeleteModal}
                     >
                       <span className="text-[length:var(--desktop-body-text-size)]">Скасувати</span>
-                    </Button>
+                    </LoadingButton>
                   </div>
                 </form>
               </Box>
@@ -416,7 +433,7 @@ function ShowUserPrivacy({ user, localLogout }) {
         </div>
       </div>
 
-      <div className="pl-5 mt-5 mb-4 row-start-6 row-end-7 col-span-full flex gap-5 items-end">
+      <div className="ml-5 my-4 row-start-6 row-end-7 col-span-full flex gap-5 items-end">
         <LoadingButton
           loading={resultUpdate.isLoading}
           loadingPosition="start"
@@ -428,12 +445,13 @@ function ShowUserPrivacy({ user, localLogout }) {
           onClick={handleClickSave}
           disabled={
             resultUpdate.isLoading ||
-            (user.email === actualEmail && actualCurrentPassword === "" && actualNewPassword === "")
+            (user?.email === actualEmail && actualCurrentPassword === "" && actualNewPassword === "")
           }
         >
           <span>Зберегти</span>
         </LoadingButton>
-        <Button
+        <LoadingButton
+          loading={isFetchingUser}
           className="w-[150px] h-[50px]"
           type="button"
           color="primary"
@@ -441,7 +459,7 @@ function ShowUserPrivacy({ user, localLogout }) {
           onClick={handleClickReset}
         >
           Скинути
-        </Button>
+        </LoadingButton>
       </div>
     </div>
   );

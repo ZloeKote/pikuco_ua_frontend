@@ -1,6 +1,5 @@
 import { useLocation } from "react-router-dom";
 import { selectCurrentToken, useFetchQuizQuery } from "../store";
-import { LinearProgress } from "@mui/material";
 import Button from "../components/simpleComponents/Button";
 import EditQuizTranslation from "../components/manageQuiz/EditQuizTranslation";
 import { useSelector } from "react-redux";
@@ -10,17 +9,20 @@ function EditQuizTranslationPage() {
   const location = useLocation();
   const token = useSelector(selectCurrentToken);
 
-  const { data, isSuccess, isError, error } = useFetchQuizQuery({
+  const { data, isFetching, isError, error } = useFetchQuizQuery({
     pseudoId: location.state?.pseudoId,
     token,
-    param: `?lang=${location.state?.language}`
+    param: `?lang=${location.state?.language}`,
   });
 
-  let content = <LinearProgress />;
-
-  if (isSuccess) {
-    content = <EditQuizTranslation quiz={data} translationLanguage={location.state?.language} />;
-  } else if (isError) {
+  let content = (
+    <EditQuizTranslation
+      quiz={data}
+      translationLanguage={location.state?.language}
+      isFetchingQuiz={isFetching}
+    />
+  );
+  if (isError) {
     if (error.status === 403) {
       return <QuizNotFound />;
     }

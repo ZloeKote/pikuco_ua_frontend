@@ -6,7 +6,6 @@ import { ROUTES } from "../ROUTES";
 import UserProfileLayout from "../components/userProfile/UserProfileLayout";
 import ProfileSections from "../predefined/ProfileSections";
 import QuizzesList from "../components/QuizzesList";
-import { LinearProgress } from "@mui/material";
 import { quizzesApi } from "../store/apis/quizzesApi";
 
 function UserCQuizzesPage() {
@@ -50,19 +49,19 @@ function UserCQuizzesPage() {
         className="h-[776px]"
         handleParam={handleChangeParam}
       >
-        {!isFetching ? (
-          <QuizzesList
-            className="my-2 mx-8 justify-between h-full"
-            quizzes={quizzes?.quizzes}
-            numPages={quizzes?.numPages}
-            page={searchParams.get("page")}
-            gapY="middle"
-            gapX="middle"
-            handlePageParam={handleChangeParam}
-          />
-        ) : (
-          <LinearProgress />
-        )}
+        <QuizzesList
+          layoutClassname="justify-between h-full"
+          quizzesClassName="mt-2 mx-8"
+          paginationClassname="mb-2"
+          quizzes={quizzes?.quizzes}
+          numPages={quizzes?.numPages}
+          page={searchParams.get("page")}
+          gapY="middle"
+          gapX="middle"
+          handlePageParam={handleChangeParam}
+          isFetchingQuizzes={isFetching}
+          skeletonItems={4}
+        />
       </UserProfileLayout>
     </div>
   );

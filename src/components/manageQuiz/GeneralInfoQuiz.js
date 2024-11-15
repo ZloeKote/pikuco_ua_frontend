@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { useState } from "react";
-import { MenuItem, TextField, Typography } from "@mui/material";
+import { MenuItem, Skeleton, TextField, Typography } from "@mui/material";
 import InfoIcon from "../simpleComponents/InfoIcon";
 import LanguageAutocompleter from "../simpleComponents/LanguageAutocompleter";
 import predefinedNumQuestions from "../../predefined/NumQuestions";
@@ -31,15 +31,25 @@ function GeneralInfoQuiz({
   titleErrorMsg,
   isDescrError,
   descrErrorMsg,
+  isFetchingQuiz,
 }) {
+  const isDataLoaded =
+    !isFetchingQuiz &&
+    title !== undefined &&
+    description !== undefined &&
+    quizType !== undefined &&
+    language !== undefined &&
+    numQuestions !== undefined;
   const [numDescriptionSymbolsLeft, setNumDescriptionSymbolsLeft] = useState(80);
-  const renderedQuizTypes = quizTypes.filter((type) => type.value !== "").map((type) => {
-    return (
-      <MenuItem key={type.value} value={type.value}>
-        <Typography sx={{ fontSize: "22px" }}>{type.label}</Typography>
-      </MenuItem>
-    );
-  });
+  const renderedQuizTypes = quizTypes
+    .filter((type) => type.value !== "")
+    .map((type) => {
+      return (
+        <MenuItem key={type.value} value={type.value}>
+          <Typography sx={{ fontSize: "22px" }}>{type.label}</Typography>
+        </MenuItem>
+      );
+    });
 
   const renderedNumQuestions = predefinedNumQuestions
     .filter((num) => num.value !== "")
@@ -73,18 +83,27 @@ function GeneralInfoQuiz({
               Назва вікторини повинна мати довжину від 3 до 30 символів
             </InfoIcon>
           </label>
-          <TextField
-            value={title}
-            onChange={handleChangeTitle}
-            placeholder={"Найкраща пісня останнього десятиліття"}
-            autoFocus
-            required
-            disabled={readOnlyTitle}
-            size="small"
-            inputProps={{ style: { fontSize: "22px" } }}
-            error={isTitleError}
-            helperText={isTitleError ? titleErrorMsg : (originalTitle || " ")}
-          />
+          {isDataLoaded ? (
+            <TextField
+              value={title}
+              onChange={handleChangeTitle}
+              placeholder={"Найкраща пісня останнього десятиліття"}
+              autoFocus
+              required
+              disabled={readOnlyTitle}
+              size="small"
+              inputProps={{ style: { fontSize: "22px" } }}
+              error={isTitleError}
+              helperText={isTitleError ? titleErrorMsg : originalTitle || " "}
+            />
+          ) : (
+            <Skeleton
+              animation="wave"
+              variant="rectangular"
+              height={49}
+              sx={{ borderRadius: 1, marginBottom: "23px" }}
+            />
+          )}
         </div>
         <div className="flex flex-col">
           <label className={labelClassname}>
@@ -96,56 +115,70 @@ function GeneralInfoQuiz({
               <br /> <span>Залишилося символів {numDescriptionSymbolsLeft}</span>
             </InfoIcon>
           </label>
-          <TextField
-            value={description}
-            inputProps={{ style: { fontSize: "22px" } }}
-            onChange={handleChangeDescription}
-            multiline
-            rows={6}
-            disabled={readOnlyDescription}
-            error={isDescrError}
-            helperText={isDescrError ? descrErrorMsg : originalDescription}
-            required={descriptionRequired}
-          />
+          {isDataLoaded ? (
+            <TextField
+              value={description}
+              inputProps={{ style: { fontSize: "22px" } }}
+              onChange={handleChangeDescription}
+              multiline
+              rows={6}
+              disabled={readOnlyDescription}
+              error={isDescrError}
+              helperText={isDescrError ? descrErrorMsg : originalDescription}
+              required={descriptionRequired}
+            />
+          ) : (
+            <Skeleton animation="wave" variant="rectangular" height={177} sx={{ borderRadius: 1 }} />
+          )}
         </div>
       </div>
 
       <div className="flex flex-col w-[300px] gap-5">
         <div className="flex flex-col">
           <label className={labelClassname}>Тип вікторини {RedAsterisk}</label>
-          <TextField
-            label="Оберіть тип"
-            value={quizType}
-            onChange={handleChangeQuizType}
-            select
-            required
-            disabled={readOnlyQuizType}
-          >
-            {renderedQuizTypes}
-          </TextField>
+          {isDataLoaded ? (
+            <TextField
+              value={quizType ?? ""}
+              onChange={handleChangeQuizType}
+              select
+              required
+              disabled={readOnlyQuizType}
+            >
+              {renderedQuizTypes}
+            </TextField>
+          ) : (
+            <Skeleton animation="wave" variant="rectangular" height={66} sx={{ borderRadius: 1 }} />
+          )}
         </div>
         <div className="flex flex-col">
           <label className={labelClassname}>Мова вікторини {RedAsterisk}</label>
-          <LanguageAutocompleter
-            value={language}
-            onChange={handleChangeLanguage}
-            required
-            disabled={readOnlyLanguage}
-            disabledOptions={disabledLanguages}
-          />
+          {isDataLoaded ? (
+            <LanguageAutocompleter
+              value={language}
+              onChange={handleChangeLanguage}
+              required
+              disabled={readOnlyLanguage}
+              disabledOptions={disabledLanguages}
+            />
+          ) : (
+            <Skeleton animation="wave" variant="rectangular" height={56} sx={{ borderRadius: 1 }} />
+          )}
         </div>
         <div className="flex flex-col">
           <label className={labelClassname}>Кількість питань {RedAsterisk}</label>
-          <TextField
-            label="Оберіть кількість"
-            value={numQuestions}
-            onChange={handleChangeNumQuestions}
-            select
-            required
-            disabled={readOnlyNumQuestions}
-          >
-            {renderedNumQuestions}
-          </TextField>
+          {isDataLoaded ? (
+            <TextField
+              value={numQuestions}
+              onChange={handleChangeNumQuestions}
+              select
+              required
+              disabled={readOnlyNumQuestions}
+            >
+              {renderedNumQuestions}
+            </TextField>
+          ) : (
+            <Skeleton animation="wave" variant="rectangular" height={66} sx={{ borderRadius: 1 }} />
+          )}
         </div>
       </div>
     </div>

@@ -1,9 +1,9 @@
 import classNames from "classnames";
-import { Tooltip, Typography } from "@mui/material";
+import { Skeleton, Tooltip, Typography } from "@mui/material";
 import { BsInfoCircleFill } from "react-icons/bs";
 import GeneratedUserAvatar from "../simpleComponents/GeneratedUserAvatar";
 
-function ShowPublicUserProfile({ user }) {
+function ShowPublicUserProfile({ user, isFetchingUser }) {
   const classnameLayout = classNames(
     "grid grid-cols-[200px_100px_1fr_1fr]",
     "grid-rows-[25px_repeat(3,minmax(0,65px))_300px]",
@@ -13,33 +13,48 @@ function ShowPublicUserProfile({ user }) {
   );
 
   let userBirthdate = "Не вказано";
-  if (user.birthdate) userBirthdate = formatDate(new Date(user.birthdate));
+  let formattedShortCreationDate;
+  let formattedFullCreationDate;
+  if (!isFetchingUser) {
+    if (user.birthdate) userBirthdate = formatDate(new Date(user.birthdate));
 
-  const formattedShortCreationDate = formatDate(new Date(user.creationDate));
-  const formattedFullCreationDate = formatDate(new Date(user.creationDate), true)
+    formattedShortCreationDate = formatDate(new Date(user.creationDate));
+    formattedFullCreationDate = formatDate(new Date(user.creationDate), true);
+  }
 
   return (
     <div className={classnameLayout}>
       <div className="row-start-1 row-end-1 col-start-1 col-end-1 z-10 flex items-center text-[--dark-link-text-hover] text-[18px]">
-        <div className="hover:cursor-default">
-          <Tooltip title={<Typography>{formattedFullCreationDate}</Typography>}>
-            <span className="pl-2">{formattedShortCreationDate}</span>
-          </Tooltip>
-        </div>
-        <div className="ml-2 hover:cursor-pointer hover:text-[--dark-quizcard-description]">
-          <Tooltip title={<Typography>Дата створення акаунту</Typography>}>
-            <span>
-              <BsInfoCircleFill />
-            </span>
-          </Tooltip>
-        </div>
+        {isFetchingUser ? (
+          <Skeleton sx={{ marginLeft: "8px", fontSize: "18px" }} animation="wave" width="60%" />
+        ) : (
+          <>
+            <div className="hover:cursor-default">
+              <Tooltip title={<Typography>{formattedFullCreationDate}</Typography>}>
+                <span className="pl-2">{formattedShortCreationDate}</span>
+              </Tooltip>
+            </div>
+            <div className="ml-2 hover:cursor-pointer hover:text-[--dark-quizcard-description]">
+              <Tooltip title={<Typography>Дата створення акаунту</Typography>}>
+                <span>
+                  <BsInfoCircleFill />
+                </span>
+              </Tooltip>
+            </div>
+          </>
+        )}
       </div>
       <div className="row-start-1 row-end-5 col-start-1 col-end-3 flex items-center justify-center">
-        <GeneratedUserAvatar
-          username={user.nickname}
-          saturation="60"
-          className="w-40 h-40 bg-lime-300 rounded-full"
-        />
+        {isFetchingUser ? (
+          <Skeleton animation="wave" variant="circular" height={160} width={160} />
+        ) : (
+          <GeneratedUserAvatar
+            username={user.nickname}
+            saturation="60"
+            className="w-40 h-40 bg-lime-300 rounded-full"
+          />
+        )}
+
         {/* <img
           className="w-40 h-40 rounded-sm"
           src={user.avatar === "some path" ? defaultAvatar : user.avatar}
@@ -49,20 +64,36 @@ function ShowPublicUserProfile({ user }) {
       <div className="col-start-3 col-end-4 row-start-2 row-end-5">
         <div className="mb-2 leading-tight">
           <h3>Нікнейм</h3>
-          <span className="italic">{user.nickname}</span>
+          {isFetchingUser ? (
+            <Skeleton animation="wave" width="80%" sx={{ fontSize: "20px" }} />
+          ) : (
+            <span className="italic">{user.nickname}</span>
+          )}
         </div>
         <div className="mb-2 leading-tight">
           <h3>Роль</h3>
-          <span className="italic">{user.role}</span>
+          {isFetchingUser ? (
+            <Skeleton animation="wave" width="40%" sx={{ fontSize: "20px" }} />
+          ) : (
+            <span className="italic">{user.role}</span>
+          )}
         </div>
         <div className="leading-tight">
           <h3>Дата народження</h3>
-          <span className="italic">{userBirthdate}</span>
+          {isFetchingUser ? (
+            <Skeleton animation="wave" width="30%" sx={{ fontSize: "20px" }} />
+          ) : (
+            <span className="italic">{userBirthdate}</span>
+          )}
         </div>
       </div>
       <div className="px-5 row-start-5 row-end-6 col-span-full border-t border-[--dark-link-text-hover]">
         <h2 className="text-[28px] bold">Опис</h2>
-        <p className="italic">{user.description}</p>
+        {isFetchingUser ? (
+          <Skeleton animation="wave" variant="rectangular" height={128} sx={{borderRadius: 1, marginTop: "7px" }} />
+        ) : (
+          <p className="italic">{user.description}</p>
+        )}
       </div>
     </div>
   );

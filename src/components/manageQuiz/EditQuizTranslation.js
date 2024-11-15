@@ -1,4 +1,4 @@
-import { useState, Fragment, useContext } from "react";
+import { useState, Fragment, useContext, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
@@ -20,21 +20,27 @@ import { validateQuizTitle, validateQuizDescription } from "../../hooks/validate
 import { RiFileEditFill } from "react-icons/ri";
 import { LoadingButton } from "@mui/lab";
 
-function EditQuizTranslation({ quiz, translationLanguage }) {
+function EditQuizTranslation({ quiz, translationLanguage, isFetchingQuiz }) {
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
   const token = useSelector(selectCurrentToken);
-  const [title, setTitle] = useState(quiz.title);
-  const [description, setDescription] = useState(quiz.description);
-  const [questions, setQuestions] = useState(quiz.questions);
+  const [title, setTitle] = useState(quiz?.title);
+  const [description, setDescription] = useState(quiz?.description);
+  const [questions, setQuestions] = useState(quiz?.questions);
   const [activeStep, setActiveStep] = useState(0);
   const [isTitleError, setIsTitleError] = useState(false);
   const [titleErrorMsg, setTitleErrorMsg] = useState("");
   const [isDescrError, setIsDescrError] = useState(false);
   const [descrErrorMsg, setDescrErrorMsg] = useState("");
 
-  const language = iso6393.find((lang) => lang.iso6391 === quiz.language);
+  const language = iso6393.find((lang) => lang.iso6391 === quiz?.language);
 
   const [editTranslation, result] = useEditQuizTranslationMutation();
+
+  useEffect(() => {
+    setTitle(quiz?.title);
+    setDescription(quiz?.description);
+    setQuestions(quiz?.questions);
+  }, [quiz]);
 
   const handleNext = (e) => {
     e?.preventDefault();
@@ -70,10 +76,10 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
       return;
     }
 
-    const actualNumQuestions = questions.filter(
-      (question) => question.url !== "" || question.title !== ""
-    ).length;
-    if (actualNumQuestions === quiz.numQuestions) {
+    const actualNumQuestions = questions?.filter(
+      (question) => question?.url !== "" || question?.title !== ""
+    )?.length;
+    if (actualNumQuestions === quiz?.numQuestions) {
       setActiveStep(activeStep + 1);
       editTranslation({
         translation: {
@@ -82,7 +88,7 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
           language: language.iso6391,
           questions: questions,
         },
-        pseudoId: quiz.pseudoId,
+        pseudoId: quiz?.pseudoId,
         token: token,
       })
         .unwrap()
@@ -111,21 +117,22 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
         <GeneralInfoQuiz
           title={title}
           descriptionRequired
-          originalTitle={quiz.title}
+          originalTitle={quiz?.title}
           onChangeTitle={handleChangeTitle}
           description={description}
-          originalDescription={quiz.description}
+          originalDescription={quiz?.description}
           onChangeDescription={handleChangeDescription}
-          quizType={quiz.type}
+          quizType={quiz?.type}
           readOnlyQuizType
           language={language}
           readOnlyLanguage
-          numQuestions={quiz.numQuestions}
+          numQuestions={quiz?.numQuestions}
           readOnlyNumQuestions
           isTitleError={isTitleError}
           titleErrorMsg={titleErrorMsg}
           isDescrError={isDescrError}
           descrErrorMsg={descrErrorMsg}
+          isFetchingQuiz={isFetchingQuiz}
         />
       ),
     },
@@ -134,8 +141,8 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
       element: (
         <QuizQuestionsInfo
           questions={questions}
-          originalQuestions={quiz.questions}
-          questionType={quiz.type}
+          originalQuestions={quiz?.questions}
+          questionType={quiz?.type}
           readOnlyUrl
           onChange={handleChangeQuestion}
         />
@@ -147,9 +154,9 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
         <CreatingQuizConfirmation
           title={title}
           description={description}
-          quizType={quiz.type}
+          quizType={quiz?.type}
           language={language.name}
-          numQuestions={quiz.numQuestions}
+          numQuestions={quiz?.numQuestions}
           questions={questions}
         />
       ),
@@ -185,7 +192,7 @@ function EditQuizTranslation({ quiz, translationLanguage }) {
             <Link to={ROUTES.Main}>Головна сторінка</Link>
           </Button>
           <Button className={buttonClassname} color="primary" variant="contained">
-            <Link to={ROUTES.Quiz(quiz.pseudoId)}>Сторінка вікторини</Link>
+            <Link to={ROUTES.Quiz(quiz?.pseudoId)}>Сторінка вікторини</Link>
           </Button>
         </div>
       </>

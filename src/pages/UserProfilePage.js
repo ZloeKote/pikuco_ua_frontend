@@ -3,7 +3,6 @@ import UserProfileLayout from "../components/userProfile/UserProfileLayout";
 import ProfileSections from "../predefined/ProfileSections";
 import { selectCurrentUser, useFetchUserByNicknameQuery } from "../store";
 import { useSelector } from "react-redux";
-import { LinearProgress } from "@mui/material";
 import ShowEditedUserProfile from "../components/userProfile/ShowEditedUserProfile";
 import ShowPublicUserProfile from "../components/userProfile/ShowPublicUserProfile";
 import UserNotFound from "../components/errors/UserNotFound";
@@ -15,11 +14,8 @@ function UserProfilePage() {
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
   const { nickname } = useParams();
   const { nickname: authPersonNickname } = useSelector(selectCurrentUser);
-  const { data: user, isError, error, isSuccess } = useFetchUserByNicknameQuery(nickname);
+  const { data: user, isError, error, isSuccess, isFetching } = useFetchUserByNicknameQuery(nickname);
 
-  let userContent = <LinearProgress />;
-
-  if (isSuccess) userContent = <ShowPublicUserProfile user={user} />;
   if (isError) {
     if (error.status === 404) {
       return <UserNotFound />;
@@ -30,7 +26,7 @@ function UserProfilePage() {
     }
   }
 
-  let content = userContent;
+  let content = <ShowPublicUserProfile user={user} isFetchingUser={isFetching} />;
   if (nickname.toLowerCase() === authPersonNickname?.toLowerCase() && isSuccess) {
     content = (
       <UserProfileLayout

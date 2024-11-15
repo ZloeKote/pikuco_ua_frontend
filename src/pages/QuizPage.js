@@ -1,8 +1,7 @@
 import { useContext, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useFetchQuizMainQuery } from "../store/apis/quizzesApi";
 import ShowQuiz from "../components/ShowQuiz";
-import { LinearProgress } from "@mui/material";
 import { useSelector } from "react-redux";
 import { selectCurrentToken } from "../store";
 import QuizNotFound from "../components/errors/QuizNotFound";
@@ -12,6 +11,8 @@ import SnackbarsContext from "../context/snackbars";
 
 function QuizPage() {
   const { handleEnqueueSnackbar } = useContext(SnackbarsContext);
+  const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { pseudoId } = useParams();
   const [language, setLanguage] = useState(searchParams.get("lang") || "");
@@ -21,7 +22,7 @@ function QuizPage() {
     isFetching,
     isError,
     error,
-  } = useFetchQuizMainQuery({ pseudoId, token, param: searchParams.toString() });
+  } = useFetchQuizMainQuery({ pseudoId, token, param: language !== "" ? `lang=${language}` : "" });
 
   if (isError) {
     if (error.status === 404) return <QuizNotFound />;
@@ -34,13 +35,23 @@ function QuizPage() {
 
   const handleChangeLanguage = (lang) => {
     setLanguage(lang);
-  };
+    searchParams.set("lang", lang);
+    navigate({
+      pathname: location.pathname,
+      search: searchParams.toString().length !== 0 ? "?" + searchParams.toString() : "",
+    });
+  }
+  console.log(searchParams.toString());
 
-  return isFetching ? (
-    <LinearProgress />
-  ) : (
-    <QuizHeader quiz={quiz} language={language} onChangeLanguage={handleChangeLanguage} section="main">
-      <ShowQuiz quiz={quiz} language={language} />
+  return (
+    <QuizHeader
+      quiz={quiz}
+      language={language}
+      onChangeLanguage={handleChangeLanguage}
+      section="main"
+      isFetchingQuiz={isFetching}
+    >
+      <ShowQuiz quiz={quiz} language={language} isFetchingQuiz={isFetching} />
     </QuizHeader>
   );
 }

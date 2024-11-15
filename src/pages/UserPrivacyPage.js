@@ -8,7 +8,6 @@ import { useFetchUserPrivacyByNicknameQuery } from "../store";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useContext } from "react";
 import ShowUserPrivacy from "../components/userProfile/ShowUserPrivacy";
-import { LinearProgress } from "@mui/material";
 import SnackbarsContext from "../context/snackbars";
 
 function UserPrivacyPage() {
@@ -54,7 +53,7 @@ function UserPrivacyPage() {
   return (
     <div className="flex justify-center mt-9">
       <UserProfileLayout title="КОНФІДЕНЦІЙНІСТЬ" section={ProfileSections.privacy} userNickname={nickname}>
-        {!isLoading ? <ShowUserPrivacy user={user} localLogout={localLogout} /> : <LinearProgress />}
+        <ShowUserPrivacy user={user} localLogout={localLogout} isFetchingUser={isLoading}/>
       </UserProfileLayout>
     </div>
   );

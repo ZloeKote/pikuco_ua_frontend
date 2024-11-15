@@ -26,6 +26,13 @@
   --dark-background-quiz-card-menu-button: rgba(12, 12, 12, 0.4);
   --dark-background-quiz-card-menu-button-hover: rgba(12, 12, 12, 0.7);
 
+  /* Was gotten from mui pallete as dark version of states of buttons */
+  --button-success-disabled: #388e3c;
+  --button-info-disabled: #0288d1;
+  --button-primary-disabled: #42a5f5;
+  --button-secondary-disabled: #ab47bc;
+  --button-error-disabled: #d32f2f;
+  --button-warning-disabled: #f57c00;
   /* font sizes */
   --desktop-smallest-text-size: 12px;
   --desktop-detail-text-size: 14px;

@@ -1,95 +1,166 @@
-import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useLocation, useParams, useSearchParams } from "react-router-dom";
 import QuestionList from "./QuestionList";
 import ActiveButton from "./simpleComponents/ActiveButton";
-import { LinearProgress } from "@mui/material";
 import classNames from "classnames";
-import { useFetchQuizResultsQuery } from "../store";
 import { types } from "../predefined/QuestionTypes";
-import { ROUTES } from "../ROUTES";
+import { quizResultsApi } from "../store/apis/quizResultsApi";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { selectCurrentToken } from "../store";
 
-function ShowQuizStats({
-  quiz,
-  indResults,
-  isResultsAfterPassing,
-  generalParams,
-  onChangeParam,
-  isIndividual,
-  onChangeIndividual,
-}) {
+function ShowQuizStats({ quiz, language, isFetching }) {
+  const token = useSelector(selectCurrentToken);
   const location = useLocation();
-  const navigate = useNavigate();
   const { pseudoId } = useParams();
-  const [searchParams] = useSearchParams();
-  const { data: results, isFetching: resultsIsLoading } = useFetchQuizResultsQuery({
-    pseudoId: pseudoId,
-    param: generalParams,
-  });
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  let questions;
-  if (isIndividual) {
-    if (isResultsAfterPassing) {
-      const page = searchParams.get("page");
-      const sort = searchParams.get("sort");
-      let questionsTemp = location.state?.resultsAfterPassing;
-      if (sort === "TITLE_ASC")
-        questionsTemp.sort((q1, q2) => (q1.title > q2.title ? 1 : q2.title > q1.title ? -1 : 0));
-      else questionsTemp.sort((q1, q2) => q1.place - q2.place);
+  const [fetchQuizResults, { data: results, isFetching: isFetchingResults }] =
+    quizResultsApi.endpoints.fetchQuizResults.useLazyQuery();
+  const [fetchIndividualResults, { data: indResults, isFetching: isFetchingIndResults }] =
+    quizResultsApi.endpoints.fetchIndividualResults.useLazyQuery();
 
-      if (page === null || page <= 1) {
-        questionsTemp = questionsTemp.slice(0, 4);
-      } else {
-        questionsTemp = questionsTemp.slice((Number(page) - 1) * 4, Number(page) * 4);
-      }
-      questions = questionsTemp;
-    } else questions = indResults?.quizResults.questions;
-  } else {
-    if (!resultsIsLoading && results === undefined) {
-      questions = quiz.questions;
-    } else {
-      questions = results?.quizResults.questions;
-    }
-  }
-  let isIndExists = location.state?.resultsAfterPassing ? true : false || indResults ? true : false;
+  const [isIndividual, setIsIndividual] = useState(location.state?.isIndividual);
+  const [generalParams, setGeneralParams] = useState(language === "" ? "" : "lang=" + language);
+  const [individualParams, setIndividualParams] = useState(language === "" ? "" : "lang=" + language);
+
+  const [resultsAfterPassing] = useState(location.state?.resultsAfterPassing);
+  const [questions, setQuestions] = useState([]);
+  let isIndExists = !!resultsAfterPassing || results?.userResultExists;
   const indClassname = classNames("mr-[25px] text-[32px]", {
     "text-gray-500 cursor-no-drop": !isIndExists,
     "text-[--dark-text]": isIndExists,
     "font-bold": isIndividual,
   });
+  const isQuizLoaded = !isFetching && quiz !== undefined;
+  const isDataLoaded =
+    isQuizLoaded &&
+    (isIndividual
+      ? !!resultsAfterPassing || (!isFetchingIndResults && indResults !== undefined)
+      : !isFetchingResults && results !== undefined);
 
-  const handleClickSort = (sortBy) => {
-    if (searchParams.has("sort")) {
-      if (searchParams.get("sort") === "PLACE_ASC" && sortBy === "title")
-        searchParams.set("sort", "TITLE_ASC");
-      else if (searchParams.get("sort") === "TITLE_ASC" && sortBy === "place")
-        searchParams.set("sort", "PLACE_ASC");
-      else searchParams.delete("sort");
-    } else {
-      if (sortBy === "place") searchParams.set("sort", "PLACE_ASC");
-      else if (sortBy === "title") searchParams.set("sort", "TITLE_ASC");
-    }
-    searchParams.delete("page");
+  useEffect(() => {
+    if (isDataLoaded) {
+      if (isIndividual) {
+        if (!!resultsAfterPassing) {
+          const page = searchParams.get("page");
+          const sort = searchParams.get("sort");
+          let questionsTemp = resultsAfterPassing;
+          if (sort === "TITLE_ASC")
+            questionsTemp.sort((q1, q2) => (q1.title > q2.title ? 1 : q2.title > q1.title ? -1 : 0));
+          else questionsTemp.sort((q1, q2) => q1.place - q2.place);
 
-    if (isResultsAfterPassing)
-      navigate(
-        ROUTES.QuizStats(pseudoId) + (!!searchParams.toString() ? "?" + searchParams.toString() : ""),
-        {
-          state: { isIndividual: true, resultsAfterPassing: location.state?.resultsAfterPassing },
+          if (page === null || page <= 1) {
+            questionsTemp = questionsTemp.slice(0, 4);
+          } else {
+            questionsTemp = questionsTemp.slice((Number(page) - 1) * 4, Number(page) * 4);
+          }
+          setQuestions(questionsTemp);
+        } else setQuestions(indResults?.quizResults.questions);
+      } else {
+        if (!isFetchingResults && results === undefined) {
+          setQuestions(quiz?.questions);
+        } else {
+          setQuestions(results?.quizResults.questions);
         }
-      );
-    else onChangeParam(searchParams.toString());
+      }
+    }
+  }, [
+    indResults?.quizResults.questions,
+    isDataLoaded,
+    isFetchingResults,
+    isIndividual,
+    resultsAfterPassing,
+    location.state?.resultsAfterPassing,
+    quiz?.questions,
+    results,
+    searchParams,
+  ]);
+
+  useEffect(() => {
+    if (isQuizLoaded) {
+      if (isIndividual) {
+        if (token === null && !!!resultsAfterPassing) {
+          setIsIndividual(false);
+          fetchQuizResults({
+            pseudoId: pseudoId,
+            param: generalParams,
+            token: token,
+          });
+        } else if (!!!resultsAfterPassing) {
+          fetchIndividualResults({ pseudoId: pseudoId, token: token, param: individualParams });
+        }
+      } else {
+        fetchQuizResults({
+          pseudoId: pseudoId,
+          param: generalParams,
+          token: token,
+        });
+      }
+    }
+  }, [
+    fetchIndividualResults,
+    individualParams,
+    isIndividual,
+    resultsAfterPassing,
+    pseudoId,
+    token,
+    isQuizLoaded,
+    fetchQuizResults,
+    generalParams,
+  ]);
+
+  useEffect(() => {
+    if (!!!resultsAfterPassing && !isIndividual) setQuestions();
+    setIndividualParams(updateQueryParam(individualParams, "lang", language));
+    setGeneralParams(updateQueryParam(generalParams, "lang", language));
+    setSearchParams(isIndividual ? individualParams : generalParams);
+  }, [language, individualParams, generalParams, isIndividual, setSearchParams, resultsAfterPassing]);
+
+  const handleChangeIndividual = (isIndividual) => {
+    setIsIndividual(isIndividual);
+  };
+  const handleClickSort = (sortBy) => {
+    let tempParams = isIndividual ? individualParams : generalParams;
+
+    if (searchParams.has("sort")) {
+      if (searchParams.get("sort") === "PLACE_ASC" && sortBy === "title") {
+        isIndividual
+          ? setIndividualParams(updateQueryParam(individualParams, "sort", "TITLE_ASC"))
+          : setGeneralParams(updateQueryParam(generalParams, "sort", "TITLE_ASC"));
+        tempParams = updateQueryParam(tempParams, "sort", "TITLE_ASC");
+      } else if (searchParams.get("sort") === "TITLE_ASC" && sortBy === "place") {
+        isIndividual
+          ? setIndividualParams(updateQueryParam(individualParams, "sort", "PLACE_ASC"))
+          : setGeneralParams(updateQueryParam(generalParams, "sort", "PLACE_ASC"));
+        tempParams = updateQueryParam(tempParams, "sort", "PLACE_ASC");
+      } else {
+        isIndividual
+          ? setIndividualParams(updateQueryParam(individualParams, "sort", ""))
+          : setGeneralParams(updateQueryParam(generalParams, "sort", ""));
+        tempParams = updateQueryParam(tempParams, "sort", "");
+      }
+    } else {
+      if (sortBy === "place") {
+        isIndividual
+          ? setIndividualParams(updateQueryParam(individualParams, "sort", "PLACE_ASC"))
+          : setGeneralParams(updateQueryParam(generalParams, "sort", "PLACE_ASC"));
+        tempParams = updateQueryParam(tempParams, "sort", "PLACE_ASC");
+      } else if (sortBy === "title") {
+        isIndividual
+          ? setIndividualParams(updateQueryParam(individualParams, "sort", "TITLE_ASC"))
+          : setGeneralParams(updateQueryParam(generalParams, "sort", "TITLE_ASC"));
+        tempParams = updateQueryParam(tempParams, "sort", "TITLE_ASC");
+      }
+    }
+    isIndividual
+      ? setIndividualParams(updateQueryParam(tempParams, "page", ""))
+      : setGeneralParams(updateQueryParam(tempParams, "page", ""));
   };
 
-  const handlePageParam = (param) => {
-    if (isResultsAfterPassing) {
-      console.log(param);
-      navigate(ROUTES.QuizStats(pseudoId) + (!!param ? "?" + param : ""), {
-        state: { isIndividual: true, resultsAfterPassing: location.state?.resultsAfterPassing },
-      });
-    } else onChangeParam(param);
-  };
+  const handlePageParam = (param) => (isIndividual ? setIndividualParams(param) : setGeneralParams(param));
 
-  const handleClickIndividual = () => onChangeIndividual(true);
-  const handleClickGeneral = () => onChangeIndividual(false);
+  const handleClickIndividual = () => handleChangeIndividual(true);
+  const handleClickGeneral = () => handleChangeIndividual(false);
 
   return (
     <div className="flex flex-col">
@@ -120,21 +191,59 @@ function ShowQuizStats({
           Назві
         </ActiveButton>
       </div>
-      {resultsIsLoading ? (
-        <LinearProgress />
-      ) : (
-        <QuestionList
-          className="w-[95%] self-center"
-          questions={questions}
-          questionType={quiz.type}
-          variant={isIndividual ? types.individual : types.general}
-          numPages={results.numPages}
-          handlePageParam={handlePageParam}
-          hiddenPagination={results.numPages < 2}
-        />
-      )}
+      <QuestionList
+        className="w-[95%] self-center"
+        questions={questions}
+        questionType={quiz?.type}
+        variant={isIndividual ? types.individual : types.general}
+        numPages={
+          isIndividual
+            ? !!resultsAfterPassing
+              ? resultsAfterPassing.length / 4
+              : indResults?.numPages
+            : results?.numPages
+        }
+        handlePageParam={handlePageParam}
+        hiddenPagination={isIndividual ? indResults?.numPages < 2 : results?.numPages < 2}
+        isLoaded={isDataLoaded}
+        skeletonItems={4}
+      />
     </div>
   );
 }
 
 export default ShowQuizStats;
+
+function updateQueryParam(query, paramToUpdate, paramValue) {
+  // Розділяємо параметри на масив
+  let paramsArray = query.split("&");
+  let langFound = false;
+
+  if (query === "" && paramValue !== "") return `${paramToUpdate}=${paramValue}`;
+
+  // Проходимося по кожному параметру
+  for (let i = 0; i < paramsArray.length; i++) {
+    let param = paramsArray[i].split("=");
+
+    // Якщо параметр знайдено, замінюємо його значення
+    if (param[0] === paramToUpdate) {
+      if (paramValue !== "") {
+        param[1] = paramValue;
+        paramsArray[i] = param.join("=");
+        // або видаляємо, якщо він пустий
+      } else {
+        paramsArray = paramsArray.filter((fparam) => fparam !== param.join("="));
+      }
+      langFound = true;
+      break;
+    }
+  }
+
+  // Якщо параметр не знайдено, додаємо його
+  if (!langFound) {
+    if (paramValue !== "") paramsArray.push(`${paramToUpdate}=` + paramValue);
+  }
+
+  // Збираємо параметри назад у рядок
+  return paramsArray.join("&");
+}
